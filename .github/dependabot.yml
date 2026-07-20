@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # Keep the pinned GitHub Actions SHAs current (Dependabot bumps SHA + comment).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+
+  # devDependencies only (there are zero runtime deps).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dev-dependencies:
+        patterns: ['*']
+    open-pull-requests-limit: 5

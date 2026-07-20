@@ -1,0 +1,69 @@
+{
+  "name": "@junr_studio/token-trim",
+  "version": "0.1.0",
+  "description": "Compress the output of shell commands your AI agent runs, to cut the tokens they cost in its context window.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Junr Studio",
+    "url": "https://github.com/Junr-Studio"
+  },
+  "homepage": "https://github.com/Junr-Studio/token-trim#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Junr-Studio/token-trim.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Junr-Studio/token-trim/issues"
+  },
+  "funding": "https://github.com/sponsors/Junr-Studio",
+  "keywords": [
+    "llm",
+    "agent",
+    "tokens",
+    "context-window",
+    "compression",
+    "claude",
+    "claude-code",
+    "shell",
+    "cli",
+    "stdout"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./stats": {
+      "types": "./dist/stats.d.ts",
+      "import": "./dist/stats.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "src", "README.md", "LICENSE", "NOTICE", "CHANGELOG.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck:test": "tsc -p tsconfig.test.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build && npm run typecheck && npm run typecheck:test && npm test"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "@vitest/coverage-v8": "^4.1.5",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  }
+}

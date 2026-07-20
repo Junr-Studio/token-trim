@@ -1,0 +1,118 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - ruby > empty output - returns empty, no condenser runs 1`] = `""`;
+
+exports[`compress - ruby > rake - all-passing run reduces the summary to just the run count 1`] = `
+"Run options: --seed 11002
+# Running:
+................
+Finished in 0.051200s, 312.5 runs/s, 625.0 assertions/s.
+rake test: 16 runs"
+`;
+
+exports[`compress - ruby > rake - condenses the minitest summary and strips rake/blank noise 1`] = `
+"Run options: --seed 34216
+# Running:
+.......F......E...
+Finished in 0.128472s, 140.1 runs/s, 311.5 assertions/s.
+  1) Failure:
+UserTest#test_full_name [test/models/user_test.rb:12]:
+Expected: "John Doe"
+  Actual: "John"
+  2) Error:
+UserTest#test_save_persists:
+NoMethodError: undefined method 'save' for nil:NilClass
+    test/models/user_test.rb:20:in 'block in <class:UserTest>'
+rake test: 18 runs, 1 failures, 1 errors"
+`;
+
+exports[`compress - ruby > rake - non-test task keeps output but still strips the "(in /...)" line 1`] = `
+"== 20240115120000 CreateUsers: migrating ======================================
+-- create_table(:users)
+   -> 0.0231s
+-- add_index(:users, :email, {:unique=>true})
+   -> 0.0089s
+== 20240115120000 CreateUsers: migrated (0.0325s) =============================
+== 20240115120500 AddPostsTable: migrating ====================================
+-- create_table(:posts)
+   -> 0.0154s
+== 20240115120500 AddPostsTable: migrated (0.0160s) ==========================="
+`;
+
+exports[`compress - ruby > rake - output that is entirely noise falls back to raw (never empties) 1`] = `
+"rake aborted!
+Rakefile:8:in 'block in <top (required)>'
+Rakefile:5:in '<main>'
+(in /home/user/myproject)"
+`;
+
+exports[`compress - ruby > rspec - caps the FAIL list at 10 and appends a "+N more" line 1`] = `
+"RSpec: 12 examples, 12 failures
+  FAIL: Widget number 1 behaves correctly under load
+  FAIL: Widget number 2 behaves correctly under load
+  FAIL: Widget number 3 behaves correctly under load
+  FAIL: Widget number 4 behaves correctly under load
+  FAIL: Widget number 5 behaves correctly under load
+  FAIL: Widget number 6 behaves correctly under load
+  FAIL: Widget number 7 behaves correctly under load
+  FAIL: Widget number 8 behaves correctly under load
+  FAIL: Widget number 9 behaves correctly under load
+  FAIL: Widget number 10 behaves correctly under load
+  ... +2 more"
+`;
+
+exports[`compress - ruby > rspec - clean run (0 failures) collapses to a single summary line 1`] = `"RSpec: 7 examples"`;
+
+exports[`compress - ruby > rspec - no summary present (load error) passes through untouched 1`] = `
+"An error occurred while loading ./spec/spec_helper.rb.
+Failure/Error: require 'app'
+
+LoadError:
+  cannot load such file -- app
+# ./spec/spec_helper.rb:3:in 'require'
+# ./spec/spec_helper.rb:3:in '<top (required)>'
+No examples found."
+`;
+
+exports[`compress - ruby > rspec - reports pending count in the summary 1`] = `
+"RSpec: 3 examples, 1 pending
+  FAIL: Order#total is not yet implemented"
+`;
+
+exports[`compress - ruby > rspec - summarizes examples/failures and lists FAIL headers, dropping backtraces 1`] = `
+"RSpec: 5 examples, 2 failures
+  FAIL: User#full_name handles missing last name
+  FAIL: User#admin? returns false for regular users"
+`;
+
+exports[`compress - ruby > rubocop - caps each file at 4 offenses with a "+N more here" line 1`] = `
+"rubocop: 6 offense(s) in 1 file(s)  [W:2 C:4]
+app/services/report.rb (6)
+  Style/FrozenStringLiteralComment: Missing frozen string literal comment.
+  Lint/UselessAssignment: Useless assignment to variable - x.
+  Layout/LineLength: Line is too long. [88/80]
+  Style/Documentation: Missing top-level documentation comment.
+  ... +2 more here"
+`;
+
+exports[`compress - ruby > rubocop - clean run collapses to the single "no offenses detected" line 1`] = `"4 files inspected, no offenses detected"`;
+
+exports[`compress - ruby > rubocop - groups offenses by file with a severity breakdown header 1`] = `
+"rubocop: 5 offense(s) in 3 file(s)  [E:1 W:1 C:3]
+app/models/user.rb (3)
+  Style/FrozenStringLiteralComment: Missing frozen string literal comment.
+  Layout/LineLength: Line is too long. [95/80]
+  Lint/UselessAssignment: Useless assignment to variable - name.
+app/controllers/users_controller.rb (1)
+  Lint/Syntax: unexpected token kEND (Using Ruby 3.2 parser).
+config/routes.rb (1)
+  Style/StringLiterals: Prefer single-quoted strings when you don't need interpolation."
+`;
+
+exports[`compress - ruby > rubocop - non-offense output (config error) passes through untouched 1`] = `
+"Error: unrecognized cop or department Style/Frozen found in .rubocop.yml
+Did you mean? Style/For
+
+Errors are usually caused by using a version of RuboCop
+that does not match the .rubocop.yml configuration."
+`;

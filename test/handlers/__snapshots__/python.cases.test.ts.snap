@@ -1,0 +1,67 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - python > go test - all pass: collapses to the single ok package line 1`] = `"ok  	example.com/mymath	0.008s"`;
+
+exports[`compress - python > go test - failures: summary header + FAIL names, RUN/detail lines stripped 1`] = `
+"Go test: 3 passed, 2 failed
+  FAIL: TestDivide (0.00s)
+  FAIL: TestModulo (0.01s)"
+`;
+
+exports[`compress - python > mypy - clean run: returns the Success line only 1`] = `"Success: no issues found in 12 source files"`;
+
+exports[`compress - python > mypy - groups errors by file, summary header with top codes, note: lines stripped 1`] = `
+"mypy: 5 error(s) in 3 file(s)  return-value(1) arg-type(1) return(1) name-defined(1) no-untyped-def(1)
+src/models.py (2)
+  Incompatible return value type (got "int", expected "str")  [return-value]
+  Argument 1 to "save" has incompatible type "None"; expected "User"  [arg-type]
+src/views.py (2)
+  Missing return statement  [return]
+  Name "reqeust" is not defined  [name-defined]
+src/utils.py (1)
+  Function is missing a return type annotation  [no-untyped-def]"
+`;
+
+exports[`compress - python > pip install - strips Collecting/Downloading/Using cached/Looking-in noise, keeps result 1`] = `
+"Installing collected packages: urllib3, charset-normalizer, certifi, requests
+Successfully installed certifi-2023.7.22 charset-normalizer-3.2.0 requests-2.31.0 urllib3-2.0.4"
+`;
+
+exports[`compress - python > pip list --outdated - one "pkg (old → new)" row each, header + Type column dropped 1`] = `
+"pip outdated:
+  certifi (2023.7.22 → 2024.2.2)
+  pip (23.1.2 → 24.0)
+  requests (2.28.0 → 2.31.0)
+  setuptools (67.8.0 → 69.5.1)
+  urllib3 (1.26.15 → 2.2.1)"
+`;
+
+exports[`compress - python > pip show - unrecognized subcommand passes through unchanged (no-trigger) 1`] = `
+"Name: requests
+Version: 2.31.0
+Summary: Python HTTP for Humans.
+Home-page: https://requests.readthedocs.io
+Author: Kenneth Reitz
+Author-email: me@kennethreitz.org
+License: Apache 2.0
+Location: /usr/lib/python3.11/site-packages
+Requires: certifi, charset-normalizer, idna, urllib3
+Required-by:"
+`;
+
+exports[`compress - python > pytest - all green: collapses full session to one "Pytest: N passed" line 1`] = `"Pytest: 42 passed"`;
+
+exports[`compress - python > pytest - empty output passes through as empty (edge case) 1`] = `""`;
+
+exports[`compress - python > pytest - failures: header with passed/failed/error(s) counts + FAIL/ERR list, traceback stripped 1`] = `
+"Pytest: 5 passed, 2 failed, 1 error(s)
+  FAIL: tests/test_math.py::test_divide
+  FAIL: tests/test_str.py::test_upper
+  FAIL: ERR:tests/test_broken_import.py"
+`;
+
+exports[`compress - python > ruff check - clean run: returns the "All checks passed" line 1`] = `"All checks passed!"`;
+
+exports[`compress - python > ruff check - one summary line: total issues, file count, top rules; messages dropped 1`] = `"ruff: 6 issue(s) in 3 file(s)  F401(2) E501(2) F811(1) E722(1)"`;
+
+exports[`compress - python > ruff format - collapses per-file lines to one reformatted/unchanged tally 1`] = `"ruff format: 3 reformatted, 2 unchanged"`;

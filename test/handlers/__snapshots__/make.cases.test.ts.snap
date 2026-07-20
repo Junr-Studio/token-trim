@@ -1,0 +1,44 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - make > all-noise - empty-guard falls back to original text instead of blanking output 1`] = `
+"make[1]: Entering directory '/home/user/project'
+make[2]: Entering directory '/home/user/project/sub'
+make[2]: Leaving directory '/home/user/project/sub'
+make[1]: Leaving directory '/home/user/project'"
+`;
+
+exports[`compress - make > blank runs - collapses 3+ consecutive newlines to a single blank line 1`] = `
+"gcc -c -o obj/a.o a.c
+
+gcc -c -o obj/b.o b.c
+
+gcc -o prog obj/a.o obj/b.o"
+`;
+
+exports[`compress - make > echo recipes - drops bare "echo ..." command lines, keeps the text they printed 1`] = `
+"==> Installing dependencies
+npm ci --silent
+==> Running build
+node build.js
+==> Build complete"
+`;
+
+exports[`compress - make > empty output - returns empty string unchanged (compress short-circuit) 1`] = `""`;
+
+exports[`compress - make > nothing-to-be-done - keeps make’s status line, drops surrounding dir noise 1`] = `"make[1]: Nothing to be done for 'all'."`;
+
+exports[`compress - make > passthrough - plain top-level build with no make noise is preserved 1`] = `
+"gcc -Wall -c -o main.o main.c
+main.c: In function 'main':
+main.c:12:5: warning: unused variable 'x' [-Wunused-variable]
+gcc -Wall -o app main.o"
+`;
+
+exports[`compress - make > recursive build - strips Entering/Leaving directory lines, keeps every recipe command 1`] = `
+"gcc -Wall -Wextra -c -o build/main.o src/main.c
+gcc -Wall -Wextra -c -o build/parser.o src/parser.c
+gcc -Wall -Wextra -c -o build/list.o src/list.c
+gcc -Wall -Wextra -c -o build/hash.o src/hash.c
+ar rcs build/libutil.a build/list.o build/hash.o
+gcc -Wall -Wextra -o build/myapp build/main.o build/parser.o -Lbuild -lutil"
+`;

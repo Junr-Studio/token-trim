@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - golangci > empty output - nothing to compress, returns empty string 1`] = `""`;
+
+exports[`compress - golangci > run - clean output surfaces the "No issues found" marker, strips info noise 1`] = `"No issues found."`;
+
+exports[`compress - golangci > run - groups issues by linter, dedups files, caps at top-5, one summary line 1`] = `"golangci-lint: 8 issue(s) in 4 file(s)  errcheck(3x)  ineffassign(1x)  gofmt(1x)  golint(1x)  govet(1x)"`;
+
+exports[`compress - golangci > run - load failure with no parseable issues passes raw text through 1`] = `
+"level=warning msg="[runner] The linter 'golint' is deprecated (since v1.41.0), please use 'revive'"
+level=error msg="Running error: context loading failed: failed to load packages: no Go files to analyze in ./...""
+`;
+
+exports[`compress - golangci > run - single issue keeps parenthetical issue(s)/file(s) wording at N=1 1`] = `"golangci-lint: 1 issue(s) in 1 file(s)  errcheck(1x)"`;

@@ -1,0 +1,83 @@
+name: Release
+
+# Runs on every push to main (i.e. every merged release PR). Publishes the
+# package.json version to npm if it isn't already there, then tags the commit
+# and cuts a GitHub Release from the CHANGELOG. Idempotent: re-runs on an
+# already-published version are a no-op.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write # create tags + GitHub releases
+  id-token: write # npm provenance (requires a public repo)
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    # GitHub Environment - scope the NPM_TOKEN here and, optionally, add required
+    # reviewers in repo settings to gate every publish behind a manual approval.
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Smoke-test the packed tarball
+        run: node scripts/smoke-tarball.mjs
+
+      - name: Resolve version
+        id: v
+        run: echo "version=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Is this version already on npm?
+        id: check
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          if npm view "@junr_studio/token-trim@$V" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::@junr_studio/token-trim@$V is already on npm - skipping publish."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm
+        if: steps.check.outputs.published == 'false'
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Tag commit + create GitHub Release
+        if: steps.check.outputs.published == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v$V"
+          git push origin "v$V"
+          node scripts/changelog-extract.mjs "$V" > RELEASE_NOTES.md || echo "Release v$V" > RELEASE_NOTES.md
+          gh release create "v$V" --title "v$V" --notes-file RELEASE_NOTES.md

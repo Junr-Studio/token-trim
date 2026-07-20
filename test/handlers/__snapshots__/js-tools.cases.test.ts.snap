@@ -1,0 +1,90 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - js-tools > empty output - returns empty string without crashing 1`] = `""`;
+
+exports[`compress - js-tools > eslint - groups problems by rule with error/warning counts, file count, and top rules 1`] = `
+"ESLint: 5 errors, 3 warnings in 2 file(s)
+  Top rules: no-console(2) semi(2) no-unused-vars(1) no-undef(1) @typescript-eslint/no-explicit-any(1)"
+`;
+
+exports[`compress - js-tools > eslint - non-lint output (config error) passes through, no false summary 1`] = `
+"Oops! Something went wrong! :(
+
+ESLint: 8.56.0
+
+No files matching the pattern "src/**/*.vue" were found.
+Please check for typing mistakes in the pattern."
+`;
+
+exports[`compress - js-tools > jest - all green collapses to a single passing summary line 1`] = `"Jest: 25 passed"`;
+
+exports[`compress - js-tools > jest - summarizes tests + failing suite count and lists failures, drops stack traces 1`] = `
+"Jest: 18 passed, 2 failed (1 suite(s))
+  FAIL: API › fetchUser › returns user data
+  FAIL: API › fetchUser › handles error response"
+`;
+
+exports[`compress - js-tools > next - failed build passes through untouched so the error stays visible 1`] = `
+"▲ Next.js 14.1.0
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./src/app/page.tsx
+Type error: Property 'foo' does not exist on type 'Props'.
+
+  10 |   return <div>{props.foo}</div>
+     |                      ^"
+`;
+
+exports[`compress - js-tools > next - successful build collapses to a route list with a count header 1`] = `
+"Next.js build: 6 routes
+  /
+  /about
+  /blog/[slug]
+  /api/users
+  /dashboard
+  /settings"
+`;
+
+exports[`compress - js-tools > playwright - all passing keeps only the summary + duration 1`] = `"Playwright: 18 passed (32.1s)"`;
+
+exports[`compress - js-tools > playwright - summarizes passed/failed/flaky/skipped with duration, lists failing specs 1`] = `
+"Playwright: 25 passed, 2 failed, 1 flaky, 2 skipped (58.3s)
+  FAIL: 3 [chromium] › checkout.spec.ts:12:1 › completes purchase (3.1s)
+  FAIL: 4 [firefox] › checkout.spec.ts:12:1 › completes purchase (3.4s)"
+`;
+
+exports[`compress - js-tools > prettier - all formatted collapses to a single confirmation line 1`] = `"Prettier: all files formatted"`;
+
+exports[`compress - js-tools > prettier - lists files needing formatting with a count header, truncates past 10 1`] = `
+"Prettier: 13 file(s) need formatting
+  [warn] src/app.ts
+  [warn] src/components/Button.tsx
+  [warn] src/components/Modal.tsx
+  [warn] src/components/Header.tsx
+  [warn] src/hooks/useAuth.ts
+  [warn] src/hooks/useFetch.ts
+  [warn] src/lib/api.ts
+  [warn] src/lib/format.ts
+  [warn] src/pages/index.tsx
+  [warn] src/pages/about.tsx
+  ... +3 more"
+`;
+
+exports[`compress - js-tools > vitest - clean run collapses to a one-line passing summary (no FAIL lines) 1`] = `"Vitest: 16 passed"`;
+
+exports[`compress - js-tools > vitest - no pass/fail counts passes through untouched (no false summary) 1`] = `
+"RUN  v1.6.0 /home/dev/project
+
+No test files found, exiting with code 1
+filter:  nonexistent-pattern
+include: **/*.{test,spec}.{js,mjs,ts}
+exclude: **/node_modules/**"
+`;
+
+exports[`compress - js-tools > vitest - summarizes pass/fail counts and lists failing tests, drops assertion noise 1`] = `
+"Vitest: 18 passed, 2 failed
+  FAIL: api > fetchUser returns user data 8ms
+  FAIL: api > fetchUser handles 404 response 5ms"
+`;

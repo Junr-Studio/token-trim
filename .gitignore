@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.tgz
+.DS_Store
+.claude-pids
+coverage/
+
+# Local tooling - not part of the library
+.claude/
+skills-lock.json
+RELEASE_NOTES.md

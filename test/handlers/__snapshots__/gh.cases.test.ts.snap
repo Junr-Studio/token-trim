@@ -1,0 +1,96 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - gh > clean body - no noise, passes through verbatim (modulo trim) 1`] = `
+"## What changed
+
+Refactored the config loader so required keys are validated at startup
+instead of lazily on first access.
+
+### Why
+
+Late validation made misconfigured deploys fail deep inside a request
+handler, which was painful to debug.
+
+### Testing
+
+- Ran the full unit suite locally
+- Added a regression test for the missing-key path
+- Verified the staging deploy boots cleanly"
+`;
+
+exports[`compress - gh > empty output - nothing to compress, stays empty 1`] = `""`;
+
+exports[`compress - gh > issue body - drops single-line HTML comments, keeps prose 1`] = `
+"## Description
+
+Fixes the flaky retry logic in the uploader.
+
+The retry now uses exponential backoff with jitter and a capped ceiling."
+`;
+
+exports[`compress - gh > pr view - drops ---/***/___ horizontal rules and collapses blank runs 1`] = `
+"## Notes
+
+First section of notes.
+
+Second section, after a long run of blank lines.
+
+Third section, after a dashed rule.
+
+Fourth section, after an asterisk rule.
+
+Fifth section, after an underscore rule."
+`;
+
+exports[`compress - gh > pr view - noise inside a \`\`\` fence is preserved while identical noise outside is stripped 1`] = `
+"The failing workflow config, quoted verbatim:
+
+\`\`\`yaml
+# CI pipeline
+---
+name: ci
+<!-- inside the fence, this comment must survive -->
+***
+![not really an image](inside-fence.png)
+on:
+  push:
+    branches: [main]
+\`\`\`
+Everything above is quoted exactly from the file."
+`;
+
+exports[`compress - gh > pr view - strips every noise type (comments, badges, images, rules, blanks) but keeps the code fence 1`] = `
+"# Add configurable server port
+
+## Summary
+
+This PR makes the listening port configurable via \`config.port\`, falling back
+to 3000 when the key is absent, so no existing deployment changes behavior.
+
+## Screenshot
+
+## Example
+
+\`\`\`ts
+const server = createServer(config)
+server.listen(config.port ?? 3000)
+\`\`\`
+## Checklist
+
+- [x] Tests added
+- [x] Docs updated"
+`;
+
+exports[`compress - gh > pr view - strips image-only lines (screenshots), keeps surrounding text 1`] = `
+"## Screenshots
+
+Before and after the redesign:
+
+The spacing is now consistent across every breakpoint."
+`;
+
+exports[`compress - gh > repo view - removes stacked badge lines, keeps the heading and tagline 1`] = `
+"# widget
+
+A tiny, dependency-free widget toolkit."
+`;

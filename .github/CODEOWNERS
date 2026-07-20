@@ -1,0 +1,8 @@
+# Default owners for everything in the repo - requested for review on every PR.
+# Replace with your actual GitHub team or usernames.
+* @Junr-Studio/maintainers
+
+# The release-critical paths deserve extra scrutiny.
+/.github/workflows/ @Junr-Studio/maintainers
+/scripts/          @Junr-Studio/maintainers
+/package.json      @Junr-Studio/maintainers

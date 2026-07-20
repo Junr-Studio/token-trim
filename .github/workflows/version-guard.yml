@@ -1,0 +1,33 @@
+name: Version guard
+
+# Every PR into main is a release. This gate refuses the merge unless the
+# version was bumped by exactly one logical semver step and a CHANGELOG entry
+# for it exists. Make it a required status check in main's branch protection.
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  version:
+    name: version bump + changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+
+      - name: Read base (main) version
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          BASE=$(git show "origin/${{ github.base_ref }}:package.json" | jq -r .version)
+          echo "BASE_VERSION=$BASE" >> "$GITHUB_ENV"
+
+      - name: Enforce logical version bump + release note
+        run: node scripts/check-version.mjs --base "$BASE_VERSION"

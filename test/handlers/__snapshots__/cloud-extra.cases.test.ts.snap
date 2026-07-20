@@ -1,0 +1,318 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - cloud-extra > aws empty output - returns empty string unchanged 1`] = `""`;
+
+exports[`compress - cloud-extra > aws iam list-roles - shortens region-less ARNs and truncates ISO timestamps to date 1`] = `
+"{
+    "Roles": [
+        {
+            "Path": "/",
+            "RoleName": "AppRole",
+            "RoleId": "AROAEXAMPLEID123456",
+            "Arn": "arn:…:role/AppRole",
+            "CreateDate": "2024-03-15",
+            "MaxSessionDuration": 3600
+        },
+        {
+            "Path": "/service-role/",
+            "RoleName": "LambdaExecRole",
+            "RoleId": "AROAEXAMPLEID654321",
+            "Arn": "arn:…:role/service-role/LambdaExecRole",
+            "CreateDate": "2024-01-02",
+            "MaxSessionDuration": 3600
+        }
+    ]
+}"
+`;
+
+exports[`compress - cloud-extra > aws lambda list-functions - shortens region-bearing ARNs (service:region:acct dropped) 1`] = `
+"{
+    "Functions": [
+        {
+            "FunctionName": "process-orders",
+            "FunctionArn": "arn:…:function:process-orders",
+            "Runtime": "nodejs20.x",
+            "Role": "arn:…:role/service-role/process-orders-role",
+            "LastModified": "2024-06-01",
+            "CodeSize": 204800
+        },
+        {
+            "FunctionName": "resize-images",
+            "FunctionArn": "arn:…:function:resize-images",
+            "Runtime": "python3.12",
+            "Role": "arn:…:role/lambda-basic",
+            "LastModified": "2024-05-20",
+            "CodeSize": 512000
+        }
+    ]
+}"
+`;
+
+exports[`compress - cloud-extra > aws s3 cp success - no-trigger passthrough (no ARNs/timestamps, stays intact) 1`] = `
+"Completed 1.0 KiB/1.0 KiB (2.5 KiB/s) with 1 file(s) remaining
+upload: ./report.txt to s3://my-bucket/reports/report.txt"
+`;
+
+exports[`compress - cloud-extra > aws s3 ls (50 lines) - caps list output at 40 lines with a "+N more" footer 1`] = `
+"2024-03-15 12:00:00       1000 path/to/objects/file001.txt
+2024-03-15 12:01:00       1001 path/to/objects/file002.txt
+2024-03-15 12:02:00       1002 path/to/objects/file003.txt
+2024-03-15 12:03:00       1003 path/to/objects/file004.txt
+2024-03-15 12:04:00       1004 path/to/objects/file005.txt
+2024-03-15 12:05:00       1005 path/to/objects/file006.txt
+2024-03-15 12:00:00       1006 path/to/objects/file007.txt
+2024-03-15 12:01:00       1007 path/to/objects/file008.txt
+2024-03-15 12:02:00       1008 path/to/objects/file009.txt
+2024-03-15 12:03:00       1009 path/to/objects/file010.txt
+2024-03-15 12:04:00       1010 path/to/objects/file011.txt
+2024-03-15 12:05:00       1011 path/to/objects/file012.txt
+2024-03-15 12:00:00       1012 path/to/objects/file013.txt
+2024-03-15 12:01:00       1013 path/to/objects/file014.txt
+2024-03-15 12:02:00       1014 path/to/objects/file015.txt
+2024-03-15 12:03:00       1015 path/to/objects/file016.txt
+2024-03-15 12:04:00       1016 path/to/objects/file017.txt
+2024-03-15 12:05:00       1017 path/to/objects/file018.txt
+2024-03-15 12:00:00       1018 path/to/objects/file019.txt
+2024-03-15 12:01:00       1019 path/to/objects/file020.txt
+2024-03-15 12:02:00       1020 path/to/objects/file021.txt
+2024-03-15 12:03:00       1021 path/to/objects/file022.txt
+2024-03-15 12:04:00       1022 path/to/objects/file023.txt
+2024-03-15 12:05:00       1023 path/to/objects/file024.txt
+2024-03-15 12:00:00       1024 path/to/objects/file025.txt
+2024-03-15 12:01:00       1025 path/to/objects/file026.txt
+2024-03-15 12:02:00       1026 path/to/objects/file027.txt
+2024-03-15 12:03:00       1027 path/to/objects/file028.txt
+2024-03-15 12:04:00       1028 path/to/objects/file029.txt
+2024-03-15 12:05:00       1029 path/to/objects/file030.txt
+2024-03-15 12:00:00       1030 path/to/objects/file031.txt
+2024-03-15 12:01:00       1031 path/to/objects/file032.txt
+2024-03-15 12:02:00       1032 path/to/objects/file033.txt
+2024-03-15 12:03:00       1033 path/to/objects/file034.txt
+2024-03-15 12:04:00       1034 path/to/objects/file035.txt
+2024-03-15 12:05:00       1035 path/to/objects/file036.txt
+2024-03-15 12:00:00       1036 path/to/objects/file037.txt
+2024-03-15 12:01:00       1037 path/to/objects/file038.txt
+2024-03-15 12:02:00       1038 path/to/objects/file039.txt
+2024-03-15 12:03:00       1039 path/to/objects/file040.txt
+... +10 more lines (aws output truncated)"
+`;
+
+exports[`compress - cloud-extra > psql bordered (60 rows) - caps data rows at 50 with a truncation notice 1`] = `
+"| id  | name      |
+|   1 | user1 |
+|   2 | user2 |
+|   3 | user3 |
+|   4 | user4 |
+|   5 | user5 |
+|   6 | user6 |
+|   7 | user7 |
+|   8 | user8 |
+|   9 | user9 |
+|  10 | user10 |
+|  11 | user11 |
+|  12 | user12 |
+|  13 | user13 |
+|  14 | user14 |
+|  15 | user15 |
+|  16 | user16 |
+|  17 | user17 |
+|  18 | user18 |
+|  19 | user19 |
+|  20 | user20 |
+|  21 | user21 |
+|  22 | user22 |
+|  23 | user23 |
+|  24 | user24 |
+|  25 | user25 |
+|  26 | user26 |
+|  27 | user27 |
+|  28 | user28 |
+|  29 | user29 |
+|  30 | user30 |
+|  31 | user31 |
+|  32 | user32 |
+|  33 | user33 |
+|  34 | user34 |
+|  35 | user35 |
+|  36 | user36 |
+|  37 | user37 |
+|  38 | user38 |
+|  39 | user39 |
+|  40 | user40 |
+|  41 | user41 |
+|  42 | user42 |
+|  43 | user43 |
+|  44 | user44 |
+|  45 | user45 |
+|  46 | user46 |
+|  47 | user47 |
+|  48 | user48 |
+|  49 | user49 |
+... (rows truncated, showing first 50)"
+`;
+
+exports[`compress - cloud-extra > psql expanded \\x (35 records) - detects expanded mode, caps at 30 records 1`] = `
+"-[ RECORD 1 ]---------+----------------------
+id       | 1
+username | user1
+email    | user1@example.com
+active   | t
+-[ RECORD 2 ]---------+----------------------
+id       | 2
+username | user2
+email    | user2@example.com
+active   | f
+-[ RECORD 3 ]---------+----------------------
+id       | 3
+username | user3
+email    | user3@example.com
+active   | t
+-[ RECORD 4 ]---------+----------------------
+id       | 4
+username | user4
+email    | user4@example.com
+active   | f
+-[ RECORD 5 ]---------+----------------------
+id       | 5
+username | user5
+email    | user5@example.com
+active   | t
+-[ RECORD 6 ]---------+----------------------
+id       | 6
+username | user6
+email    | user6@example.com
+active   | f
+-[ RECORD 7 ]---------+----------------------
+id       | 7
+username | user7
+email    | user7@example.com
+active   | t
+-[ RECORD 8 ]---------+----------------------
+id       | 8
+username | user8
+email    | user8@example.com
+active   | f
+-[ RECORD 9 ]---------+----------------------
+id       | 9
+username | user9
+email    | user9@example.com
+active   | t
+-[ RECORD 10 ]---------+----------------------
+id       | 10
+username | user10
+email    | user10@example.com
+active   | f
+-[ RECORD 11 ]---------+----------------------
+id       | 11
+username | user11
+email    | user11@example.com
+active   | t
+-[ RECORD 12 ]---------+----------------------
+id       | 12
+username | user12
+email    | user12@example.com
+active   | f
+-[ RECORD 13 ]---------+----------------------
+id       | 13
+username | user13
+email    | user13@example.com
+active   | t
+-[ RECORD 14 ]---------+----------------------
+id       | 14
+username | user14
+email    | user14@example.com
+active   | f
+-[ RECORD 15 ]---------+----------------------
+id       | 15
+username | user15
+email    | user15@example.com
+active   | t
+-[ RECORD 16 ]---------+----------------------
+id       | 16
+username | user16
+email    | user16@example.com
+active   | f
+-[ RECORD 17 ]---------+----------------------
+id       | 17
+username | user17
+email    | user17@example.com
+active   | t
+-[ RECORD 18 ]---------+----------------------
+id       | 18
+username | user18
+email    | user18@example.com
+active   | f
+-[ RECORD 19 ]---------+----------------------
+id       | 19
+username | user19
+email    | user19@example.com
+active   | t
+-[ RECORD 20 ]---------+----------------------
+id       | 20
+username | user20
+email    | user20@example.com
+active   | f
+-[ RECORD 21 ]---------+----------------------
+id       | 21
+username | user21
+email    | user21@example.com
+active   | t
+-[ RECORD 22 ]---------+----------------------
+id       | 22
+username | user22
+email    | user22@example.com
+active   | f
+-[ RECORD 23 ]---------+----------------------
+id       | 23
+username | user23
+email    | user23@example.com
+active   | t
+-[ RECORD 24 ]---------+----------------------
+id       | 24
+username | user24
+email    | user24@example.com
+active   | f
+-[ RECORD 25 ]---------+----------------------
+id       | 25
+username | user25
+email    | user25@example.com
+active   | t
+-[ RECORD 26 ]---------+----------------------
+id       | 26
+username | user26
+email    | user26@example.com
+active   | f
+-[ RECORD 27 ]---------+----------------------
+id       | 27
+username | user27
+email    | user27@example.com
+active   | t
+-[ RECORD 28 ]---------+----------------------
+id       | 28
+username | user28
+email    | user28@example.com
+active   | f
+-[ RECORD 29 ]---------+----------------------
+id       | 29
+username | user29
+email    | user29@example.com
+active   | t
+-[ RECORD 30 ]---------+----------------------
+id       | 30
+username | user30
+email    | user30@example.com
+active   | f"
+`;
+
+exports[`compress - cloud-extra > psql table - strips the dashed +/- separator line, keeps header/rows/count 1`] = `
+"id |  name  |       email
+  1 | Alice  | alice@example.com
+  2 | Bob    | bob@example.com
+  3 | Carol  | carol@example.com
+(3 rows)"
+`;
+
+exports[`compress - cloud-extra > psql zero rows - clean result, separator stripped, "(0 rows)" preserved 1`] = `
+"id | name
+(0 rows)"
+`;

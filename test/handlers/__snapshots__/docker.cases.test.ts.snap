@@ -1,0 +1,94 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - docker > build - strips build context, cache markers, bare layer hashes, and pull layer-transfer noise; keeps Step/output lines 1`] = `
+"Step 1/8 : FROM node:18-alpine
+18-alpine: Pulling from library/node
+Digest: sha256:9c8f7e6d5c4b3a29180f7e6d5c4b3a29180f7e6d5c4b3a29180f7e6d5c4b3a29
+Status: Downloaded newer image for node:18-alpine
+Step 2/8 : WORKDIR /app
+Step 3/8 : COPY package.json package-lock.json ./
+Step 4/8 : RUN npm ci --production
+ ---> Running in 9f8e7d6c5b4a
+npm WARN deprecated har-validator@5.1.5: this library is no longer supported
+added 214 packages in 8.3s
+Step 5/8 : COPY . .
+Step 6/8 : RUN npm run build
+ ---> Running in 1a2b3c4d5e6f
+> myapp@1.0.0 build
+> tsc -p tsconfig.json
+Step 7/8 : EXPOSE 3000
+ ---> Running in 2b3c4d5e6f70
+Step 8/8 : CMD ["node", "dist/server.js"]
+ ---> Running in 3c4d5e6f7081
+Successfully built 1b2c3d4e5f60
+Successfully tagged myapp:latest"
+`;
+
+exports[`compress - docker > images - collapses to "[docker] N images:" with repo:tag [size] only (no IMAGE ID, no header) 1`] = `
+"[docker] 6 images:
+  nginx:1.25-alpine  [42.6MB]
+  postgres:16  [432MB]
+  myregistry.io/team/api:v2.3.1  [198MB]
+  redis:7-alpine  [41.4MB]
+  <none>:<none>  [1.12GB]
+  node:18-alpine  [176MB]"
+`;
+
+exports[`compress - docker > images - no images collapses to a single zero line 1`] = `"[docker] 0 images"`;
+
+exports[`compress - docker > kubectl get nodes - untargeted kind passes through untouched (no rollup, no table) 1`] = `
+"NAME         STATUS   ROLES           AGE   VERSION
+gke-node-1   Ready    control-plane   45d   v1.28.3
+gke-node-2   Ready    <none>          45d   v1.28.3
+gke-node-3   Ready    <none>          30d   v1.28.3"
+`;
+
+exports[`compress - docker > kubectl get pods - all healthy yields a clean rollup with no issue list 1`] = `"5 pods: 5 running"`;
+
+exports[`compress - docker > kubectl get pods - empty cluster ("No resources found") rolls up to zero pods 1`] = `"0 pods: 0 running"`;
+
+exports[`compress - docker > kubectl get pods - rolls up to running/pending/failed counts with a bracketed issue list 1`] = `
+"8 pods: 3 running, 2 pending, 3 failed
+  [x] worker-6b5a4c3d2-pl9wx [CrashLoopBackOff]
+  [x] worker-6b5a4c3d2-qz7vn [Error]
+  [x] migrate-7c6b5a4d3-hh2mn [ImagePullBackOff]"
+`;
+
+exports[`compress - docker > kubectl get svc - compact "N svc:" table of name/type/[ports], dropping cluster/external IPs and age 1`] = `
+"5 svc:
+  kubernetes ClusterIP [443/TCP]
+  api-service ClusterIP [3000/TCP]
+  web-frontend LoadBalancer [80:31380/TCP,443:31743/TCP]
+  app-db ClusterIP [5432/TCP]
+  app-cache ClusterIP [6379/TCP]"
+`;
+
+exports[`compress - docker > kubectl get svc - no rows returns the "No <kind> found" sentinel 1`] = `"No svc found"`;
+
+exports[`compress - docker > logs - no table and no layer noise, passes through verbatim (modulo trim) 1`] = `
+"2026-07-20T10:15:03.221Z INFO  server starting, node v18.19.0
+2026-07-20T10:15:03.455Z INFO  connected to postgres at app-db:5432
+2026-07-20T10:15:03.512Z INFO  redis cache ready at app-cache:6379
+2026-07-20T10:15:03.998Z INFO  http server listening on 0.0.0.0:3000
+2026-07-20T10:15:14.203Z WARN  slow query detected (1243ms): SELECT * FROM orders
+2026-07-20T10:15:22.887Z INFO  GET /api/health 200 3ms"
+`;
+
+exports[`compress - docker > ps - collapses the wide table to a "[docker] N containers:" summary (short id/name/image/status, no COMMAND, no header) 1`] = `
+"[docker] 5 containers:
+  a1b2c3d4e5f6 web-frontend (nginx:1.25-alpine) Up 2 hours
+  b2c3d4e5f6a7 app-db (postgres:16) Up 3 hours (healthy)
+  c3d4e5f6a7b8 app-cache (redis:7-alpine) Up 3 hours
+  d4e5f6a7b8c9 api-service (api:v2.3.1) Up 45 minutes
+  e5f6a7b8c9d0 message-broker (rabbitmq:3.12-management) Up 1 day"
+`;
+
+exports[`compress - docker > ps - no containers running collapses to a single zero line 1`] = `"[docker] 0 containers running"`;
+
+exports[`compress - docker > pull - default branch strips per-layer transfer noise, keeps digest/status 1`] = `
+"Using default tag: latest
+latest: Pulling from library/redis
+Digest: sha256:0d3c3c3f3c8d1e6b5a4938271605f4e3d2c1b0a9887766554433221100ffeedd
+Status: Downloaded newer image for redis:latest
+docker.io/library/redis:latest"
+`;

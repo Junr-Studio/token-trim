@@ -1,0 +1,91 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - cargo > build (clean) - pure Compiling noise collapses to just the Finished line 1`] = `"Finished dev [unoptimized + debuginfo] target(s) in 2.14s"`;
+
+exports[`compress - cargo > build - strips Compiling/Updating noise, keeps the E0308 error 1`] = `
+"error[E0308]: mismatched types
+  --> src/main.rs:4:18
+   |
+4  |     let x: u32 = "hello";
+   |            ---   ^^^^^^^ expected \`u32\`, found \`&str\`
+   |            |
+   |            expected due to this
+   |
+error: aborting due to 1 previous error
+
+For more information about this error, try \`rustc --explain E0308\`."
+`;
+
+exports[`compress - cargo > check - strips Blocking/Compiling noise, keeps the warning + Finished 1`] = `
+"warning: unused variable: \`y\`
+ --> src/main.rs:3:9
+  |
+3 |     let y = 42;
+  |         ^ help: if this is intentional, prefix it with an underscore: \`_y\`
+  |
+  = note: \`#[warn(unused_variables)]\` on by default
+
+warning: \`myapp\` (bin "myapp") generated 1 warning
+    Finished dev [unoptimized + debuginfo] target(s) in 0.52s"
+`;
+
+exports[`compress - cargo > clippy - strips Updating/Compiling but preserves the Checking + lint 1`] = `
+"Checking myapp v0.1.0 (/home/user/myapp)
+warning: this expression creates a reference which is immediately dereferenced by the compiler
+ --> src/main.rs:7:18
+  |
+7 |     do_something(&*value);
+  |                  ^^^^^^^ help: change this to: \`value\`
+  |
+  = note: \`#[warn(clippy::needless_borrow)]\` on by default
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
+
+warning: \`myapp\` (bin "myapp") generated 1 warning
+    Finished dev [unoptimized + debuginfo] target(s) in 0.30s"
+`;
+
+exports[`compress - cargo > empty output - returns empty, never throws 1`] = `""`;
+
+exports[`compress - cargo > test (all pass) - a 12-test green run collapses to one summary line 1`] = `"Cargo test: 12 passed, 0 failed"`;
+
+exports[`compress - cargo > test (compile error) - no result line ⇒ passthrough, error preserved 1`] = `
+"Compiling myapp v0.1.0 (/home/user/myapp)
+error[E0432]: unresolved import \`crate::missing\`
+ --> src/lib.rs:1:5
+  |
+1 | use crate::missing;
+  |     ^^^^^^^^^^^^^^^ no \`missing\` in the root
+
+error: could not compile \`myapp\` (lib test) due to 1 previous error"
+`;
+
+exports[`compress - cargo > test (failure) - summary header + FAIL block capped at 6 detail lines 1`] = `
+"Cargo test: 2 passed, 1 failed
+  FAIL: tests::test_parser
+    thread 'tests::test_parser' panicked at src/parser.rs:128:13:
+    assertion \`left == right\` failed
+      left: Token { kind: Ident, value: "foo", span: 12..15 }
+     right: Token { kind: Keyword, value: "fn", span: 12..14 }
+    stack backtrace:
+       0: rust_begin_unwind"
+`;
+
+exports[`compress - cargo > test (many failures) - only 5 render, rest collapse to "... +2 more" 1`] = `
+"Cargo test: 0 passed, 7 failed
+  FAIL: suite::case_01
+    thread 'suite::case_01' panicked at src/lib.rs:10:5:
+    assertion failed: result.is_ok()
+  FAIL: suite::case_02
+    thread 'suite::case_02' panicked at src/lib.rs:20:5:
+    assertion failed: result.is_ok()
+  FAIL: suite::case_03
+    thread 'suite::case_03' panicked at src/lib.rs:30:5:
+    assertion failed: result.is_ok()
+  FAIL: suite::case_04
+    thread 'suite::case_04' panicked at src/lib.rs:40:5:
+    assertion failed: result.is_ok()
+  FAIL: suite::case_05
+    thread 'suite::case_05' panicked at src/lib.rs:50:5:
+    assertion failed: result.is_ok()
+  ... +2 more"
+`;

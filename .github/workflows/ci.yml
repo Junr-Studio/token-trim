@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main, canary, dev]
+  pull_request:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [18, 20, 22]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck (src)
+        run: npm run typecheck
+
+      - name: Typecheck (tests)
+        run: npx tsc -p tsconfig.test.json
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  # Validate the PUBLISHED artifact (not just the source): pack it, install the
+  # tarball into a clean project and import the entrypoints, then lint the
+  # package manifest and exported types.
+  package:
+    name: package checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Smoke-test the packed tarball
+        run: node scripts/smoke-tarball.mjs
+
+      - name: Lint the published package (publint)
+        run: npx --yes publint --strict
+
+      # Advisory: token-trim is intentionally ESM-only, so attw's CJS-interop
+      # findings are expected. Surfaced for visibility, not a gate.
+      - name: Check exported types (are-the-types-wrong)
+        continue-on-error: true
+        run: npx --yes @arethetypeswrong/cli --pack
+
+  # Single stable status check to require in branch protection (the matrix job
+  # names vary per cell). Passes only if every matrix cell and package check passed.
+  ci-success:
+    name: CI success
+    if: always()
+    needs: [test, package]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all required jobs passed
+        run: |
+          if [ "${{ needs.test.result }}" != "success" ] || [ "${{ needs.package.result }}" != "success" ]; then
+            echo "CI failed (test=${{ needs.test.result }}, package=${{ needs.package.result }})."
+            exit 1
+          fi
+          echo "All CI matrix jobs and package checks passed."

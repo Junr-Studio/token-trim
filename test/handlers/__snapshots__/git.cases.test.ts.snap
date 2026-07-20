@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - git > diff - drops hunk/index headers, keeps +/- and a summary 1`] = `
+"diff: 1 file(s)  +3 -1
+
+── src/app.ts
+-   server.listen(3000)
++   server.listen(config.port ?? 3000)
++
++ export const VERSION = '2.0.0'"
+`;
+
+exports[`compress - git > log - passes an already-compact pretty log through cleanly 1`] = `
+"a1b2c3d fix: handle null config case (2 hours ago) <alice>
+e4f5g6h feat: configurable server port (5 hours ago) <bob>
+9c8b7a6 chore: bump deps (1 day ago) <alice>
+1122334 docs: update README (2 days ago) <carol>"
+`;
+
+exports[`compress - git > status - short/branch format stays compact 1`] = `
+"## main...origin/main [ahead 1]
+ M src/app.ts
+ M README.md
+?? src/new-feature.ts"
+`;

@@ -1,0 +1,62 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - universal > (a) strips ANSI cursor position + move sequences, preserves SGR color 1`] = `
+"Building project...
+Status: compiling modules
+Moving cursor then back done
+[31mERROR[0m: type mismatch in handler
+[1;32mPASS[0m: 12 checks succeeded
+ cursor saved  cursor restored
+Column jump and next line marker
+Warning: [33mdeprecated API[0m used here"
+`;
+
+exports[`compress - universal > (b) collapses a run of 4+ CR progress redraws to only the final frame 1`] = `
+"Downloading model weights...
+
+Progress: 100% [##########]
+Download complete: model.bin (240 MB)
+Verifying checksum... ok"
+`;
+
+exports[`compress - universal > (b2) a short run of CR redraws (below threshold) is left intact 1`] = `
+"Saving file...
+
+Saving:   0%
+Saving: 100%
+Saved."
+`;
+
+exports[`compress - universal > (c) collapses 3+ consecutive blank lines down to one 1`] = `
+"Test run finished.
+
+Summary: 42 passed, 0 failed.
+
+Coverage: 87% of statements."
+`;
+
+exports[`compress - universal > (d) trims trailing spaces and tabs from every line 1`] = `
+"name = token-trim
+version = 1.0.0
+description = output compressor
+
+enabled = true
+paths = [ /usr/bin ]"
+`;
+
+exports[`compress - universal > clean output with no noise passes through unchanged (just trimmed) 1`] = `
+"All checks passed.
+3 files formatted, 0 issues found.
+Everything is up to date."
+`;
+
+exports[`compress - universal > empty output returns the empty string unchanged 1`] = `""`;
+
+exports[`compress - universal > kitchen sink - all four universal passes compose on one output 1`] = `
+"Installer v2.3
+Resolving packages
+
+Fetched 88 pkgs
+
+[32mDONE[0m installation complete"
+`;

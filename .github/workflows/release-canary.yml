@@ -1,0 +1,64 @@
+name: Release (canary channel)
+
+# Early-access channel. Every push to canary publishes a PRE-RELEASE of the
+# upcoming version under the "canary" dist-tag - WITHOUT touching "latest".
+# Anyone can opt in with `pnpm add @junr_studio/token-trim@canary` (or npm); normal installs
+# (`pnpm add @junr_studio/token-trim`) keep getting the stable `latest` release.
+#
+# package.json holds the target STABLE version (e.g. 0.2.0). Here we stamp it as
+# 0.2.0-canary.<run> at publish time only (never committed). When canary is
+# promoted to main, main publishes the same 0.2.0 as the stable `latest` release.
+
+on:
+  push:
+    branches: [canary]
+
+permissions:
+  contents: read
+  id-token: write # npm provenance (requires a public repo)
+
+concurrency:
+  group: release-canary
+  cancel-in-progress: false
+
+jobs:
+  prerelease:
+    name: Publish pre-release to npm (@canary)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Smoke-test the packed tarball
+        run: node scripts/smoke-tarball.mjs
+
+      - name: Stamp a canary pre-release version
+        id: v
+        run: |
+          BASE=$(jq -r .version package.json)
+          RC="${BASE}-canary.${{ github.run_number }}"
+          npm version "$RC" --no-git-tag-version --allow-same-version
+          echo "version=$RC" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to the "canary" channel
+        run: npm publish --tag canary --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Summary
+        run: echo "::notice::Published @junr_studio/token-trim@${{ steps.v.outputs.version }} to dist-tag 'canary' - install with 'pnpm add @junr_studio/token-trim@canary'."

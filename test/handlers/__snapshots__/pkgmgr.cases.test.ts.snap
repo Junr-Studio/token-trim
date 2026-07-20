@@ -1,0 +1,47 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - pkgmgr > install - empty output stays empty (no crash, no growth) 1`] = `""`;
+
+exports[`compress - pkgmgr > install - safety fallback: all-noise output returns the ORIGINAL, never empty 1`] = `
+"npm warn deprecated foo@1.0.0: deprecated
+npm timing reify:reify Completed in 12ms
+Progress: resolved 10, reused 10, downloaded 0, added 0"
+`;
+
+exports[`compress - pkgmgr > npm audit (text) - clean tree surfaces the "found 0 vulnerabilities" line 1`] = `"found 0 vulnerabilities"`;
+
+exports[`compress - pkgmgr > npm audit (text) - parses the summary line into a severity rollup 1`] = `"audit: 1 critical, 3 high, 1 moderate, 2 low (7 total)"`;
+
+exports[`compress - pkgmgr > npm audit --json - clean tree reports "0 vulnerabilities" 1`] = `"audit: 0 vulnerabilities"`;
+
+exports[`compress - pkgmgr > npm audit --json - collapses metadata histogram to a one-line summary 1`] = `"audit: 1 critical, 3 high, 1 moderate, 2 low (7 total)"`;
+
+exports[`compress - pkgmgr > npm install - strips deprecation warnings / notices / timing, keeps summary 1`] = `
+"added 1043 packages, and audited 1044 packages in 24s
+142 packages are looking for funding
+  run \`npm fund\` for details
+found 0 vulnerabilities"
+`;
+
+exports[`compress - pkgmgr > npm ls - no-noise tree passes through intact (no mangling) 1`] = `
+"my-app@1.0.0 /home/user/my-app
+├── express@4.19.2
+├── lodash@4.17.21
+├── typescript@5.4.5
+└── vitest@1.6.0"
+`;
+
+exports[`compress - pkgmgr > pnpm install - strips braille spinners / Progress / Downloading / .pnpm paths 1`] = `
+"Lockfile is up to date, resolution step is skipped
+dependencies:
++ express 4.19.2
++ typescript 5.4.5
+Done in 8.3s"
+`;
+
+exports[`compress - pkgmgr > yarn install - strips Resolving/Fetching/Downloading + "> pkg@N" lifecycle 1`] = `
+"yarn install v1.22.19
+success Saved lockfile.
+success Saved 1053 new dependencies.
+Done in 34.21s."
+`;

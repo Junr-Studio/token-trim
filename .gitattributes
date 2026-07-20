@@ -1,0 +1,13 @@
+# Normalize all text files to LF in the repo and on checkout, on every platform.
+# This library generates POSIX shell scripts and its snapshot tests are
+# line-ending sensitive, so CRLF must never sneak in.
+* text=auto eol=lf
+
+# Shell wrappers and scripts stay LF regardless.
+*.sh   text eol=lf
+*.mjs  text eol=lf
+
+# Binary assets are never normalized.
+*.tgz  binary
+*.png  binary
+*.ico  binary

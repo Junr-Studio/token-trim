@@ -1,0 +1,33 @@
+name: CodeQL
+
+# Static analysis of the JavaScript/TypeScript source. Runs on PRs, pushes to
+# the long-lived branches, and weekly. (github/* actions are tag-pinned and kept
+# current by Dependabot; the release pipeline itself is SHA-pinned.)
+
+on:
+  push:
+    branches: [main, canary, dev]
+  pull_request:
+    branches: [main, canary, dev]
+  schedule:
+    - cron: '27 4 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3

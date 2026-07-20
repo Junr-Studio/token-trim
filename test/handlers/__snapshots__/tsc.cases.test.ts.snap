@@ -1,0 +1,72 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - tsc > clean run - 'Found 0 errors' collapses to a one-line summary 1`] = `"TypeScript: no errors"`;
+
+exports[`compress - tsc > content trigger - npm build output with TS codes routes to tsc condenser ahead of npm, drops npm noise 1`] = `
+"TypeScript: 3 errors in 1 files  TS2345(1×) TS2304(1×) TS2532(1×)
+──────────────────────────────────────────────────
+src/server.ts  (3)
+  L14: TS2345 Argument of type 'number' is not assignable to parameter of type 'string'.
+  L30: TS2304 Cannot find name 'requre'.
+  L58: TS2532 Object is possibly 'undefined'."
+`;
+
+exports[`compress - tsc > empty output - returns empty, no summary synthesized 1`] = `""`;
+
+exports[`compress - tsc > errors - groups by file, top-5 codes summary, truncates >120-char messages, keeps overload context 1`] = `
+"TypeScript: 7 errors in 3 files  TS2322(2×) TS2304(1×) TS2339(1×) TS2769(1×) TS7006(1×)
+──────────────────────────────────────────────────
+src/index.ts  (3)
+  L12: TS2322 Type '{ name: string; age: number; email: string; active: boolean; }' is not assignable to type 'User'. Object literal m
+  L45: TS2304 Cannot find name 'unknownHelper'.
+  L88: TS2322 Type 'null' is not assignable to type 'string'.
+src/components/Button.tsx  (2)
+  L23: TS2339 Property 'onClik' does not exist on type 'ButtonProps'. Did you mean 'onClick'?
+  L51: TS2769 No overload matches this call.
+    Overload 1 of 2, '(props: ButtonProps): Button', gave the following error.
+    Argument of type '{ label: number; }' is not assignable to parameter of type 'ButtonProps'.
+    Overload 2 of 2, '(props: ButtonProps, ctx: RenderContext): Button', gave the following error.
+    Expected 2 arguments, but got 1.
+src/utils/format.ts  (2)
+  L7: TS7006 Parameter 'value' implicitly has an 'any' type.
+  L19: TS2531 Object is possibly 'null'."
+`;
+
+exports[`compress - tsc > no trigger - non-tsc output without any TS code is left alone by the tsc condenser 1`] = `
+"Deploying to production...
+  - uploading assets
+  - invalidating cache
+Done in 4.2s"
+`;
+
+exports[`compress - tsc > prose TS code - content trigger fires but no error format matches, text passes through untouched 1`] = `
+"Building project bundle...
+Note: encountered deprecation TS2345: assignability of tuple types changed in 5.0.
+See https://example.com/ts-migration for the upgrade guide.
+Build finished in 4.2s."
+`;
+
+exports[`compress - tsc > warnings - folded into the error count, error/warning label dropped, codes aggregated 1`] = `
+"TypeScript: 16 errors in 4 files  TS6133(14×) TS6192(1×) TS2551(1×)
+──────────────────────────────────────────────────
+src/legacy/parser.ts  (5)
+  L3: TS6133 'readFileSync' is declared but its value is never read.
+  L4: TS6133 'writeFileSync' is declared but its value is never read.
+  L88: TS6133 'tempBuffer' is declared but its value is never read.
+  L140: TS6133 'legacyFlag' is declared but its value is never read.
+  L201: TS6133 'seenTokens' is declared but its value is never read.
+src/legacy/tokenizer.ts  (5)
+  L12: TS6133 'DEBUG_MODE' is declared but its value is never read.
+  L45: TS6133 'scratchPad' is declared but its value is never read.
+  L77: TS6133 'lastChar' is declared but its value is never read.
+  L98: TS6133 'columnHint' is declared but its value is never read.
+  L120: TS6192 All imports in import declaration are unused.
+src/legacy/emitter.ts  (3)
+  L30: TS6133 'unusedImport' is declared but its value is never read.
+  L51: TS6133 'sourceMapUrl' is declared but its value is never read.
+  L84: TS6133 'indentCache' is declared but its value is never read.
+src/legacy/analyzer.ts  (3)
+  L19: TS6133 'visited' is declared but its value is never read.
+  L63: TS6133 'depthLimit' is declared but its value is never read.
+  L90: TS2551 Property 'porrt' does not exist on type 'Config'. Did you mean 'port'?"
+`;
