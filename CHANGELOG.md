@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-07-21
+
+### Changed
+
+- `publint` and `@arethetypeswrong/cli` are now dev dependencies (hash-pinned via
+  the lockfile) invoked through npm scripts, instead of unpinned `npx` calls, so
+  the OpenSSF Scorecard Pinned-Dependencies check no longer flags them.
+
 ## [0.1.3] - 2026-07-21
 
 ### Changed
@@ -65,7 +73,8 @@ an AI agent runs, cutting the tokens they cost in its context window.
   `createSavingsAccumulator` for estimating and totaling tokens saved.
 - Zero runtime dependencies, ESM-only distribution, Node.js >= 18.
 
-[Unreleased]: https://github.com/Junr-Studio/token-trim/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/Junr-Studio/token-trim/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/Junr-Studio/token-trim/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/Junr-Studio/token-trim/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/Junr-Studio/token-trim/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Junr-Studio/token-trim/compare/v0.1.0...v0.1.1
