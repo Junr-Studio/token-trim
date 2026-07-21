@@ -10,8 +10,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write # create tags + GitHub releases
-  id-token: write # npm provenance (requires a public repo)
+  contents: read
 
 concurrency:
   group: release
@@ -21,6 +20,9 @@ jobs:
   release:
     name: Publish to npm
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # create tags + GitHub releases
+      id-token: write # npm provenance (requires a public repo)
     # GitHub Environment - scope the NPM_TOKEN here and, optionally, add required
     # reviewers in repo settings to gate every publish behind a manual approval.
     environment: production
