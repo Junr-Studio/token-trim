@@ -5,6 +5,7 @@ name: Scorecard supply-chain security
 # README badge stays live.
 
 on:
+  workflow_dispatch:
   branch_protection_rule:
   schedule:
     - cron: '18 5 * * 1'
@@ -25,7 +26,7 @@ jobs:
           persist-credentials: false
 
       - name: Run analysis
-        uses: ossf/scorecard-action@v2
+        uses: ossf/scorecard-action@v2.4.3
         with:
           results_file: results.sarif
           results_format: sarif

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-07-21
+
+### Fixed
+
+- Scorecard workflow now pins `ossf/scorecard-action@v2.4.3` (the action has no
+  moving `v2` major tag, so `@v2` failed to resolve). Added a `workflow_dispatch`
+  trigger so the analysis can be run on demand.
+
 ## [0.1.1] - 2026-07-21
 
 ### Changed
@@ -46,6 +54,7 @@ an AI agent runs, cutting the tokens they cost in its context window.
   `createSavingsAccumulator` for estimating and totaling tokens saved.
 - Zero runtime dependencies, ESM-only distribution, Node.js >= 18.
 
-[Unreleased]: https://github.com/Junr-Studio/token-trim/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/Junr-Studio/token-trim/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/Junr-Studio/token-trim/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Junr-Studio/token-trim/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Junr-Studio/token-trim/releases/tag/v0.1.0
