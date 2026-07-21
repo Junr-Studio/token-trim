@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-07-21
+
+### Changed
+
+- Hardened the CI/CD supply-chain posture (OpenSSF Scorecard): every workflow now
+  declares a minimal top-level `permissions: contents: read` and escalates only
+  where needed (Token-Permissions), and all GitHub Actions are pinned by commit
+  SHA (Pinned-Dependencies), kept current by Dependabot.
+- README license badge is now a static Apache-2.0 badge instead of the npm badge,
+  which failed to resolve the scoped package name.
+
 ## [0.1.2] - 2026-07-21
 
 ### Fixed
@@ -54,7 +65,8 @@ an AI agent runs, cutting the tokens they cost in its context window.
   `createSavingsAccumulator` for estimating and totaling tokens saved.
 - Zero runtime dependencies, ESM-only distribution, Node.js >= 18.
 
-[Unreleased]: https://github.com/Junr-Studio/token-trim/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/Junr-Studio/token-trim/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/Junr-Studio/token-trim/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/Junr-Studio/token-trim/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Junr-Studio/token-trim/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Junr-Studio/token-trim/releases/tag/v0.1.0

@@ -15,7 +15,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write # npm provenance (requires a public repo)
 
 concurrency:
   group: release-canary
@@ -25,6 +24,9 @@ jobs:
   prerelease:
     name: Publish pre-release to npm (@canary)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance (requires a public repo)
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

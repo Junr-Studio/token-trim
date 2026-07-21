@@ -5,7 +5,7 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Junr-Studio/token-trim/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Junr-Studio/token-trim)
 [![node](https://img.shields.io/node/v/@junr_studio/token-trim.svg)](https://www.npmjs.com/package/@junr_studio/token-trim)
 [![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](https://github.com/Junr-Studio/token-trim/blob/main/package.json)
-[![license](https://img.shields.io/npm/l/@junr_studio/token-trim.svg)](./LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
 **Compress the output of shell commands your AI agent runs, to cut the tokens they cost in its context window.**
 
