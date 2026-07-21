@@ -65,13 +65,13 @@ jobs:
         run: node scripts/smoke-tarball.mjs
 
       - name: Lint the published package (publint)
-        run: npx --yes publint --strict
+        run: npm run lint:package
 
       # Advisory: token-trim is intentionally ESM-only, so attw's CJS-interop
       # findings are expected. Surfaced for visibility, not a gate.
       - name: Check exported types (are-the-types-wrong)
         continue-on-error: true
-        run: npx --yes @arethetypeswrong/cli --pack
+        run: npm run lint:types
 
   # Single stable status check to require in branch protection (the matrix job
   # names vary per cell). Passes only if every matrix cell and package check passed.
