@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-07-21
+
+### Changed
+
+- Raised the minimum supported Node.js to **24**. Node 18 and 20 are end-of-life,
+  and the test tooling (vitest 4) requires Node 20+.
+
+### Fixed
+
+- CI test matrix now runs on Node 24 only, fixing failures caused by vitest 4
+  importing a `node:util` export unavailable on Node 18.
+- The Scorecard workflow no longer runs on `push` (schedule and branch-protection
+  triggers only), removing spurious first-run failures.
+- Dependabot now targets the `dev` branch so dependency updates flow through the
+  dev -> canary -> main pipeline instead of landing directly on `main`.
+
 ## [0.1.0] - 2026-07-20
 
 Initial public release of **token-trim** - a zero-dependency, pure-ESM library
@@ -30,5 +46,6 @@ an AI agent runs, cutting the tokens they cost in its context window.
   `createSavingsAccumulator` for estimating and totaling tokens saved.
 - Zero runtime dependencies, ESM-only distribution, Node.js >= 18.
 
-[Unreleased]: https://github.com/Junr-Studio/token-trim/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Junr-Studio/token-trim/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/Junr-Studio/token-trim/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Junr-Studio/token-trim/releases/tag/v0.1.0
