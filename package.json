@@ -1,6 +1,6 @@
 {
   "name": "@junr_studio/token-trim",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Compress the output of shell commands your AI agent runs, to cut the tokens they cost in its context window.",
   "type": "module",
   "license": "Apache-2.0",
@@ -30,7 +30,7 @@
     "stdout"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=24"
   },
   "sideEffects": false,
   "main": "./dist/index.js",

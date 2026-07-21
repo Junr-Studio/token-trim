@@ -35,7 +35,7 @@ pnpm add @junr_studio/token-trim           # stable (latest)
 pnpm add @junr_studio/token-trim@canary    # early-access pre-releases
 ```
 
-Requires **Node ≥ 18**. The environment where the agent runs commands needs `node` on its `PATH` (the wrappers are `node proxy.mjs …`) and a POSIX `sh` (present everywhere; on Windows it ships with Git).
+Requires **Node ≥ 24**. The environment where the agent runs commands needs `node` on its `PATH` (the wrappers are `node proxy.mjs …`) and a POSIX `sh` (present everywhere; on Windows it ships with Git).
 
 ## Quick start
 

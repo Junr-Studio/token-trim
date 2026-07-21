@@ -3,6 +3,7 @@ updates:
   # Keep the pinned GitHub Actions SHAs current (Dependabot bumps SHA + comment).
   - package-ecosystem: github-actions
     directory: /
+    target-branch: dev
     schedule:
       interval: weekly
     groups:
@@ -12,6 +13,7 @@ updates:
   # devDependencies only (there are zero runtime deps).
   - package-ecosystem: npm
     directory: /
+    target-branch: dev
     schedule:
       interval: weekly
     groups:

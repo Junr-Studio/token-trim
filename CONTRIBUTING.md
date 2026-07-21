@@ -3,14 +3,14 @@
 Thanks for your interest in improving **token-trim**! This guide covers local
 setup, how the tests are organized, and the conventions we expect in a PR.
 
-token-trim is a zero-dependency, pure-ESM library (Node >= 18) that generates
+token-trim is a zero-dependency, pure-ESM library (Node >= 24) that generates
 PATH-wrapper scripts to condense the stdout of the shell commands an AI agent
 runs. The generated scripts differ per operating system, so changes must keep
 working on Linux, macOS, **and Windows**.
 
 ## Prerequisites
 
-- **Node.js >= 18** with `node` on your PATH.
+- **Node.js >= 24** with `node` on your PATH.
 - **npm** (the repo is pinned with a `package-lock.json`).
 
 ## Setup
