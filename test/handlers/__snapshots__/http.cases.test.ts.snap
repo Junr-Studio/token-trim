@@ -1,11 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`compress - http > curl - body exactly at the 2000-char boundary is kept verbatim (<= MAX) 1`] = `"{"ok":true,"payload":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}"`;
-
-exports[`compress - http > curl - body just over the limit GROWS because the truncation footer adds overhead (allowGrowth) 1`] = `
-"{"ok":true,"payload":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-... (2001 bytes total, truncated)"
-`;
+exports[`compress - http > curl - a body at the size boundary that is valid JSON stays valid JSON 1`] = `"{"ok":true,"payload":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}"`;
 
 exports[`compress - http > curl - empty output short-circuits to empty (zero case) 1`] = `""`;
 
@@ -19,35 +14,141 @@ exports[`compress - http > curl - short body under the limit passes through unch
 }"
 `;
 
-exports[`compress - http > curl - truncates a long response body (>2000 chars) with a byte-count footer 1`] = `
-"{
-  "head_marker": "START_OF_BODY",
-  "users": [
-    { "id": 0, "name": "user_0", "email": "user_0@example.com", "active": true },
-    { "id": 1, "name": "user_1", "email": "user_1@example.com", "active": true },
-    { "id": 2, "name": "user_2", "email": "user_2@example.com", "active": true },
-    { "id": 3, "name": "user_3", "email": "user_3@example.com", "active": true },
-    { "id": 4, "name": "user_4", "email": "user_4@example.com", "active": true },
-    { "id": 5, "name": "user_5", "email": "user_5@example.com", "active": true },
-    { "id": 6, "name": "user_6", "email": "user_6@example.com", "active": true },
-    { "id": 7, "name": "user_7", "email": "user_7@example.com", "active": true },
-    { "id": 8, "name": "user_8", "email": "user_8@example.com", "active": true },
-    { "id": 9, "name": "user_9", "email": "user_9@example.com", "active": true },
-    { "id": 10, "name": "user_10", "email": "user_10@example.com", "active": true },
-    { "id": 11, "name": "user_11", "email": "user_11@example.com", "active": true },
-    { "id": 12, "name": "user_12", "email": "user_12@example.com", "active": true },
-    { "id": 13, "name": "user_13", "email": "user_13@example.com", "active": true },
-    { "id": 14, "name": "user_14", "email": "user_14@example.com", "active": true },
-    { "id": 15, "name": "user_15", "email": "user_15@example.com", "active": true },
-    { "id": 16, "name": "user_16", "email": "user_16@example.com", "active": true },
-    { "id": 17, "name": "user_17", "email": "user_17@example.com", "active": true },
-    { "id": 18, "name": "user_18", "email": "user_18@example.com", "active": true },
-    { "id": 19, "name": "user_19", "email": "user_19@example.com", "active": true },
-    { "id": 20, "name": "user_20", "email": "user_20@example.com", "active": true },
-    { "id": 21, "name": "user_21", "email": "user_21@example.com", "active": true },
-    { "id": 22, "name": "user_22", "email": "user_22@example.com", "active": true },
-    { "id": 23, "name": "u
-... (5167 bytes total, truncated)"
+exports[`compress - http > curl HTML page - prose-shaped, so it is capped and the elision is disclosed 1`] = `
+"<!doctype html>
+<html><head><title>Example</title>
+<meta name="tag-0" content="value number 0 for the page metadata">
+<meta name="tag-1" content="value number 1 for the page metadata">
+<meta name="tag-2" content="value number 2 for the page metadata">
+<meta name="tag-3" content="value number 3 for the page metadata">
+<meta name="tag-4" content="value number 4 for the page metadata">
+<meta name="tag-5" content="value number 5 for the page metadata">
+<meta name="tag-6" content="value number 6 for the page metadata">
+<meta name="tag-7" content="value number 7 for the page metadata">
+<meta name="tag-8" content="value number 8 for the page metadata">
+<meta name="tag-9" content="value number 9 for the page metadata">
+<meta name="tag-10" content="value number 10 for the page metadata">
+<meta name="tag-11" content="value number 11 for the page metadata">
+<meta name="tag-12" content="value number 12 for the page metadata">
+<meta name="tag-13" content="value number 13 for the page metadata">
+<meta name="tag-14" content="value number 14 for the page metadata">
+<meta name="tag-15" content="value number 15 for the page metadata">
+<meta name="tag-16" content="value number 16 for the page metadata">
+<meta name="tag-17" content="value number 17 for the page metadata">
+<meta name="tag-18" content="value number 18 for the page metadata">
+<meta name="tag-19" content="value number 19 for the page metadata">
+<meta name="tag-20" content="value number 20 for the page metadata">
+<meta name="tag-21" content="value number 21 for the page metadata">
+<meta name="tag-22" content="value number 22 for the page metadata">
+<meta name="tag-23" content="value number 23 for the page metadata">
+<meta name="tag-24" content="value number 24 for the page metadata">
+<meta name="tag-25" content="value number 25 for the page metadata">
+<meta name="tag-26" content="value number 26 for the page metadata">
+<meta name="tag-27" content="value number 27 for the page metadata">
+<meta name="tag-28" content="value nu
+... (8422 bytes total, truncated - re-run with --full)"
+`;
+
+exports[`compress - http > curl JSON body - condensed but still parseable, because \`| jq\` is the canonical use 1`] = `"{"head_marker":"START_OF_BODY","users":[{"id":0,"name":"user_0","email":"user_0@example.com","active":true},{"id":1,"name":"user_1","email":"user_1@example.com","active":true},{"id":2,"name":"user_2","email":"user_2@example.com","active":true},{"id":3,"name":"user_3","email":"user_3@example.com","active":true},{"id":4,"name":"user_4","email":"user_4@example.com","active":true},{"id":5,"name":"user_5","email":"user_5@example.com","active":true},{"id":6,"name":"user_6","email":"user_6@example.com","active":true},{"id":7,"name":"user_7","email":"user_7@example.com","active":true},{"id":8,"name":"user_8","email":"user_8@example.com","active":true},{"id":9,"name":"user_9","email":"user_9@example.com","active":true},{"id":10,"name":"user_10","email":"user_10@example.com","active":true},{"id":11,"name":"user_11","email":"user_11@example.com","active":true},{"id":12,"name":"user_12","email":"user_12@example.com","active":true},{"id":13,"name":"user_13","email":"user_13@example.com","active":true},{"id":14,"name":"user_14","email":"user_14@example.com","active":true},{"id":15,"name":"user_15","email":"user_15@example.com","active":true},{"id":16,"name":"user_16","email":"user_16@example.com","active":true},{"id":17,"name":"user_17","email":"user_17@example.com","active":true},{"id":18,"name":"user_18","email":"user_18@example.com","active":true},{"id":19,"name":"user_19","email":"user_19@example.com","active":true},{"id":20,"name":"user_20","email":"user_20@example.com","active":true},{"id":21,"name":"user_21","email":"user_21@example.com","active":true},{"id":22,"name":"user_22","email":"user_22@example.com","active":true},{"id":23,"name":"user_23","email":"user_23@example.com","active":true},{"id":24,"name":"user_24","email":"user_24@example.com","active":true},{"id":25,"name":"user_25","email":"user_25@example.com","active":true},{"id":26,"name":"user_26","email":"user_26@example.com","active":true},{"id":27,"name":"user_27","email":"user_27@example.com","active":true},{"id":28,"name":"user_28","email":"user_28@example.com","active":true},{"id":29,"name":"user_29","email":"user_29@example.com","active":true},{"id":30,"name":"user_30","email":"user_30@example.com","active":true},{"id":31,"name":"user_31","email":"user_31@example.com","active":true},{"id":32,"name":"user_32","email":"user_32@example.com","active":true},{"id":33,"name":"user_33","email":"user_33@example.com","active":true},{"id":34,"name":"user_34","email":"user_34@example.com","active":true},{"id":35,"name":"user_35","email":"user_35@example.com","active":true},{"id":36,"name":"user_36","email":"user_36@example.com","active":true},{"id":37,"name":"user_37","email":"user_37@example.com","active":true},{"id":38,"name":"user_38","email":"user_38@example.com","active":true},{"id":39,"name":"user_39","email":"user_39@example.com","active":true},{"id":40,"name":"user_40","email":"user_40@example.com","active":true},{"id":41,"name":"user_41","email":"user_41@example.com","active":true},{"id":42,"name":"user_42","email":"user_42@example.com","active":true},{"id":43,"name":"user_43","email":"user_43@example.com","active":true},{"id":44,"name":"user_44","email":"user_44@example.com","active":true},{"id":45,"name":"user_45","email":"user_45@example.com","active":true},{"id":46,"name":"user_46","email":"user_46@example.com","active":true},{"id":47,"name":"user_47","email":"user_47@example.com","active":true},{"id":48,"name":"user_48","email":"user_48@example.com","active":true},{"id":49,"name":"user_49","email":"user_49@example.com","active":true},{"id":50,"name":"user_50","email":"user_50@example.com","active":true},{"id":51,"name":"user_51","email":"user_51@example.com","active":true},{"id":52,"name":"user_52","email":"user_52@example.com","active":true},{"id":53,"name":"user_53","email":"user_53@example.com","active":true},{"id":54,"name":"user_54","email":"user_54@example.com","active":true},{"id":55,"name":"user_55","email":"user_55@example.com","active":true},{"id":56,"name":"user_56","email":"user_56@example.com","active":true},{"id":57,"name":"user_57","email":"user_57@example.com","active":true},{"id":58,"name":"user_58","email":"user_58@example.com","active":true},{"id":59,"name":"user_59","email":"user_59@example.com","active":true}],"tail_marker":"END_OF_BODY_SECRET_TAIL"}"`;
+
+exports[`compress - http > curl shell script - never cut, because the pipe target executes it 1`] = `
+"#!/bin/sh
+set -eu
+echo "step 0: preparing component number 0 of the installation"
+echo "step 1: preparing component number 1 of the installation"
+echo "step 2: preparing component number 2 of the installation"
+echo "step 3: preparing component number 3 of the installation"
+echo "step 4: preparing component number 4 of the installation"
+echo "step 5: preparing component number 5 of the installation"
+echo "step 6: preparing component number 6 of the installation"
+echo "step 7: preparing component number 7 of the installation"
+echo "step 8: preparing component number 8 of the installation"
+echo "step 9: preparing component number 9 of the installation"
+echo "step 10: preparing component number 10 of the installation"
+echo "step 11: preparing component number 11 of the installation"
+echo "step 12: preparing component number 12 of the installation"
+echo "step 13: preparing component number 13 of the installation"
+echo "step 14: preparing component number 14 of the installation"
+echo "step 15: preparing component number 15 of the installation"
+echo "step 16: preparing component number 16 of the installation"
+echo "step 17: preparing component number 17 of the installation"
+echo "step 18: preparing component number 18 of the installation"
+echo "step 19: preparing component number 19 of the installation"
+echo "step 20: preparing component number 20 of the installation"
+echo "step 21: preparing component number 21 of the installation"
+echo "step 22: preparing component number 22 of the installation"
+echo "step 23: preparing component number 23 of the installation"
+echo "step 24: preparing component number 24 of the installation"
+echo "step 25: preparing component number 25 of the installation"
+echo "step 26: preparing component number 26 of the installation"
+echo "step 27: preparing component number 27 of the installation"
+echo "step 28: preparing component number 28 of the installation"
+echo "step 29: preparing component number 29 of the installation"
+echo "step 30: preparing component number 30 of the installation"
+echo "step 31: preparing component number 31 of the installation"
+echo "step 32: preparing component number 32 of the installation"
+echo "step 33: preparing component number 33 of the installation"
+echo "step 34: preparing component number 34 of the installation"
+echo "step 35: preparing component number 35 of the installation"
+echo "step 36: preparing component number 36 of the installation"
+echo "step 37: preparing component number 37 of the installation"
+echo "step 38: preparing component number 38 of the installation"
+echo "step 39: preparing component number 39 of the installation"
+echo "step 40: preparing component number 40 of the installation"
+echo "step 41: preparing component number 41 of the installation"
+echo "step 42: preparing component number 42 of the installation"
+echo "step 43: preparing component number 43 of the installation"
+echo "step 44: preparing component number 44 of the installation"
+echo "step 45: preparing component number 45 of the installation"
+echo "step 46: preparing component number 46 of the installation"
+echo "step 47: preparing component number 47 of the installation"
+echo "step 48: preparing component number 48 of the installation"
+echo "step 49: preparing component number 49 of the installation"
+echo "step 50: preparing component number 50 of the installation"
+echo "step 51: preparing component number 51 of the installation"
+echo "step 52: preparing component number 52 of the installation"
+echo "step 53: preparing component number 53 of the installation"
+echo "step 54: preparing component number 54 of the installation"
+echo "step 55: preparing component number 55 of the installation"
+echo "step 56: preparing component number 56 of the installation"
+echo "step 57: preparing component number 57 of the installation"
+echo "step 58: preparing component number 58 of the installation"
+echo "step 59: preparing component number 59 of the installation"
+echo "step 60: preparing component number 60 of the installation"
+echo "step 61: preparing component number 61 of the installation"
+echo "step 62: preparing component number 62 of the installation"
+echo "step 63: preparing component number 63 of the installation"
+echo "step 64: preparing component number 64 of the installation"
+echo "step 65: preparing component number 65 of the installation"
+echo "step 66: preparing component number 66 of the installation"
+echo "step 67: preparing component number 67 of the installation"
+echo "step 68: preparing component number 68 of the installation"
+echo "step 69: preparing component number 69 of the installation"
+echo "step 70: preparing component number 70 of the installation"
+echo "step 71: preparing component number 71 of the installation"
+echo "step 72: preparing component number 72 of the installation"
+echo "step 73: preparing component number 73 of the installation"
+echo "step 74: preparing component number 74 of the installation"
+echo "step 75: preparing component number 75 of the installation"
+echo "step 76: preparing component number 76 of the installation"
+echo "step 77: preparing component number 77 of the installation"
+echo "step 78: preparing component number 78 of the installation"
+echo "step 79: preparing component number 79 of the installation"
+install_everything
+echo "done""
+`;
+
+exports[`compress - http > wget - a payload whose lines merely LOOK like the transfer log is returned byte-for-byte 1`] = `
+"metric,value
+Length: 42 (unspecified)
+19M of raw telemetry follows
+     0K .......... .......... rows below this line are data
+Resolving hostnames is done by the collector, not here
+Connecting to the socket took 3ms
+HTTP request sent, awaiting response was logged by the app itself
+Saving to: /var/lib/collector/spool
+requests_total,481203
+bytes_in_total,99182334"
 `;
 
 exports[`compress - http > wget - all-noise output (file saved to disk) falls back to the original via the || text safety net 1`] = `
@@ -64,5 +165,12 @@ Saving to: 'big.iso'
 
 exports[`compress - http > wget - strips resolving/connecting/progress-bar noise, keeps downloaded content 1`] = `
 "{"status":"ok","items":[{"id":1,"name":"alpha"},{"id":2,"name":"beta"}],"total":2}
+
 2026-07-20 12:34:57 (5.75 MB/s) - 'data.json' saved [4096/4096]"
+`;
+
+exports[`compress - http > wget - two URLs in one run: each log block is stripped, each payload is kept 1`] = `
+"alpha payload line
+beta payload line
+2026-07-20 12:34:58 (2.30 MB/s) - written to stdout [17/17]"
 `;

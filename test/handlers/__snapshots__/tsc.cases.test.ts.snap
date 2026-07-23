@@ -1,5 +1,58 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`compress - tsc > CRLF stdout (real Windows tsc) - diagnostics are parsed and grouped exactly as on LF 1`] = `
+"TypeScript: 16 errors in 4 files  TS6133(14×) TS6192(1×) TS2551(1×)
+──────────────────────────────────────────────────
+src/legacy/parser.ts  (5)
+  L3: TS6133 'readFileSync' is declared but its value is never read.
+  L4: TS6133 'writeFileSync' is declared but its value is never read.
+  L88: TS6133 'tempBuffer' is declared but its value is never read.
+  L140: TS6133 'legacyFlag' is declared but its value is never read.
+  L201: TS6133 'seenTokens' is declared but its value is never read.
+src/legacy/tokenizer.ts  (5)
+  L12: TS6133 'DEBUG_MODE' is declared but its value is never read.
+  L45: TS6133 'scratchPad' is declared but its value is never read.
+  L77: TS6133 'lastChar' is declared but its value is never read.
+  L98: TS6133 'columnHint' is declared but its value is never read.
+  L120: TS6192 All imports in import declaration are unused.
+src/legacy/emitter.ts  (3)
+  L30: TS6133 'unusedImport' is declared but its value is never read.
+  L51: TS6133 'sourceMapUrl' is declared but its value is never read.
+  L84: TS6133 'indentCache' is declared but its value is never read.
+src/legacy/analyzer.ts  (3)
+  L19: TS6133 'visited' is declared but its value is never read.
+  L63: TS6133 'depthLimit' is declared but its value is never read.
+  L90: TS2551 Property 'porrt' does not exist on type 'Config'. Did you mean 'port'?"
+`;
+
+exports[`compress - tsc > a two-error run is already terse - the summary + rule + group headers would cost more than they save 1`] = `
+"src/mod1.ts(12,5): error TS2304: Cannot find name 'thing1'.
+src/mod2.ts(30,5): error TS2304: Cannot find name 'thing2'."
+`;
+
+exports[`compress - tsc > absolute Windows paths - the shared checkout directory is hoisted to one base line 1`] = `
+"base: C:\\Users\\dev\\source\\repos\\acme-portal\\
+TypeScript: 4 errors in 3 files  TS2339(1×) TS2554(1×) TS2345(1×) TS2532(1×)
+──────────────────────────────────────────────────
+src\\components\\Button.tsx  (2)
+  L23: TS2339 Property 'onClik' does not exist on type 'ButtonProps'. Did you mean 'onClick'?
+  L51: TS2554 Expected 2 arguments, but got 1.
+src\\hooks\\useAuth.ts  (1)
+  L14: TS2345 Argument of type 'number' is not assignable to parameter of type 'string'.
+test\\Button.spec.tsx  (1)
+  L88: TS2532 Object is possibly 'undefined'."
+`;
+
+exports[`compress - tsc > absolute path on a single file - no base line, the path is left absolute 1`] = `
+"TypeScript: 4 errors in 1 files  TS2345(1×) TS2532(1×) TS2304(1×) TS2339(1×)
+──────────────────────────────────────────────────
+C:\\Users\\dev\\source\\repos\\acme-portal\\src\\hooks\\useAuth.ts  (4)
+  L14: TS2345 Argument of type 'number' is not assignable to parameter of type 'string'.
+  L31: TS2532 Object is possibly 'undefined'.
+  L47: TS2304 Cannot find name 'useSesion'.
+  L62: TS2339 Property 'refresh' does not exist on type 'Session'."
+`;
+
 exports[`compress - tsc > clean run - 'Found 0 errors' collapses to a one-line summary 1`] = `"TypeScript: no errors"`;
 
 exports[`compress - tsc > content trigger - npm build output with TS codes routes to tsc condenser ahead of npm, drops npm noise 1`] = `

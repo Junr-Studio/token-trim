@@ -1,0 +1,117 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - unix > df - a row shape the parser cannot read is passed through, never partially reshaped 1`] = `
+"Filesystem      Size  Used Avail Use% Mounted on
+/dev/mapper/vg--data-lv--postgres--primary--replica
+                916G  412G  458G  48% /var/lib/postgresql
+tmpfs            32G  2.1M   32G   1% /dev/shm"
+`;
+
+exports[`compress - unix > df - the inode form (-i) is relayed identically; nothing about it is special-cased 1`] = `
+"Filesystem       Inodes  IUsed    IFree IUse% Mounted on
+/dev/nvme0n1p2 61054976 812443 60242533    2% /
+tmpfs           8216044     41  8216003    1% /dev/shm"
+`;
+
+exports[`compress - unix > df -h - field positions and row order are preserved, because awk reads them positionally 1`] = `
+"Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme0n1p2  916G  412G  458G  48% /
+tmpfs            32G  2.1M   32G   1% /dev/shm
+/dev/nvme0n1p1  511M  6.1M  505M   2% /boot/efi"
+`;
+
+exports[`compress - unix > df -h - relayed as printed, because awk reads its fields by position 1`] = `
+"Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme0n1p2  916G  412G  458G  48% /
+tmpfs            32G  2.1M   32G   1% /dev/shm
+/dev/nvme0n1p1  511M  6.1M  505M   2% /boot/efi
+tmpfs           6.3G  2.3M  6.3G   1% /run/user/1000"
+`;
+
+exports[`compress - unix > du - sorted biggest-first, and the numeric field is left exactly as the tool printed it 1`] = `
+"189432	node_modules
+2048	dist
+412	src
+88	test"
+`;
+
+exports[`compress - unix > du - unrecognised shape passes through instead of being sorted into nonsense 1`] = `"du: cannot read directory ./private: Permission denied"`;
+
+exports[`compress - unix > journalctl - a line that is not in the syslog grammar is kept verbatim 1`] = `"-- No entries --"`;
+
+exports[`compress - unix > journalctl - the repeated host/unit/pid prefix is hoisted and identical lines collapse 1`] = `
+"[web-01 myapp[4821]]
+Jul 22 10:15:03 starting worker pool
+Jul 22 10:15:03 connected to postgres
+Jul 22 10:15:04 retrying upstream fetch  (x4, through Jul 22 10:15:07)
+Jul 22 10:15:08 listening on 0.0.0.0:8080"
+`;
+
+exports[`compress - unix > ls -la over several directories - the group banners survive, so a path stays answerable 1`] = `
+"dist:
+total 8
+-rw-r--r-- 1 me me 120 Jul 22 10:00 index.js
+
+src:
+total 8
+-rw-r--r-- 1 me me 240 Jul 22 10:01 index.ts
+drwxr-xr-x 2 me me 4096 Jul 22 10:02 lib"
+`;
+
+exports[`compress - unix > ps - empty output stays empty 1`] = `""`;
+
+exports[`compress - unix > ps - output with no recognisable header passes through rather than being projected 1`] = `
+"  PID TTY          TIME CMD
+ 4821 pts/0    00:00:03 bash
+ 5120 pts/0    00:00:00 ps"
+`;
+
+exports[`compress - unix > ps aux - projects to pid/cpu/mem/command, sorted by CPU, using the header not fixed offsets 1`] = `
+"5120  47.9%cpu 8.1%mem  python3 /opt/ml/train.py --epochs 200
+4821  12.5%cpu 3.4%mem  node /srv/app/dist/server.js --port 8080
+4899  0.3%cpu 0.2%mem  /usr/bin/postgres -D /var/lib/postgresql
+1  0%cpu 0.1%mem  /sbin/init
+220  0%cpu 0.0%mem  /lib/systemd/systemd-journald"
+`;
+
+exports[`compress - unix > systemctl - an unrecognised shape passes through 1`] = `"active"`;
+
+exports[`compress - unix > systemctl status - keeps Loaded/Active and the recent log, drops the cgroup tree 1`] = `
+"● myapp.service - My Application
+Loaded: loaded (/etc/systemd/system/myapp.service; enabled; vendor preset: enabled)
+Active: active (running) since Tue 2026-07-22 09:01:12 UTC; 1h 14min ago
+Jul 22 10:15:08 web-01 myapp[4821]: listening on 0.0.0.0:8080
+Jul 22 10:15:09 web-01 myapp[4821]: ready"
+`;
+
+exports[`compress - unix > tree - an empty directory is never rendered as a file: the marking is complete or it is absent 1`] = `
+".
+empty-dir
+src
+  index.ts
+README.md
+
+2 directories, 2 files"
+`;
+
+exports[`compress - unix > tree - the box-drawing gutter becomes plain indentation and the count summary survives 1`] = `
+".
+README.md
+package.json
+src/
+  index.ts
+  util.ts
+tsconfig.json
+
+1 directory, 5 files"
+`;
+
+exports[`compress - unix > tree -F - the directory marker tree itself printed is preserved, not stripped 1`] = `
+".
+empty-dir/
+src/
+  index.ts
+README.md
+
+2 directories, 2 files"
+`;

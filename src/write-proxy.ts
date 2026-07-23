@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { PROXY_FRAME }         from './frame.js'
+import { ARGS_HANDLER }        from './handlers/args.js'
 import { GIT_HANDLER }         from './handlers/git.js'
 import { TSC_HANDLER }         from './handlers/tsc.js'
 import { PKGMGR_HANDLER }      from './handlers/pkgmgr.js'
@@ -19,6 +20,9 @@ import { CLOUD_EXTRA_HANDLER } from './handlers/cloud-extra.js'
 import { GOLANGCI_HANDLER }    from './handlers/golangci.js'
 import { JQ_HANDLER }          from './handlers/jq.js'
 import { BUILD_TOOLS_HANDLER } from './handlers/build-tools.js'
+import { CROSSCUT_HANDLER }    from './handlers/crosscut.js'
+import { HELM_HANDLER }        from './handlers/helm.js'
+import { UNIX_HANDLER }        from './handlers/unix.js'
 
 // ─── Proxied commands ─────────────────────────────────────────────────────────
 // Adding a command here installs a wrapper script in the agent's PATH at spawn.
@@ -49,17 +53,21 @@ export const PROXIED_COMMANDS = [
   'mvn', 'gradle', 'dotnet',
   'terraform', 'tofu',
   // infra / cloud
-  'docker', 'kubectl',
+  'docker', 'kubectl', 'helm',
   'curl', 'wget',
   'aws', 'psql',
   // framework CLIs
   'next',
+  // system inspection (read-only; classic filters like sort/awk/sed/xargs are
+  // deliberately excluded - their stdout is machine-consumed by definition)
+  'tree', 'ps', 'du', 'df', 'systemctl', 'journalctl',
 ]
 
 // ─── Assemble proxy.mjs ───────────────────────────────────────────────────────
 
 const PROXY_SCRIPT_SOURCE = [
   PROXY_FRAME,
+  ARGS_HANDLER,
   GIT_HANDLER,
   TSC_HANDLER,
   PKGMGR_HANDLER,
@@ -78,6 +86,9 @@ const PROXY_SCRIPT_SOURCE = [
   GOLANGCI_HANDLER,
   JQ_HANDLER,
   BUILD_TOOLS_HANDLER,
+  CROSSCUT_HANDLER,
+  HELM_HANDLER,
+  UNIX_HANDLER,
 ].join('\n')
 
 // ─── Options ──────────────────────────────────────────────────────────────────
@@ -142,6 +153,22 @@ function toPosixPath(p: string): string {
 }
 
 /**
+ * Quote a path for a POSIX shell so its contents are taken literally.
+ *
+ * `dir` is caller-supplied and `$` is legal in a path on every platform. Inside
+ * DOUBLE quotes the shell expands it, so a directory like `d_$HOME_cache` became
+ * `d_` — setup.sh then put a non-existent directory on PATH (compression
+ * silently never activated) and each wrapper died with "Cannot find module".
+ * A backtick would have been command substitution outright.
+ *
+ * Single quotes suppress every expansion; the only character needing care is the
+ * single quote itself, closed and reopened around an escaped one.
+ */
+function shQuote(p: string): string {
+  return `'${p.split("'").join(`'\\''`)}'`
+}
+
+/**
  * Generate `proxy.mjs`, per-command PATH wrapper scripts and `setup.sh` into
  * `compressDir`. Returns the paths and resolved env-var names needed to wire the
  * proxy into a child process (see {@link createCommandProxy} for the easy path).
@@ -193,14 +220,14 @@ export async function writeProxyScripts(
       const cmdContent = `@echo off\nnode "${proxyPath}" ${cmd} %*\n`
       await fs.writeFile(path.join(binDir, `${cmd}.cmd`), cmdContent, 'utf8')
       // Extensionless sh wrapper for Git Bash / MSYS2 (bash ignores .cmd files)
-      const shContent = `#!/bin/sh\nexec node "${proxyPathForSh}" ${cmd} "$@"\n`
+      const shContent = `#!/bin/sh\nexec node ${shQuote(proxyPathForSh)} ${cmd} "$@"\n`
       const shPath = path.join(binDir, cmd)
       await fs.writeFile(shPath, shContent, 'utf8')
       // chmod 0o755 is ignored on Windows NTFS but sets the POSIX exec bit
       // that Git Bash / MSYS2 reads from the file's ACL metadata
       await fs.chmod(shPath, 0o755)
     } else {
-      const content = `#!/bin/sh\nexec node "${proxyPath}" ${cmd} "$@"\n`
+      const content = `#!/bin/sh\nexec node ${shQuote(proxyPath)} ${cmd} "$@"\n`
       const wrapperPath = path.join(binDir, cmd)
       await fs.writeFile(wrapperPath, content, 'utf8')
       await fs.chmod(wrapperPath, 0o755)
@@ -213,7 +240,7 @@ export async function writeProxyScripts(
   const setupScript = path.join(compressDir, 'setup.sh')
   await fs.writeFile(
     setupScript,
-    `#!/bin/sh\nexport PATH="${posixBinDir}:$PATH"\n`,
+    `#!/bin/sh\nexport PATH=${shQuote(posixBinDir)}":$PATH"\n`,
     'utf8',
   )
   if (process.platform !== 'win32') {

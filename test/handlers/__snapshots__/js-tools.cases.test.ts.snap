@@ -2,6 +2,45 @@
 
 exports[`compress - js-tools > empty output - returns empty string without crashing 1`] = `""`;
 
+exports[`compress - js-tools > eslint - .vue/.mts headers are counted, not reported as 0 file(s) 1`] = `
+"ESLint: 2 errors, 1 warnings in 2 file(s)
+  Top rules: no-console(1) @typescript-eslint/explicit-function-return-type(1) no-unused-vars(1)"
+`;
+
+exports[`compress - js-tools > eslint - a mixed .ts/.vue run counts both files, not just the .ts one 1`] = `
+"ESLint: 2 errors in 2 file(s)
+  Top rules: semi(1) no-console(1)"
+`;
+
+exports[`compress - js-tools > eslint - a mixed .ts/extensionless run counts both files, not just the .ts one 1`] = `
+"ESLint: 2 errors in 2 file(s)
+  Top rules: semi(1) no-console(1)"
+`;
+
+exports[`compress - js-tools > eslint - a rule-less parse error is counted and its message survives 1`] = `
+"ESLint: 1 errors in 1 file(s)
+  /repo/src/broken.ts:1:1 Parsing error: Unexpected token }"
+`;
+
+exports[`compress - js-tools > eslint - an extensionless lint target is counted, not reported as 0 file(s) 1`] = `
+"ESLint: 4 errors, 1 warnings in 2 file(s)
+  Top rules: no-console(2) no-undef(1) @typescript-eslint/explicit-function-return-type(1) quotes(1)"
+`;
+
+exports[`compress - js-tools > eslint - an unrecognisable file header yields the report, never "0 file(s)" 1`] = `
+"<text>
+  1:5   error    Unexpected console statement    no-console
+  4:12  warning  Unexpected any                  @typescript-eslint/no-explicit-any
+  9:3   error    Strings must use singlequote    quotes
+
+✖ 3 problems (2 errors, 1 warning)"
+`;
+
+exports[`compress - js-tools > eslint - counts Windows file headers instead of reporting 0 file(s) 1`] = `
+"ESLint: 5 errors, 3 warnings in 2 file(s)
+  Top rules: no-console(2) semi(2) no-unused-vars(1) no-undef(1) @typescript-eslint/no-explicit-any(1)"
+`;
+
 exports[`compress - js-tools > eslint - groups problems by rule with error/warning counts, file count, and top rules 1`] = `
 "ESLint: 5 errors, 3 warnings in 2 file(s)
   Top rules: no-console(2) semi(2) no-unused-vars(1) no-undef(1) @typescript-eslint/no-explicit-any(1)"
@@ -16,16 +55,61 @@ No files matching the pattern "src/**/*.vue" were found.
 Please check for typing mistakes in the pattern."
 `;
 
+exports[`compress - js-tools > eslint - paths with spaces, ~ and @scope segments still count as files 1`] = `
+"ESLint: 2 errors, 1 warnings in 2 file(s)
+  Top rules: no-unused-vars(1) no-console(1) semi(1)"
+`;
+
 exports[`compress - js-tools > jest - all green collapses to a single passing summary line 1`] = `"Jest: 25 passed"`;
 
-exports[`compress - js-tools > jest - summarizes tests + failing suite count and lists failures, drops stack traces 1`] = `
+exports[`compress - js-tools > jest - rolls up the counts and keeps the expected/received pair 1`] = `
 "Jest: 18 passed, 2 failed (1 suite(s))
   FAIL: API › fetchUser › returns user data
-  FAIL: API › fetchUser › handles error response"
+    Expected: 200
+    Received: 404
+    TypeError: Cannot read properties of undefined
+  FAIL: API › fetchUser › handles error response
+    TypeError: Cannot read properties of undefined"
+`;
+
+exports[`compress - js-tools > jest failure - the assertion block survives the rollup too 1`] = `
+"Jest: 27 passed, 1 failed (1 suite(s))
+  FAIL: cart › applies the discount
+    Expected: 90
+    Received: 100"
+`;
+
+exports[`compress - js-tools > next - Next 15 table (box connectors, ƒ dynamic marker) yields the real route count 1`] = `
+"Next.js build: 11 routes
+  /
+  /_not-found
+  /api/checkout
+  /api/webhooks/stripe
+  /blog/[slug]
+  /cart
+  /checkout
+  /products
+  /products/[id]
+  /search
+  /settings"
+`;
+
+exports[`compress - js-tools > next - an unreadable route table is returned verbatim, never "0 routes" 1`] = `
+"   ▲ Next.js 99.1.0
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+
+Route (app)                              Size     First Load JS
+▸ static   /                             5.2 kB          89 kB
+▸ static   /about                        1.1 kB          85 kB
+▸ dynamic  /api/users                    0 B                0 B
+
+Build completed in 21.4s"
 `;
 
 exports[`compress - js-tools > next - failed build passes through untouched so the error stays visible 1`] = `
-"▲ Next.js 14.1.0
+"   ▲ Next.js 14.1.0
 
    Creating an optimized production build ...
 Failed to compile.
@@ -47,6 +131,14 @@ exports[`compress - js-tools > next - successful build collapses to a route list
   /settings"
 `;
 
+exports[`compress - js-tools > playwright - a green run with one flaky test reports no failure at all 1`] = `"Playwright: 2 passed, 1 flaky (5.0s)"`;
+
+exports[`compress - js-tools > playwright - a test that passed on retry is flaky, not a third failure 1`] = `
+"Playwright: 2 passed, 2 failed, 1 flaky (48.2s)
+  FAIL: 2 [chromium] › tests/checkout.spec.ts:31:5 › checkout › applies a promo code (30.4s)
+  FAIL: 6 [firefox] › tests/checkout.spec.ts:31:5 › checkout › applies a promo code (30.6s)"
+`;
+
 exports[`compress - js-tools > playwright - all passing keeps only the summary + duration 1`] = `"Playwright: 18 passed (32.1s)"`;
 
 exports[`compress - js-tools > playwright - summarizes passed/failed/flaky/skipped with duration, lists failing specs 1`] = `
@@ -57,8 +149,15 @@ exports[`compress - js-tools > playwright - summarizes passed/failed/flaky/skipp
 
 exports[`compress - js-tools > prettier - all formatted collapses to a single confirmation line 1`] = `"Prettier: all files formatted"`;
 
+exports[`compress - js-tools > prettier - its own summary sentence is not one of the files it names 1`] = `
+"Prettier: 3 file(s) need formatting
+  [warn] src/lib/date.ts
+  [warn] src/lib/money.ts
+  [warn] src/routes/cart.ts"
+`;
+
 exports[`compress - js-tools > prettier - lists files needing formatting with a count header, truncates past 10 1`] = `
-"Prettier: 13 file(s) need formatting
+"Prettier: 12 file(s) need formatting
   [warn] src/app.ts
   [warn] src/components/Button.tsx
   [warn] src/components/Modal.tsx
@@ -69,13 +168,51 @@ exports[`compress - js-tools > prettier - lists files needing formatting with a 
   [warn] src/lib/format.ts
   [warn] src/pages/index.tsx
   [warn] src/pages/about.tsx
-  ... +3 more"
+  ... +2 more"
+`;
+
+exports[`compress - js-tools > prettier - the 2.x wording of that sentence is not a file either 1`] = `
+"Prettier: 2 file(s) need formatting
+  [warn] src/lib/date.ts
+  [warn] src/routes/cart.ts"
+`;
+
+exports[`compress - js-tools > prettier --write - a diagnostic line does not flip the mode to "need formatting" 1`] = `
+"Prettier: 10 file(s) formatted, 3 unchanged
+  src/components/Button.tsx
+  src/components/Modal.tsx
+  src/components/Sidebar.tsx
+  src/hooks/useAuth.ts
+  src/lib/api.ts
+  src/lib/format.ts
+  src/pages/index.tsx
+  src/pages/about.tsx
+  src/pages/contact.tsx
+  src/utils/date.ts
+  [error] src/generated/schema.ts: SyntaxError: Unexpected token (3:1)"
+`;
+
+exports[`compress - js-tools > prettier --write - reports files it formatted, not files that "need formatting" 1`] = `
+"Prettier: 2 file(s) formatted, 2 unchanged
+  src/a.ts
+  src/c.ts"
+`;
+
+exports[`compress - js-tools > prettier -l - a bare path list is handed back untouched (the xargs pipe survives) 1`] = `
+"src/app.ts
+src/components/Button.tsx
+src/components/Modal.tsx
+src/hooks/useAuth.ts
+src/lib/api.ts
+src/lib/format.ts
+src/pages/index.tsx
+src/utils/date.ts"
 `;
 
 exports[`compress - js-tools > vitest - clean run collapses to a one-line passing summary (no FAIL lines) 1`] = `"Vitest: 16 passed"`;
 
 exports[`compress - js-tools > vitest - no pass/fail counts passes through untouched (no false summary) 1`] = `
-"RUN  v1.6.0 /home/dev/project
+" RUN  v1.6.0 /home/dev/project
 
 No test files found, exiting with code 1
 filter:  nonexistent-pattern
@@ -83,8 +220,29 @@ include: **/*.{test,spec}.{js,mjs,ts}
 exclude: **/node_modules/**"
 `;
 
-exports[`compress - js-tools > vitest - summarizes pass/fail counts and lists failing tests, drops assertion noise 1`] = `
+exports[`compress - js-tools > vitest - rolls up the counts and keeps the assertion, not just the test name 1`] = `
 "Vitest: 18 passed, 2 failed
-  FAIL: api > fetchUser returns user data 8ms
-  FAIL: api > fetchUser handles 404 response 5ms"
+  FAIL: src/api.test.ts > api > fetchUser returns user data
+    AssertionError: expected 200 to deeply equal 404
+    - Expected
+    + Received
+    - 404
+    + 200
+    ❯ src/api.test.ts:12:34
+  FAIL: src/api.test.ts > api > fetchUser handles 404 response
+    AssertionError: expected undefined to be defined
+    ❯ src/api.test.ts:20:18"
 `;
+
+exports[`compress - js-tools > vitest failure - the expected/received values survive the rollup 1`] = `
+"Vitest: 27 passed, 1 failed
+  FAIL: test/auth.test.ts > auth > rejects an expired token
+    AssertionError: expected 200 to be 401 // Object.is equality
+    - Expected
+    + Received
+    - 401
+    + 200
+    ❯ test/auth.test.ts:42:23"
+`;
+
+exports[`compress - js-tools > vitest green run - stays a single summary line, no failure detail to carry 1`] = `"Vitest: 28 passed"`;

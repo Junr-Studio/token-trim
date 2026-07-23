@@ -1,5 +1,5 @@
 import { expect } from 'vitest'
-import { describeCompression } from '../support/harness.js'
+import { describeCompression, passedThrough } from '../support/harness.js'
 
 // Characterization + behavioral suite for the `cloud-extra` handler.
 //
@@ -9,7 +9,6 @@ import { describeCompression } from '../support/harness.js'
 //
 // The ellipsis used by condenseAws in the shortened ARN is the real U+2026
 // character ('arn:…:$1'), asserted below via the … escape.
-const ELLIPSIS = '…'
 
 // ── aws fixtures ───────────────────────────────────────────────────────────────
 
@@ -113,37 +112,43 @@ const PSQL_EXPANDED = Array.from({ length: 35 }, (_, i) => {
 describeCompression('cloud-extra', [
   // ── aws ───────────────────────────────────────────────────────────────────
   {
-    name: 'aws iam list-roles - shortens region-less ARNs and truncates ISO timestamps to date',
+    // CHANGED DELIBERATELY on two counts.
+    // (1) This fixture IS JSON, which is the aws CLI's default output format -
+    //     no flag on the command line announces it, so isMachineOutput cannot
+    //     see it, yet `aws … | jq` is how it is normally read. Rewriting values
+    //     inside the document and capping it by line count broke that consumer.
+    //     Compact re-serialisation is lossless, still parses, and shrinks it.
+    // (2) An ARN's account id and region identify the resource. Two roles can
+    //     differ ONLY in the account, so collapsing to "arn:…:role/x" merges
+    //     rows that are not the same thing.
+    name: 'aws iam list-roles - default JSON output stays parseable, ARNs keep their identity',
     cmd: 'aws',
     args: ['iam', 'list-roles'],
     input: AWS_IAM_ROLES,
     assert: (out, input) => {
-      // ARNs collapsed to arn:…:<resource>, account id & service dropped.
-      expect(out).toContain(`arn:${ELLIPSIS}:role/AppRole`)
-      expect(out).toContain(`arn:${ELLIPSIS}:role/service-role/LambdaExecRole`)
-      expect(out).not.toContain('arn:aws:iam')
-      expect(out).not.toContain('123456789012')
-      // ISO timestamps reduced to the date component only.
-      expect(out).toContain('"CreateDate": "2024-03-15"')
-      expect(out).not.toMatch(/T\d{2}:\d{2}:\d{2}/)
-      expect(out).not.toContain('12:34:56')
+      expect(() => JSON.parse(out)).not.toThrow()
+      const roles = JSON.parse(out).Roles
+      expect(roles[0].Arn).toBe('arn:aws:iam::123456789012:role/AppRole')
+      expect(roles[1].Arn).toBe('arn:aws:iam::123456789012:role/service-role/LambdaExecRole')
+      // whitespace is where the savings come from, not from deleting values
       expect(out.length).toBeLessThan(input.length)
+      expect(out).not.toContain('\n')
     },
   },
   {
-    name: 'aws lambda list-functions - shortens region-bearing ARNs (service:region:acct dropped)',
+    // CHANGED DELIBERATELY, same reasoning as the iam case above. Here the
+    // region matters too: two functions with the same name in us-east-1 and
+    // eu-west-1 are different functions, and the old rewrite made them identical.
+    name: 'aws lambda list-functions - JSON stays parseable, region and account survive',
     cmd: 'aws',
     args: ['lambda', 'list-functions'],
     input: AWS_LAMBDA_FUNCS,
     assert: (out, input) => {
-      expect(out).toContain(`arn:${ELLIPSIS}:function:process-orders`)
-      expect(out).toContain(`arn:${ELLIPSIS}:function:resize-images`)
-      expect(out).toContain(`arn:${ELLIPSIS}:role/lambda-basic`)
-      expect(out).not.toContain('arn:aws:lambda')
-      expect(out).not.toContain('us-east-1:123456789012')
-      // Timestamps truncated to date.
-      expect(out).toContain('"LastModified": "2024-06-01"')
-      expect(out).not.toContain('09:15:30')
+      expect(() => JSON.parse(out)).not.toThrow()
+      const fns = JSON.parse(out).Functions
+      expect(fns[0].FunctionArn).toContain('us-east-1')
+      expect(fns[0].FunctionArn).toContain('123456789012')
+      expect(fns[0].LastModified).toBe('2024-06-01T09:15:30.123Z')
       expect(out.length).toBeLessThan(input.length)
     },
   },
@@ -153,7 +158,10 @@ describeCompression('cloud-extra', [
     args: ['s3', 'ls'],
     input: AWS_S3_LS,
     assert: (out, input) => {
-      expect(out).toContain('... +10 more lines (aws output truncated)')
+      // `aws s3 ls` is text, not JSON, so the line cap still applies - it just
+      // says how to recover the rest now.
+      expect(out).toMatch(/\.\.\. \+10 more lines \(truncated/)
+      expect(out).toContain('--full')
       // 40 kept lines + 1 footer line.
       expect(out.split('\n').length).toBeLessThanOrEqual(41)
       expect(out).toContain('file001.txt')
@@ -241,6 +249,63 @@ describeCompression('cloud-extra', [
       expect(out).toContain('user1@example.com')
       expect(out).not.toContain('user31@example.com')
       expect(out.length).toBeLessThan(input.length)
+    },
+  },
+
+  // ── aws: the default output format is JSON, with no flag to detect it ──────
+  // `isMachineOutput` keys off an explicit --output/--json flag, so a plain
+  // `aws ec2 describe-instances` never trips it - yet the response IS JSON and
+  // `aws … | jq` is how it is normally consumed. Cutting it at 40 lines leaves
+  // an unterminated document.
+  {
+    name: 'aws (default json output) - stays parseable instead of being cut at 40 lines',
+    cmd: 'aws',
+    args: ['ec2', 'describe-instances'],
+    input: JSON.stringify(
+      {
+        Reservations: Array.from({ length: 6 }, (_, r) => ({
+          ReservationId: `r-${r}`,
+          Instances: Array.from({ length: 3 }, (_, i) => ({
+            InstanceId: `i-0abc${r}${i}`,
+            InstanceType: 't3.medium',
+            LaunchTime: '2026-03-15T12:34:56.789Z',
+            State: { Name: 'running' },
+            IamInstanceProfile: {
+              Arn: `arn:aws:iam::123456789012:instance-profile/role-${r}-${i}`,
+            },
+          })),
+        })),
+      },
+      null,
+      2,
+    ) + '\n',
+    assert: (out, input) => {
+      expect(() => JSON.parse(out)).not.toThrow()
+      expect(JSON.parse(out).Reservations).toHaveLength(6)
+      expect(out.length).toBeLessThan(input.length)
+    },
+  },
+  {
+    name: 'aws - an ARN keeps its account and region, which are what identifies the resource',
+    cmd: 'aws',
+    args: ['iam', 'list-roles', '--output', 'text'],
+    input:
+      'ROLES\tarn:aws:iam::123456789012:role/prod-deployer\t2026-01-02\tprod-deployer\n' +
+      'ROLES\tarn:aws:iam::999988887777:role/staging-deployer\t2026-01-03\tstaging-deployer\n',
+    assert: (out) => {
+      // Collapsing to "arn:…:role/prod-deployer" erased the account id, which is
+      // exactly what distinguishes these two rows.
+      expect(out).toContain('123456789012')
+      expect(out).toContain('999988887777')
+    },
+  },
+  {
+    name: 'aws - non-JSON text output that is unrecognised passes through rather than being capped mid-record',
+    cmd: 'aws',
+    args: ['sts', 'get-caller-identity', '--output', 'text'],
+    input: '123456789012\tarn:aws:iam::123456789012:user/ci\tAIDAEXAMPLE\n',
+    assert: (out, input) => {
+      expect(out).toBe(passedThrough(input))
     },
   },
 ])

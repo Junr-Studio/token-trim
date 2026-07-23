@@ -1,0 +1,245 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - dispatch > ANSI - full CSI and OSC escape sequences are stripped, not just cursor moves 1`] = `
+"ERROR build failed
+warning in module
+hidden cursor done"
+`;
+
+exports[`compress - dispatch > backstop cap - a large valid JSON document is never cut, because a cut JSON is worthless 1`] = `"{"Reservations":[{"ReservationId":"r-0abc0","Instances":[{"InstanceId":"i-0abcdef0","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.0.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-0"}]}]},{"ReservationId":"r-0abc1","Instances":[{"InstanceId":"i-0abcdef1","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.1.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-1"}]}]},{"ReservationId":"r-0abc2","Instances":[{"InstanceId":"i-0abcdef2","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.2.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-2"}]}]},{"ReservationId":"r-0abc3","Instances":[{"InstanceId":"i-0abcdef3","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.3.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-3"}]}]},{"ReservationId":"r-0abc4","Instances":[{"InstanceId":"i-0abcdef4","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.4.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-4"}]}]},{"ReservationId":"r-0abc5","Instances":[{"InstanceId":"i-0abcdef5","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.5.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-5"}]}]},{"ReservationId":"r-0abc6","Instances":[{"InstanceId":"i-0abcdef6","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.6.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-6"}]}]},{"ReservationId":"r-0abc7","Instances":[{"InstanceId":"i-0abcdef7","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.7.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-7"}]}]},{"ReservationId":"r-0abc8","Instances":[{"InstanceId":"i-0abcdef8","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.8.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-8"}]}]},{"ReservationId":"r-0abc9","Instances":[{"InstanceId":"i-0abcdef9","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.9.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-9"}]}]},{"ReservationId":"r-0abc10","Instances":[{"InstanceId":"i-0abcdef10","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.10.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-10"}]}]},{"ReservationId":"r-0abc11","Instances":[{"InstanceId":"i-0abcdef11","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.11.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-11"}]}]},{"ReservationId":"r-0abc12","Instances":[{"InstanceId":"i-0abcdef12","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.12.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-12"}]}]},{"ReservationId":"r-0abc13","Instances":[{"InstanceId":"i-0abcdef13","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.13.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-13"}]}]},{"ReservationId":"r-0abc14","Instances":[{"InstanceId":"i-0abcdef14","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.14.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-14"}]}]},{"ReservationId":"r-0abc15","Instances":[{"InstanceId":"i-0abcdef15","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.15.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-15"}]}]},{"ReservationId":"r-0abc16","Instances":[{"InstanceId":"i-0abcdef16","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.16.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-16"}]}]},{"ReservationId":"r-0abc17","Instances":[{"InstanceId":"i-0abcdef17","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.17.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-17"}]}]},{"ReservationId":"r-0abc18","Instances":[{"InstanceId":"i-0abcdef18","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.18.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-18"}]}]},{"ReservationId":"r-0abc19","Instances":[{"InstanceId":"i-0abcdef19","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.19.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-19"}]}]},{"ReservationId":"r-0abc20","Instances":[{"InstanceId":"i-0abcdef20","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.20.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-20"}]}]},{"ReservationId":"r-0abc21","Instances":[{"InstanceId":"i-0abcdef21","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.21.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-21"}]}]},{"ReservationId":"r-0abc22","Instances":[{"InstanceId":"i-0abcdef22","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.22.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-22"}]}]},{"ReservationId":"r-0abc23","Instances":[{"InstanceId":"i-0abcdef23","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.23.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-23"}]}]},{"ReservationId":"r-0abc24","Instances":[{"InstanceId":"i-0abcdef24","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.24.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-24"}]}]},{"ReservationId":"r-0abc25","Instances":[{"InstanceId":"i-0abcdef25","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.25.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-25"}]}]},{"ReservationId":"r-0abc26","Instances":[{"InstanceId":"i-0abcdef26","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.26.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-26"}]}]},{"ReservationId":"r-0abc27","Instances":[{"InstanceId":"i-0abcdef27","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.27.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-27"}]}]},{"ReservationId":"r-0abc28","Instances":[{"InstanceId":"i-0abcdef28","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.28.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-28"}]}]},{"ReservationId":"r-0abc29","Instances":[{"InstanceId":"i-0abcdef29","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.29.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-29"}]}]},{"ReservationId":"r-0abc30","Instances":[{"InstanceId":"i-0abcdef30","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.30.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-30"}]}]},{"ReservationId":"r-0abc31","Instances":[{"InstanceId":"i-0abcdef31","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.31.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-31"}]}]},{"ReservationId":"r-0abc32","Instances":[{"InstanceId":"i-0abcdef32","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.32.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-32"}]}]},{"ReservationId":"r-0abc33","Instances":[{"InstanceId":"i-0abcdef33","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.33.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-33"}]}]},{"ReservationId":"r-0abc34","Instances":[{"InstanceId":"i-0abcdef34","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.34.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-34"}]}]},{"ReservationId":"r-0abc35","Instances":[{"InstanceId":"i-0abcdef35","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.35.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-35"}]}]},{"ReservationId":"r-0abc36","Instances":[{"InstanceId":"i-0abcdef36","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.36.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-36"}]}]},{"ReservationId":"r-0abc37","Instances":[{"InstanceId":"i-0abcdef37","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.37.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-37"}]}]},{"ReservationId":"r-0abc38","Instances":[{"InstanceId":"i-0abcdef38","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.38.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-38"}]}]},{"ReservationId":"r-0abc39","Instances":[{"InstanceId":"i-0abcdef39","InstanceType":"t3.large","State":{"Name":"running"},"PrivateIpAddress":"10.0.39.15","LaunchTime":"2026-03-15T12:34:56.000Z","Tags":[{"Key":"Name","Value":"worker-39"}]}]}]}"`;
+
+exports[`compress - dispatch > backstop cap - normal-sized output is untouched by it 1`] = `
+"a short result
+with three
+lines"
+`;
+
+exports[`compress - dispatch > backstop cap - one enormous line is truncated by characters, never replaced by the marker alone 1`] = `
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxpayload-segment-0|payload-segment-1|payload-segment-2|payload-segment-3|payload-segment-4|payload-segment-5|payload-segment-6|payload-segment-7|payload-segment-8|payload-segment-9|payload-segment-10|payload-segment-11|payload-segment-12|payload-segment-13|payload-segment-14|payload-segment-15|payload-segment-16|payload-segment-17|payload-segment-18|payload-segment-19|payload-segment-20|payload-segment-21|payload-segment-22|payload-segment-23|payload-segment-24|payload-segment-25|payload-segment-26|payload-segment-27|payload-segment-28|payload-segment-29|payload-segment-30|payload-segment-31|payload-segment-32|payload-segment-33|payload-segment-34|payload-segment-35|payload-segment-36|payload-segment-37|payload-segment-38|payload-segment-39|payload-segment-40|payload-segment-41|payload-segment-42|payload-segment-43|payload-segment-44|payload-segment-45|payload-segment-46|payload-segment-47|payload-segment-48|payload-segment-49|payload-segment-50|payload-segment-51|payload-segment-52|payload-segment-53|payload-segment-54|payload-segment-55|payload-segment-56|payload-segment-57|payload-segment-58|payload-segment-59|payload-segment-60|payload-segment-61|payload-segment-62|payload-segment-63|payload-segment-64|payload-segment-65|payload-segment-66|payload-segment-67|payload-segment-68|payload-segment-69|payload-segment-70|payload-segment-71|payload-segment-72|payload-segment-73|payload-segment-74|payload-segment-75|payload-segment-76|payload-segment-77|payload-segment-78|payload-segment-79|payload-segment-80|payload-segment-81|payload-segment-82|payload-segment-83|payload-segment-84|payload-segment-85|payload-segment-86|payload-segment-87|payload-segment-88|payload-segment-89|payload-segment-90|payload-segment-91|payload-segment-92|payload-segment-93|payload-segment-94|payload-segment-95|payload-segment-96|payload-segment-97|payload-segment-98|payload-segment-99|payload-segment-100|payload-segment-101|payload-segment-102|payload-segment-103|payload-segment-104|payload-segment-105|payload-segment-106|payload-segment-107|payload-segment-108|payload-segment-109|payload-segment-110|payload-segment-111|payload-segment-112|payload-segment-113|payload-segment-114|payload-segment-115|payload-segment-116|payload-segment-117|payload-segment-118|payload-segment-119|payload-segment-120|payload-segment-121|payload-segment-122|payload-segment-123|payload-segment-124|payload-segment-125|payload-segment-126|payload-segment-127|payload-segment-128|payload-segment-129|payload-segment-130|payload-segment-131|payload-segment-132|payload-segment-133|payload-segment-134|payload-segment-135|payload-segment-136|payload-segment-137|payload-segment-138|payload-segment-139|payload-segment-140|payload-segment-141|payload-segment-142|payload-segment-143|payload-segment-144|payload-segment-145|payload-segment-146|payload-segment-147|payload-segment-148|payload-segment-149|payload-segment-150|payload-segment-151|payload-segment-152|payload-segment-153|payload-segment-154|payload-segment-155|payload-segment-156|payload-segment-157|payload-segment-158|payload-segment-159|payload-segment-160|payload-segment-161|payload-segment-162|payload-segment-163|payload-segment-164|payload-segment-165|payload-segment-166|payload-segment-167|payload-segment-168|payload-segment-169|payload-segment-170|payload-segment-171|payload-segment-172|payload-segment-173|payload-segment-174|payload-segment-175|payload-segment-176|payload-segment-177|payload-segment-178|payload-segment-179|payload-segment-180|payload-segment-181|payload-segment-182|payload-segment-183|payload-segment-184|payload-segment-185|payload-segment-186|payload-segment-187|payload-segment-188|payload-segment-189|payload-segment-190|payload-segment-191|payload-segment-192|payload-segment-193|payload-segment-194|payload-segment-195|payload-segment-196|payload-segment-197|payload-segment-198|payload-segment-199|payload-segment-200|payload-segment-201|payload-segment-202|payload-segment-203|payload-segment-204|payload-segment-205|payload-segment-206|payload-segment-207|payload-segment-208|payload-segment-209|payload-segment-210|payload-segment-211|payload-segment-212|payload-segment-213|payload-segment-214|payload-segment-215|payload-segment-216|payload-segment-217|payload-segment-218|payload-segment-219|payload-segment-220|payload-segment-221|payload-segment-222|payload-segment-223|payload-segment-224|payload-segment-225|payload-segment-226|payload-segment-227|payload-segment-228|payload-segment-229|payload-segment-230|payload-segment-231|payload-segment-232|payload-segment-233|payload-segment-234|payload-segment-235|payload-segment-236|payload-segment-237|payload-segment-238|payload-segment-239|payload-segment-240|payload-segment-241|payload-segment-242|payload-segment-243|payload-segment-244|payload-segment-245|payload-segment-246|payload-segment-247|payload-segment-248|payload-segment-249|payload-se
+... 189 characters elided (8 KB total) - re-run with --full for all of it ...
+|payload-segment-260|payload-segment-261|payload-segment-262|payload-segment-263|payload-segment-264|payload-segment-265|payload-segment-266|payload-segment-267|payload-segment-268|payload-segment-269|payload-segment-270|payload-segment-271|payload-segment-272|payload-segment-273|payload-segment-274|payload-segment-275|payload-segment-276|payload-segment-277|payload-segment-278|payload-segment-279|payload-segment-280|payload-segment-281|payload-segment-282|payload-segment-283|payload-segment-284|payload-segment-285|payload-segment-286|payload-segment-287|payload-segment-288|payload-segment-289|payload-segment-290|payload-segment-291|payload-segment-292|payload-segment-293|payload-segment-294|payload-segment-295|payload-segment-296|payload-segment-297|payload-segment-298|payload-segment-299|payload-segment-300|payload-segment-301|payload-segment-302|payload-segment-303|payload-segment-304|payload-segment-305|payload-segment-306|payload-segment-307|payload-segment-308|payload-segment-309|payload-segment-310|payload-segment-311|payload-segment-312|payload-segment-313|payload-segment-314|payload-segment-315|payload-segment-316|payload-segment-317|payload-segment-318|payload-segment-319|payload-segment-320|payload-segment-321|payload-segment-322|payload-segment-323|payload-segment-324|payload-segment-325|payload-segment-326|payload-segment-327|payload-segment-328|payload-segment-329|payload-segment-330|payload-segment-331|payload-segment-332|payload-segment-333|payload-segment-334|payload-segment-335|payload-segment-336|payload-segment-337|payload-segment-338|payload-segment-339|payload-segment-340|payload-segment-341|payload-segment-342|payload-segment-343|payload-segment-344|payload-segment-345|payload-segment-346|payload-segment-347|payload-segment-348|payload-segment-349|payload-segment-350|payload-segment-351|payload-segment-352|payload-segment-353|payload-segment-354|payload-segment-355|payload-segment-356|payload-segment-357|payload-segment-358|payload-segment-359|payload-segment-360|payload-segment-361|payload-segment-362|payload-segment-363|payload-segment-364|payload-segment-365|payload-segment-366|payload-segment-367|payload-segment-368|payload-segment-369|payload-segment-370|payload-segment-371|payload-segment-372|payload-segment-373|payload-segment-374|payload-segment-375|payload-segment-376|payload-segment-377|payload-segment-378|payload-segment-379|payload-segment-380|payload-segment-381|payload-segment-382|payload-segment-383|payload-segment-384|payload-segment-385|payload-segment-386|payload-segment-387|payload-segment-388|payload-segment-389|payload-segment-390|payload-segment-391|payload-segment-392|payload-segment-393|payload-segment-394|payload-segment-395|payload-segment-396|payload-segment-397|payload-segment-398|payload-segment-399"
+`;
+
+exports[`compress - dispatch > backstop cap - output with no dedicated condenser is still bounded 1`] = `
+"line 0: some moderately long payload describing record number 0 in detail
+line 1: some moderately long payload describing record number 1 in detail
+line 2: some moderately long payload describing record number 2 in detail
+line 3: some moderately long payload describing record number 3 in detail
+line 4: some moderately long payload describing record number 4 in detail
+line 5: some moderately long payload describing record number 5 in detail
+line 6: some moderately long payload describing record number 6 in detail
+line 7: some moderately long payload describing record number 7 in detail
+line 8: some moderately long payload describing record number 8 in detail
+line 9: some moderately long payload describing record number 9 in detail
+line 10: some moderately long payload describing record number 10 in detail
+line 11: some moderately long payload describing record number 11 in detail
+line 12: some moderately long payload describing record number 12 in detail
+line 13: some moderately long payload describing record number 13 in detail
+line 14: some moderately long payload describing record number 14 in detail
+line 15: some moderately long payload describing record number 15 in detail
+line 16: some moderately long payload describing record number 16 in detail
+line 17: some moderately long payload describing record number 17 in detail
+line 18: some moderately long payload describing record number 18 in detail
+line 19: some moderately long payload describing record number 19 in detail
+line 20: some moderately long payload describing record number 20 in detail
+line 21: some moderately long payload describing record number 21 in detail
+line 22: some moderately long payload describing record number 22 in detail
+line 23: some moderately long payload describing record number 23 in detail
+line 24: some moderately long payload describing record number 24 in detail
+line 25: some moderately long payload describing record number 25 in detail
+line 26: some moderately long payload describing record number 26 in detail
+line 27: some moderately long payload describing record number 27 in detail
+line 28: some moderately long payload describing record number 28 in detail
+line 29: some moderately long payload describing record number 29 in detail
+line 30: some moderately long payload describing record number 30 in detail
+line 31: some moderately long payload describing record number 31 in detail
+line 32: some moderately long payload describing record number 32 in detail
+line 33: some moderately long payload describing record number 33 in detail
+line 34: some moderately long payload describing record number 34 in detail
+line 35: some moderately long payload describing record number 35 in detail
+line 36: some moderately long payload describing record number 36 in detail
+line 37: some moderately long payload describing record number 37 in detail
+line 38: some moderately long payload describing record number 38 in detail
+line 39: some moderately long payload describing record number 39 in detail
+line 40: some moderately long payload describing record number 40 in detail
+line 41: some moderately long payload describing record number 41 in detail
+line 42: some moderately long payload describing record number 42 in detail
+line 43: some moderately long payload describing record number 43 in detail
+line 44: some moderately long payload describing record number 44 in detail
+line 45: some moderately long payload describing record number 45 in detail
+line 46: some moderately long payload describing record number 46 in detail
+line 47: some moderately long payload describing record number 47 in detail
+line 48: some moderately long payload describing record number 48 in detail
+line 49: some moderately long payload describing record number 49 in detail
+line 50: some moderately long payload describing record number 50 in detail
+line 51: some moderately long payload describing record number 51 in detail
+line 52: some moderately long payload describing record number 52 in detail
+line 53: some moderately long payload describing record number 53 in detail
+line 54: some moderately long payload describing record number 54 in detail
+line 55: some moderately long payload describing record number 55 in detail
+line 56: some moderately long payload describing record number 56 in detail
+line 57: some moderately long payload describing record number 57 in detail
+line 58: some moderately long payload describing record number 58 in detail
+line 59: some moderately long payload describing record number 59 in detail
+line 60: some moderately long payload describing record number 60 in detail
+line 61: some moderately long payload describing record number 61 in detail
+line 62: some moderately long payload describing record number 62 in detail
+line 63: some moderately long payload describing record number 63 in detail
+line 64: some moderately long payload describing record number 64 in detail
+line 65: some moderately long payload describing record number 65 in detail
+line 66: some moderately long payload describing record number 66 in detail
+line 67: some moderately long payload describing record number 67 in detail
+... 3897 lines elided (310 KB total) - re-run with --full for all of it ...
+line 3965: some moderately long payload describing record number 3965 in detail
+line 3966: some moderately long payload describing record number 3966 in detail
+line 3967: some moderately long payload describing record number 3967 in detail
+line 3968: some moderately long payload describing record number 3968 in detail
+line 3969: some moderately long payload describing record number 3969 in detail
+line 3970: some moderately long payload describing record number 3970 in detail
+line 3971: some moderately long payload describing record number 3971 in detail
+line 3972: some moderately long payload describing record number 3972 in detail
+line 3973: some moderately long payload describing record number 3973 in detail
+line 3974: some moderately long payload describing record number 3974 in detail
+line 3975: some moderately long payload describing record number 3975 in detail
+line 3976: some moderately long payload describing record number 3976 in detail
+line 3977: some moderately long payload describing record number 3977 in detail
+line 3978: some moderately long payload describing record number 3978 in detail
+line 3979: some moderately long payload describing record number 3979 in detail
+line 3980: some moderately long payload describing record number 3980 in detail
+line 3981: some moderately long payload describing record number 3981 in detail
+line 3982: some moderately long payload describing record number 3982 in detail
+line 3983: some moderately long payload describing record number 3983 in detail
+line 3984: some moderately long payload describing record number 3984 in detail
+line 3985: some moderately long payload describing record number 3985 in detail
+line 3986: some moderately long payload describing record number 3986 in detail
+line 3987: some moderately long payload describing record number 3987 in detail
+line 3988: some moderately long payload describing record number 3988 in detail
+line 3989: some moderately long payload describing record number 3989 in detail
+line 3990: some moderately long payload describing record number 3990 in detail
+line 3991: some moderately long payload describing record number 3991 in detail
+line 3992: some moderately long payload describing record number 3992 in detail
+line 3993: some moderately long payload describing record number 3993 in detail
+line 3994: some moderately long payload describing record number 3994 in detail
+line 3995: some moderately long payload describing record number 3995 in detail
+line 3996: some moderately long payload describing record number 3996 in detail
+line 3997: some moderately long payload describing record number 3997 in detail
+line 3998: some moderately long payload describing record number 3998 in detail
+line 3999: some moderately long payload describing record number 3999 in detail"
+`;
+
+exports[`compress - dispatch > content sniff - rg hits that merely MENTION a TS code are not rendered as a tsc report 1`] = `
+"12 matches in 5 file(s)
+docs/errors.md  (6)
+  12:TS2304: Cannot find name - see the troubleshooting table
+  48:TS2345: Argument type mismatch is the most common one
+  120:TS7006: Parameter implicitly has an any type
+  121:TS2532: Object is possibly undefined
+  122:TS2339: Property does not exist on type
+  123:TS18048: Value is possibly undefined
+src/lint/rules.ts  (3)
+  31:// suppress TS2304: generated code references globals
+  77:const IGNORED = new Set(["TS2304:", "TS2345:"])
+  90:// TS2339: property access on a narrowed union
+test/fixtures/tsc-output.txt  (1)
+  1:app.ts(1,1): error TS2304: Cannot find name x
+CHANGELOG.md  (1)
+  90:- handle TS2304: unresolved identifiers in generated files
+README.md  (1)
+  44:Common codes: TS2304, TS2345, TS7006 - see docs/errors.md"
+`;
+
+exports[`compress - dispatch > machine output - git status --porcelain is not reshaped 1`] = `
+" M src/app.ts
+ M README.md
+?? src/new.ts
+A  src/added.ts"
+`;
+
+exports[`compress - dispatch > machine output - kubectl -o json stays parseable JSON 1`] = `
+"{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "metadata": {
+        "name": "api-pod-0",
+        "namespace": "production"
+      },
+      "status": {
+        "phase": "Running",
+        "podIP": "10.1.2.0"
+      }
+    },
+    {
+      "metadata": {
+        "name": "api-pod-1",
+        "namespace": "production"
+      },
+      "status": {
+        "phase": "Running",
+        "podIP": "10.1.2.1"
+      }
+    },
+    {
+      "metadata": {
+        "name": "api-pod-2",
+        "namespace": "production"
+      },
+      "status": {
+        "phase": "Running",
+        "podIP": "10.1.2.2"
+      }
+    },
+    {
+      "metadata": {
+        "name": "api-pod-3",
+        "namespace": "production"
+      },
+      "status": {
+        "phase": "Running",
+        "podIP": "10.1.2.3"
+      }
+    },
+    {
+      "metadata": {
+        "name": "api-pod-4",
+        "namespace": "production"
+      },
+      "status": {
+        "phase": "Running",
+        "podIP": "10.1.2.4"
+      }
+    },
+    {
+      "metadata": {
+        "name": "api-pod-5",
+        "namespace": "production"
+      },
+      "status": {
+        "phase": "Running",
+        "podIP": "10.1.2.5"
+      }
+    },
+    {
+      "metadata": {
+        "name": "api-pod-6",
+        "namespace": "production"
+      },
+      "status": {
+        "phase": "Running",
+        "podIP": "10.1.2.6"
+      }
+    },
+    {
+      "metadata": {
+        "name": "api-pod-7",
+        "namespace": "production"
+      },
+      "status": {
+        "phase": "Running",
+        "podIP": "10.1.2.7"
+      }
+    }
+  ]
+}"
+`;

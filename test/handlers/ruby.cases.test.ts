@@ -138,6 +138,30 @@ app/services/report.rb:20:7: W: Lint/ShadowingOuterLocalVariable: Shadowing oute
 1 file inspected, 6 offenses detected
 `
 
+// RuboCop's default AllCops/Include covers **/*.rake, **/Rakefile, **/Gemfile,
+// **/*.gemspec and **/*.ru as well as **/*.rb, so a mixed offence list is the
+// norm in any Rails repo. The row regex used to require the path to end in
+// `.rb`, so every offence in one of those files was dropped from the body, from
+// the severity histogram AND from the total - and RuboCop's own authoritative
+// "N offenses detected" line is deleted by the condenser, so the undercount was
+// silent. Here an E: severity in a `.rake` file is the one an agent must not
+// lose: fixing the two `.rb` offences and reporting "lint clean" leaves CI
+// failing on a syntax error that was never shown.
+const RUBOCOP_MIXED_PATHS = `Inspecting 12 files
+..C..W...E..
+
+Offenses:
+
+app/models/user.rb:10:5: C: Style/StringLiterals: Prefer single-quoted strings.
+app/models/user.rb:22:1: W: Lint/UselessAssignment: Useless assignment to variable - tmp.
+lib/tasks/import.rake:4:3: C: Layout/IndentationWidth: Use 2 (not 4) spaces for indentation.
+Gemfile:1:1: C: Style/FrozenStringLiteralComment: Missing frozen string literal comment.
+config.ru:3:1: E: Lint/Syntax: unexpected token kEND (Using Ruby 3.2 parser).
+myapp.gemspec:8:5: W: Lint/DuplicateMethods: Method Gem::Specification#name is defined twice.
+
+12 files inspected, 6 offenses detected, 2 offenses autocorrectable
+`
+
 const RUBOCOP_CLEAN = `Inspecting 4 files
 ....
 
@@ -299,6 +323,27 @@ describeCompression('ruby', [
       expect(out).toContain('[W:2 C:4]')
       expect(out).toContain('app/services/report.rb (6)')
       expect(out).toContain('  ... +2 more here')
+    },
+  },
+  {
+    name: 'rubocop - offences in .rake / Gemfile / .gemspec / config.ru are counted and shown, not silently dropped',
+    cmd: 'rubocop',
+    args: [],
+    input: RUBOCOP_MIXED_PATHS,
+    assert: (out) => {
+      // RuboCop said 6; the header must say 6, over all 5 files it named.
+      expect(out).toMatch(/^rubocop: 6 offense\(s\) in 5 file\(s\)/)
+      // The histogram must include the .ru syntax error and the .gemspec warning.
+      expect(out).toContain('[E:1 W:2 C:3]')
+      // Every non-.rb path is a heading of its own, with its offence beneath it.
+      expect(out).toContain('lib/tasks/import.rake (1)')
+      expect(out).toContain('Gemfile (1)')
+      expect(out).toContain('config.ru (1)')
+      expect(out).toContain('myapp.gemspec (1)')
+      // The severity that breaks the build must be visible, not just counted.
+      expect(out).toContain('Lint/Syntax: unexpected token kEND')
+      expect(out).toContain('Lint/DuplicateMethods')
+      expect(out).toContain('Layout/IndentationWidth')
     },
   },
   {

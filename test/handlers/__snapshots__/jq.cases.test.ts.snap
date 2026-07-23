@@ -1,5 +1,120 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`compress - jq > compact (-c) document stream - one record per line, so the cap still applies 1`] = `
+"{"id":1,"name":"item-1","active":true}
+{"id":2,"name":"item-2","active":true}
+{"id":3,"name":"item-3","active":true}
+{"id":4,"name":"item-4","active":true}
+{"id":5,"name":"item-5","active":true}
+{"id":6,"name":"item-6","active":true}
+{"id":7,"name":"item-7","active":true}
+{"id":8,"name":"item-8","active":true}
+{"id":9,"name":"item-9","active":true}
+{"id":10,"name":"item-10","active":true}
+{"id":11,"name":"item-11","active":true}
+{"id":12,"name":"item-12","active":true}
+{"id":13,"name":"item-13","active":true}
+{"id":14,"name":"item-14","active":true}
+{"id":15,"name":"item-15","active":true}
+{"id":16,"name":"item-16","active":true}
+{"id":17,"name":"item-17","active":true}
+{"id":18,"name":"item-18","active":true}
+{"id":19,"name":"item-19","active":true}
+{"id":20,"name":"item-20","active":true}
+{"id":21,"name":"item-21","active":true}
+{"id":22,"name":"item-22","active":true}
+{"id":23,"name":"item-23","active":true}
+{"id":24,"name":"item-24","active":true}
+{"id":25,"name":"item-25","active":true}
+{"id":26,"name":"item-26","active":true}
+{"id":27,"name":"item-27","active":true}
+{"id":28,"name":"item-28","active":true}
+{"id":29,"name":"item-29","active":true}
+{"id":30,"name":"item-30","active":true}
+{"id":31,"name":"item-31","active":true}
+{"id":32,"name":"item-32","active":true}
+{"id":33,"name":"item-33","active":true}
+{"id":34,"name":"item-34","active":true}
+{"id":35,"name":"item-35","active":true}
+{"id":36,"name":"item-36","active":true}
+{"id":37,"name":"item-37","active":true}
+{"id":38,"name":"item-38","active":true}
+{"id":39,"name":"item-39","active":true}
+{"id":40,"name":"item-40","active":true}
+{"id":52,"name":"item-52","active":true}
+{"id":53,"name":"item-53","active":true}
+{"id":54,"name":"item-54","active":true}
+{"id":55,"name":"item-55","active":true}
+{"id":56,"name":"item-56","active":true}
+{"id":57,"name":"item-57","active":true}
+{"id":58,"name":"item-58","active":true}
+{"id":59,"name":"item-59","active":true}
+{"id":60,"name":"item-60","active":true}"
+`;
+
+exports[`compress - jq > default multi-document stream (jq '.[]') - never cut mid-document, so the stream still parses 1`] = `
+"{
+  "id": 1,
+  "name": "item-1",
+  "active": true
+}
+{
+  "id": 2,
+  "name": "item-2",
+  "active": true
+}
+{
+  "id": 3,
+  "name": "item-3",
+  "active": true
+}
+{
+  "id": 4,
+  "name": "item-4",
+  "active": true
+}
+{
+  "id": 5,
+  "name": "item-5",
+  "active": true
+}
+{
+  "id": 6,
+  "name": "item-6",
+  "active": true
+}
+{
+  "id": 7,
+  "name": "item-7",
+  "active": true
+}
+{
+  "id": 8,
+  "name": "item-8",
+  "active": true
+}
+{
+  "id": 9,
+  "name": "item-9",
+  "active": true
+}
+{
+  "id": 10,
+  "name": "item-10",
+  "active": true
+}
+{
+  "id": 11,
+  "name": "item-11",
+  "active": true
+}
+{
+  "id": 12,
+  "name": "item-12",
+  "active": true
+}"
+`;
+
 exports[`compress - jq > empty output - nothing to compress, returns empty 1`] = `""`;
 
 exports[`compress - jq > large array of objects - previews first 5 items behind a schema header 1`] = `
@@ -83,7 +198,7 @@ exports[`compress - jq > large object - over 20 keys, previews first 20 and coun
 ... +10 more keys"
 `;
 
-exports[`compress - jq > raw (-r) non-JSON output - over 50 lines, truncates with a line-count footer 1`] = `
+exports[`compress - jq > raw (-r) non-JSON output - capped to real values only, elision disclosed out of band 1`] = `
 "user01@example.com
 user02@example.com
 user03@example.com
@@ -124,17 +239,16 @@ user37@example.com
 user38@example.com
 user39@example.com
 user40@example.com
-user41@example.com
-user42@example.com
-user43@example.com
-user44@example.com
-user45@example.com
-user46@example.com
-user47@example.com
-user48@example.com
-user49@example.com
-user50@example.com
-... +30 more lines"
+user71@example.com
+user72@example.com
+user73@example.com
+user74@example.com
+user75@example.com
+user76@example.com
+user77@example.com
+user78@example.com
+user79@example.com
+user80@example.com"
 `;
 
 exports[`compress - jq > scalar result - a single value passes through untouched 1`] = `"1234"`;

@@ -12,15 +12,112 @@ exports[`compress - pkgmgr > npm audit (text) - clean tree surfaces the "found 0
 
 exports[`compress - pkgmgr > npm audit (text) - parses the summary line into a severity rollup 1`] = `"audit: 1 critical, 3 high, 1 moderate, 2 low (7 total)"`;
 
-exports[`compress - pkgmgr > npm audit --json - clean tree reports "0 vulnerabilities" 1`] = `"audit: 0 vulnerabilities"`;
+exports[`compress - pkgmgr > npm audit --json - clean tree also passes through as valid JSON 1`] = `
+"{
+  "auditReportVersion": 2,
+  "vulnerabilities": {},
+  "metadata": {
+    "vulnerabilities": { "info": 0, "low": 0, "moderate": 0, "high": 0, "critical": 0, "total": 0 },
+    "dependencies": { "prod": 850, "dev": 420, "optional": 12, "peer": 0, "peerOptional": 0, "total": 1282 }
+  }
+}"
+`;
 
-exports[`compress - pkgmgr > npm audit --json - collapses metadata histogram to a one-line summary 1`] = `"audit: 1 critical, 3 high, 1 moderate, 2 low (7 total)"`;
+exports[`compress - pkgmgr > npm audit --json - machine format passes through as valid JSON 1`] = `
+"{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "minimist": {
+      "name": "minimist",
+      "severity": "critical",
+      "isDirect": false,
+      "via": [ { "source": 1179, "name": "minimist", "title": "Prototype Pollution in minimist", "url": "https://github.com/advisories/GHSA-xvch-5gv4-984h", "severity": "critical", "range": "<1.2.6" } ],
+      "effects": [ "mkdirp" ],
+      "range": "<1.2.6",
+      "nodes": [ "node_modules/minimist" ],
+      "fixAvailable": true
+    },
+    "lodash": {
+      "name": "lodash",
+      "severity": "high",
+      "isDirect": true,
+      "via": [ { "source": 1065, "name": "lodash", "title": "Prototype Pollution in lodash", "url": "https://github.com/advisories/GHSA-p6mc-m28h-5vfr", "severity": "high", "range": ">=3.7.0 <4.17.19" } ],
+      "effects": [],
+      "range": ">=3.7.0 <4.17.19",
+      "nodes": [ "node_modules/lodash" ],
+      "fixAvailable": true
+    }
+  },
+  "metadata": {
+    "vulnerabilities": { "info": 0, "low": 2, "moderate": 1, "high": 3, "critical": 1, "total": 7 },
+    "dependencies": { "prod": 850, "dev": 420, "optional": 12, "peer": 0, "peerOptional": 0, "total": 1282 }
+  }
+}"
+`;
+
+exports[`compress - pkgmgr > npm config list - settings and the resolved environment both survive 1`] = `
+"; "user" config from /home/user/.npmrc
+//registry.npmjs.org/:_authToken = (protected)
+registry = "https://registry.npmjs.org/"
+save-exact = true
+; node bin location = /usr/local/bin/node
+; node version = v22.11.0
+; npm version = 10.8.1
+; cwd = /home/user/my-app
+; Run \`npm config ls -l\` to show all defaults."
+`;
+
+exports[`compress - pkgmgr > npm doctor - a clean run is a single tally line 1`] = `"doctor: 11 checks ok"`;
+
+exports[`compress - pkgmgr > npm doctor - passing checks collapse to a tally, failures keep their advice 1`] = `
+"doctor: 9 of 11 checks ok
+  [x] node -v: Use node v22.11.0 (current: v20.9.0)
+  [x] Verify cache contents: Cache verification failed, run npm cache verify"
+`;
+
+exports[`compress - pkgmgr > npm explain - keeps the direct requirers, folds the longer paths behind a count 1`] = `
+"lodash@4.17.21 dev
+  dev lodash@"^4.17.21" from the root project
+  lodash@"^4.17.20" from eslint@8.57.0
+  lodash@"^4.17.15" from @typescript-eslint/utils@7.13.1
+... 3 longer paths folded"
+`;
+
+exports[`compress - pkgmgr > npm fund - the funding groups survive the light strip intact 1`] = `
+"my-app@1.0.0
+├─┬ https://github.com/sponsors/sindresorhus
+│ └── ansi-styles@6.2.1, chalk@5.3.0, slash@5.1.0
+├─┬ https://opencollective.com/express
+│ └── express@4.19.2
+└─┬ https://github.com/sponsors/isaacs
+  └── glob@10.4.2, rimraf@5.0.7"
+`;
 
 exports[`compress - pkgmgr > npm install - strips deprecation warnings / notices / timing, keeps summary 1`] = `
 "added 1043 packages, and audited 1044 packages in 24s
 142 packages are looking for funding
   run \`npm fund\` for details
 found 0 vulnerabilities"
+`;
+
+exports[`compress - pkgmgr > npm ll --all - long-form continuation lines are never re-attributed to the wrong package 1`] = `
+"my-app@1.0.0 /home/user/my-app
+├─┬ express@4.19.2
+│ │ Fast, unopinionated, minimalist web framework
+│ ├── accepts@1.3.8
+│ │ Higher-level content negotiation
+│ ├── cookie@0.6.0
+│ │ HTTP server cookie parsing and serialization
+│ └── debug@2.6.9
+│   small debugging utility
+└─┬ lodash@4.17.21
+  │ Lodash modular utilities.
+  └── nothing@1.0.0"
+`;
+
+exports[`compress - pkgmgr > npm ls - a project with no dependencies is left exactly as npm printed it 1`] = `
+"my-app@1.0.0 /home/user/my-app
+└── (empty)"
 `;
 
 exports[`compress - pkgmgr > npm ls - no-noise tree passes through intact (no mangling) 1`] = `
@@ -31,6 +128,129 @@ exports[`compress - pkgmgr > npm ls - no-noise tree passes through intact (no ma
 └── vitest@1.6.0"
 `;
 
+exports[`compress - pkgmgr > npm ls --all - a package NAMED "is-invalid-path" is not a problem report 1`] = `
+"my-app@1.0.0 /home/user/my-app
+├─┬ valid-path@1.0.0
+└── lodash@4.17.21
+... 6 nested entries hidden - 2 direct of 8 total"
+`;
+
+exports[`compress - pkgmgr > npm ls --all - a shallow tree whose problem list would cost more than it saves comes back whole 1`] = `
+"my-app@1.0.0 /home/user/my-app
+├─┬ pkg@1.0.0
+│ ├── leftover@1.0.0 extraneous
+│ ├── a@1.0.0
+│ ├── b@1.0.0
+│ ├── c@1.0.0
+│ └── d@1.0.0
+└── lodash@4.17.21"
+`;
+
+exports[`compress - pkgmgr > npm ls --all - a tree whose every nested row is flagged has nothing to fold, so it comes back verbatim instead of growing 1`] = `
+"my-app@1.0.0 /home/user/my-app
+├─┬ pkg@1.0.0
+│ ├── leftover@1.0.0 extraneous
+│ └── UNMET DEPENDENCY send@^0.18.0
+└── lodash@4.17.21"
+`;
+
+exports[`compress - pkgmgr > npm ls --all - an indented note after the tree is not a long-form description, so the tree is still condensed 1`] = `
+"my-app@1.0.0 /home/user/my-app
+├─┬ express@4.19.2
+└── lodash@4.17.21
+  npm ls output truncated
+... 4 nested entries hidden - 2 direct of 6 total"
+`;
+
+exports[`compress - pkgmgr > npm ls --all - keeps the direct deps, drops nested entries, surfaces only the flagged ones 1`] = `
+"my-app@1.0.0 /home/user/my-app
+├─┬ express@4.19.2
+├── lodash@4.17.21
+├─┬ typescript@5.4.5
+└─┬ vitest@1.6.0
+... 12 nested entries hidden - 4 direct of 19 total
+3 problems:
+  [x] UNMET DEPENDENCY send@^0.18.0
+  [x] UNMET OPTIONAL DEPENDENCY fsevents@^2.3.3
+  [x] deep-eql@4.1.3 invalid: "^5.0.0" from the root project"
+`;
+
+exports[`compress - pkgmgr > npm ls --json - machine format still parses as JSON 1`] = `
+"{
+  "name": "my-app",
+  "version": "1.0.0",
+  "problems": [
+    "invalid: deep-eql@4.1.3 /home/user/my-app/node_modules/deep-eql"
+  ],
+  "dependencies": {
+    "express": { "version": "4.19.2", "resolved": "https://registry.npmjs.org/express/-/express-4.19.2.tgz" },
+    "lodash": { "version": "4.17.21", "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz" },
+    "typescript": { "version": "5.4.5", "resolved": "https://registry.npmjs.org/typescript/-/typescript-5.4.5.tgz" }
+  }
+}"
+`;
+
+exports[`compress - pkgmgr > npm ls --parseable - bare path list survives verbatim as xargs input 1`] = `
+"/home/user/my-app
+/home/user/my-app/node_modules/express
+/home/user/my-app/node_modules/lodash
+/home/user/my-app/node_modules/typescript"
+`;
+
+exports[`compress - pkgmgr > npm outdated - everything up to date prints nothing and stays nothing 1`] = `""`;
+
+exports[`compress - pkgmgr > npm outdated - the wide table becomes one line per package 1`] = `
+"5 outdated (current → wanted/latest):
+@types/node 20.11.30 → 20.14.9/22.0.0
+eslint 8.57.0 → 8.57.1/9.7.0
+express 4.18.2 → 4.19.2
+typescript 5.3.3 → 5.4.5/5.5.4
+vite MISSING → 5.3.3"
+`;
+
+exports[`compress - pkgmgr > npm pack --dry-run - the file listing becomes a count, the sizes and the top directories 1`] = `
+"token-trim@0.4.1: 10 files, 12.3 kB packed, 48.7 kB unpacked
+  dist/ 5 files
+  ./ 3 files
+  src/ 2 files
+token-trim-0.4.1.tgz"
+`;
+
+exports[`compress - pkgmgr > npm publish - output with no tarball listing falls back to install-noise stripping 1`] = `"+ token-trim@0.4.1"`;
+
+exports[`compress - pkgmgr > npm run - a "-p" bound for the script does not disable noise stripping 1`] = `
+"> vite build -p production
+vite v5.3.3 building for production...
+dist/index.html   0.46 kB
+dist/assets/index-4f2a8b1c.js  142.87 kB
+built in 1.23s"
+`;
+
+exports[`compress - pkgmgr > npm view <pkg> maintainers - a non-version array is not relabelled as versions 1`] = `
+"[
+  'dougwilson <doug@somethingdoug.com>',
+  'wesleytodd <wes@wesleytodd.com>',
+  'jonchurch <npm@jonchurch.com>',
+  'ctcpip <c@labsyn.com>'
+]"
+`;
+
+exports[`compress - pkgmgr > npm view <pkg> versions - a bare version array collapses to a count and a range 1`] = `"versions: 8 (0.14.0 … 4.19.2)"`;
+
+exports[`compress - pkgmgr > npm view - output with no version array keeps every field 1`] = `
+"express@4.19.2 | MIT | deps: 31 | versions: 280
+Fast, unopinionated, minimalist web framework
+http://expressjs.com/
+dist
+.tarball: https://registry.npmjs.org/express/-/express-4.19.2.tgz
+.unpackedSize: 209.5 kB
+dependencies:
+accepts: ~1.3.8            array-flatten: 1.1.1       body-parser: 1.20.2
+dist-tags:
+latest: 4.19.2
+published 3 months ago by dougwilson <doug@somethingdoug.com>"
+`;
+
 exports[`compress - pkgmgr > pnpm install - strips braille spinners / Progress / Downloading / .pnpm paths 1`] = `
 "Lockfile is up to date, resolution step is skipped
 dependencies:
@@ -39,9 +259,60 @@ dependencies:
 Done in 8.3s"
 `;
 
+exports[`compress - pkgmgr > pnpm outdated - an unrecognised box table is returned unchanged, not summarised 1`] = `
+"┌────────────────┬──────────┬────────┐
+│ Package        │ Current  │ Latest │
+├────────────────┼──────────┼────────┤
+│ express        │ 4.18.2   │ 4.19.2 │
+├────────────────┼──────────┼────────┤
+│ typescript     │ 5.3.3    │ 5.5.4  │
+└────────────────┴──────────┴────────┘"
+`;
+
+exports[`compress - pkgmgr > pnpm why - an unrecognised section list is returned unchanged 1`] = `
+"Legend: production dependency, optional only, dev only
+
+my-app@1.0.0 /home/user/my-app
+
+devDependencies:
+eslint 8.57.0
+└── lodash 4.17.21"
+`;
+
+exports[`compress - pkgmgr > yarn info - the version history array collapses to a count and a range 1`] = `
+"yarn info v1.22.19
+{ name: 'express',
+  description: 'Fast, unopinionated, minimalist web framework',
+  'dist-tags': { latest: '4.19.2' },
+  versions: 8 (0.14.0 … 4.19.2),
+  maintainers: [ { name: 'dougwilson', email: 'doug@somethingdoug.com' } ],
+  license: 'MIT',
+  homepage: 'http://expressjs.com/',
+  dependencies: { accepts: '~1.3.8', 'body-parser': '1.20.2', cookie: '0.6.0' } }
+Done in 0.83s."
+`;
+
 exports[`compress - pkgmgr > yarn install - strips Resolving/Fetching/Downloading + "> pkg@N" lifecycle 1`] = `
 "yarn install v1.22.19
 success Saved lockfile.
 success Saved 1053 new dependencies.
 Done in 34.21s."
+`;
+
+exports[`compress - pkgmgr > yarn outdated - banner and colour legend go, unparsed lines are still kept 1`] = `
+"2 outdated (current → wanted/latest):
+express 4.18.2 → 4.19.2
+lodash 4.17.20 → 4.17.21
+Done in 1.23s."
+`;
+
+exports[`compress - pkgmgr > yarn why - progress counter and disk-size trivia go, the reasons stay 1`] = `
+"yarn why v1.22.19
+=> Found "lodash@4.17.21"
+info Has been hoisted to "lodash"
+info Reasons this module exists
+   - "workspace-aggregator-8b1f" depends on it
+   - Specified in "devDependencies"
+   - Hoisted from "eslint#lodash"
+Done in 1.32s."
 `;

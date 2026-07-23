@@ -82,6 +82,26 @@ const WIDGET_JSON = JSON.stringify(
   2,
 )
 
+// ── default MULTI-DOCUMENT stream (`jq '.[]' data.json`) ──────────────────────
+// jq's normal, non-`-r` output for a filter that yields more than one value is
+// a STREAM of pretty-printed documents - many lines per record, not one record
+// per line. `JSON.parse` of the whole thing fails (it is a stream, not a
+// document), so this used to fall through to the flat-data-list cap, which cuts
+// whole LINES out of the middle: the cut landed inside an object, two documents
+// vanished, and the survivor lost its opening brace, leaving stdout holding
+// syntactically corrupt JSON presented as jq's answer.
+const JQ_STREAM =
+  Array.from({ length: 12 }, (_, i) =>
+    JSON.stringify({ id: i + 1, name: `item-${i + 1}`, active: true }, null, 2),
+  ).join('\n') + '\n'
+
+// The same 12 records in `-c` compact form: one self-contained document per
+// line, which IS a flat data list and stays safe to cap.
+const JQ_COMPACT =
+  Array.from({ length: 60 }, (_, i) =>
+    JSON.stringify({ id: i + 1, name: `item-${i + 1}`, active: true }),
+  ).join('\n') + '\n'
+
 describeCompression('jq', [
   {
     name: 'empty output - nothing to compress, returns empty',
@@ -172,19 +192,65 @@ describeCompression('jq', [
     },
   },
   {
-    name: 'raw (-r) non-JSON output - over 50 lines, truncates with a line-count footer',
+    // CHANGED DELIBERATELY: `jq -r` emits raw values one per line, headed for
+    // another program (`jq -r '.[].email' | mail -t`). The old in-band
+    // "... +30 more lines" footer was read as one more email address. The
+    // elision is disclosed on stderr now, and the tail is kept as well as the
+    // head - the end of a list is as informative as its start.
+    name: 'raw (-r) non-JSON output - capped to real values only, elision disclosed out of band',
     cmd: 'jq',
     args: ['-r', '.[].email'],
     input: EMAILS,
     assert: (out, input) => {
-      // not parseable as JSON ⇒ falls through to plain line truncation
-      expect(out).toMatch(/\n\.\.\. \+30 more lines$/)
-      expect(out).toContain('user01@example.com') // first line kept
-      expect(out).toContain('user50@example.com') // 50th line kept
-      expect(out).not.toContain('user51@example.com') // 51st line dropped
-      expect(out).not.toContain('user80@example.com') // last line dropped
-      // exactly 50 emails survive
-      expect(out.match(/@example\.com/g)?.length).toBe(50)
+      const source = new Set(input.split('\n').map((l) => l.trim()).filter(Boolean))
+      for (const line of out.split('\n')) {
+        expect(source.has(line), `"${line}" is not a value jq printed`).toBe(true)
+      }
+      expect(out).not.toContain('more lines')
+      expect(out).toContain('user01@example.com') // head kept
+      expect(out).toContain('user80@example.com') // tail kept too
+      expect(out.length).toBeLessThan(input.length)
+    },
+  },
+  {
+    // A condenser may delete information; it may never INVENT it, and emitting
+    // JSON that jq did not produce - and that no longer parses - is the worst
+    // form of inventing. The flat-list cap's own contract is "one independent
+    // record per line", which a pretty-printed stream violates, so this shape
+    // is handed back whole rather than cut at an arbitrary line.
+    name: "default multi-document stream (jq '.[]') - never cut mid-document, so the stream still parses",
+    cmd: 'jq',
+    args: ['.[]', 'data.json'],
+    input: JQ_STREAM,
+    assert: (out, input) => {
+      // Every document that comes back must be a complete, parseable value.
+      const docs = out.split(/\n(?=\{)/).filter((d) => d.trim())
+      expect(docs.length).toBeGreaterThan(0)
+      for (const d of docs) {
+        expect(() => JSON.parse(d), `not parseable JSON:\n${d}`).not.toThrow()
+      }
+      // No brace may have been eaten: a `}` is never followed by a bare field.
+      expect(out).not.toMatch(/^\}\n\s+"/m)
+      // And no record vanished from the middle without a trace.
+      for (let i = 1; i <= 12; i++) expect(out).toContain(`"id": ${i}`)
+      expect(out).toBe(input.trim())
+    },
+  },
+  {
+    // `jq -c` (and `jq '.[] | @json'`) really is one self-contained record per
+    // line, so the data-list cap applies exactly as it does to `-r` output.
+    name: 'compact (-c) document stream - one record per line, so the cap still applies',
+    cmd: 'jq',
+    args: ['-c', '.[]', 'data.json'],
+    input: JQ_COMPACT,
+    assert: (out, input) => {
+      const source = new Set(input.split('\n').map((l) => l.trim()).filter(Boolean))
+      for (const line of out.split('\n')) {
+        expect(source.has(line), `"${line}" is not a document jq printed`).toBe(true)
+        expect(() => JSON.parse(line)).not.toThrow()
+      }
+      expect(out).toContain('"id":1,')
+      expect(out).toContain('"id":60,')
       expect(out.length).toBeLessThan(input.length)
     },
   },

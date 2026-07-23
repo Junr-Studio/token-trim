@@ -387,6 +387,92 @@ const XML_FILE = `<?xml version="1.0" encoding="UTF-8"?>
 </project>
 `
 
+// A LINE comment that merely mentions the block-comment opener. `/*` inside a
+// `//` comment, a glob string or a regex is not the start of a block comment,
+// and treating it as one blanks every line down to the next `*/` - usually the
+// rest of the file. Real trigger, found in node_modules/publint/src/shared/message.js.
+const JS_GLOB_IN_LINE_COMMENT = `export function f(a) {
+  return a
+}
+
+// \`@types/*\` packages have an empty main field
+export const SECRET_TOKEN_COUNT = 42
+
+export function g() {
+  return SECRET_TOKEN_COUNT
+}
+`
+
+// The same trigger from a plain STRING: a glob argument in a data literal. This
+// one fires on this repository's own test/matrix/unix.matrix.ts.
+const TS_GLOB_IN_STRING = `export const FIND_ARGS = [
+  '.',
+  '-name', '*.ts',
+  '-not', '-path', './node_modules/*',
+]
+
+export const LAST_EXPORT = 'still here'
+`
+
+// A brace inside a STRING literal is not a block opener. One of these pushed the
+// depth counter to 1 for good, so every line below it was replaced by a single
+// marker plus blanks and the file's remaining top-level declarations vanished.
+const GO_BRACE_IN_STRING = `package main
+
+// Package main is the entry point for the demo binary.
+import "fmt"
+
+const OpenBrace = "{"
+
+func Critical() string {
+	// Assemble the answer the caller is waiting for.
+	answer := fmt.Sprintf("%s answer %s", OpenBrace, OpenBrace)
+	return answer
+}
+
+const Version = "9.9.9"
+`
+
+// Same defect reached through a REGEX literal - the shape that empties ~100 of
+// highlight.js's language definitions.
+const JS_BRACE_IN_REGEX = String.raw`export function parse(s) {
+  return s.replace(/\{+/g, '')
+}
+
+export const OPEN = 'still here'
+
+module.exports = parse
+`
+
+// A pretty-printed API dump. 64-bit snowflake ids are past 2^53, so a
+// re-serialisation through JSON.parse rewrites them into digits that were never
+// in the file - and rewrites three distinct ids into one identical value.
+const JSON_SNOWFLAKE = `{
+  "events": [
+    {
+      "id": 1234567890123456789,
+      "author_id": 9876543210987654321,
+      "text": "hello"
+    },
+    {
+      "id": 1234567890123456790,
+      "author_id": 9876543210987654322,
+      "text": "world"
+    },
+    {
+      "id": 1234567890123456791,
+      "author_id": 9876543210987654323,
+      "text": "again"
+    }
+  ],
+  "total": 3,
+  "cursor": null,
+  "limit": 1e5,
+  "ratio": 1.0,
+  "offset": -0
+}
+`
+
 const PLAIN_NOTES = `TODO list for the release:
 // this looks like a comment but is plain text
 # so does this line
@@ -461,36 +547,42 @@ describeCompression('source', [
 
   // ── data: JSON array (schema header + 5-item preview + tail count) ──
   {
-    name: 'cat users.json - array condensed to [N items schema:{...}] + 5-item preview',
+    // CHANGED DELIBERATELY. The "[12 items  schema: {...}]" header over a
+    // five-item preview reads beautifully and is not JSON, so
+    // `cat users.json | jq '.[].email'` failed to parse - and the seven items
+    // past the preview were gone with no way to ask for them. Compact
+    // re-serialisation is lossless, still parses, and the indentation it drops
+    // was the bulk of the file anyway.
+    name: 'cat users.json - the array survives whole as compact, parseable JSON',
     cmd: 'cat',
     args: ['users.json'],
     input: JSON_ARRAY,
     assert: (out, input) => {
-      expect(out).toContain('12 items')
-      expect(out).toContain('schema: {id, name, email, role, active}')
-      expect(out).toContain('+7 more items')
-      // first 5 items previewed, remainder dropped
-      expect(out).toContain('Alice Anderson')
-      expect(out).toContain('Eve Evans')
-      expect(out).not.toContain('Frank Ford')
-      expect(out).not.toContain('Lorna Last')
+      expect(() => JSON.parse(out)).not.toThrow()
+      const items = JSON.parse(out) as Array<{ name: string }>
+      expect(items).toHaveLength(12)
+      // nothing is dropped any more - including the items the preview cut
+      expect(items.map((i) => i.name)).toEqual(
+        expect.arrayContaining(['Alice Anderson', 'Frank Ford', 'Lorna Last']),
+      )
       expect(out.length).toBeLessThan(input.length)
     },
   },
 
   // ── data: JSON object with > 20 keys (keys header + 20-key preview) ──
   {
-    name: 'cat settings.json - wide object condensed to {N keys} + first-20 preview',
+    // CHANGED DELIBERATELY, same reason as the array case above.
+    name: 'cat settings.json - the object survives whole as compact, parseable JSON',
     cmd: 'cat',
     args: ['settings.json'],
     input: JSON_OBJECT,
     assert: (out, input) => {
-      expect(out).toContain('{40 keys}')
-      expect(out).toContain('+20 more keys')
-      expect(out).toContain('"key01": "value01"')
-      expect(out).toContain('"key20": "value20"')
-      expect(out).not.toContain('"key21"')
-      expect(out).not.toContain('"key40"')
+      expect(() => JSON.parse(out)).not.toThrow()
+      const cfg = JSON.parse(out) as Record<string, string>
+      expect(Object.keys(cfg)).toHaveLength(40)
+      // the twenty keys the preview used to cut are back
+      expect(cfg['key01']).toBe('value01')
+      expect(cfg['key40']).toBe('value40')
       expect(out.length).toBeLessThan(input.length)
     },
   },
@@ -507,7 +599,7 @@ describeCompression('source', [
       expect(out).not.toContain('more keys')
       expect(out).toContain('"name": "my-app"')
       expect(out).toContain('"build": "tsc"')
-      expect(out).toBe(JSON_SMALL.trim())
+      expect(out).toBe(JSON_SMALL)
     },
   },
 
@@ -581,6 +673,123 @@ describeCompression('source', [
     },
   },
 
+  // ── a `/*` that is not a block comment ───────────────────────────────────
+  // The block-comment tracker opened on any line CONTAINING the opener, so a
+  // `//` comment that mentions `/*`, a glob string, or a regex switched it on
+  // and every line down to the next `*/` - often EOF - came back blank. Nothing
+  // marks the loss: the agent reads a file whose second half is empty and
+  // concludes the declarations below the trigger do not exist.
+  {
+    name: 'cat message.js - a // comment mentioning /* does not blank the rest of the file',
+    cmd: 'cat',
+    args: ['message.js'],
+    input: JS_GLOB_IN_LINE_COMMENT,
+    assert: (out) => {
+      expect(out).toContain('export const SECRET_TOKEN_COUNT = 42')
+      expect(out).toContain('export function g() {')
+      // the comment itself is still stripped - this is not a passthrough
+      expect(out).not.toContain('packages have an empty main field')
+    },
+  },
+  {
+    name: 'cat matrix.ts - a glob inside a string is not a block comment either',
+    cmd: 'cat',
+    args: ['matrix.ts'],
+    input: TS_GLOB_IN_STRING,
+    assert: (out) => {
+      expect(out).toContain("'-not', '-path', './node_modules/*',")
+      expect(out).toContain("export const LAST_EXPORT = 'still here'")
+    },
+  },
+
+  // ── a brace that is not code ─────────────────────────────────────────────
+  // Brace depth decides which lines are a body worth folding away. Counting the
+  // braces inside string and regex literals pushed the depth to 1 permanently,
+  // so the file's remaining top-level declarations were replaced by one
+  // "... implementation" marker and blanks, indistinguishable from a short file.
+  {
+    name: 'cat main.go - a brace inside a string literal does not swallow the rest of the file',
+    cmd: 'cat',
+    args: ['main.go'],
+    input: GO_BRACE_IN_STRING,
+    assert: (out) => {
+      expect(out).toContain('const OpenBrace = "{"')
+      expect(out).toContain('func Critical() string {')
+      expect(out).toContain('const Version = "9.9.9"')
+    },
+  },
+  {
+    name: 'cat parse.js - a brace inside a regex literal does not swallow the rest either',
+    cmd: 'cat',
+    args: ['parse.js'],
+    input: JS_BRACE_IN_REGEX,
+    assert: (out) => {
+      expect(out).toContain("export const OPEN = 'still here'")
+      expect(out).toContain('module.exports = parse')
+    },
+  },
+  {
+    // The general guard behind both cases above. A body is only folded away once
+    // its closing brace has been seen. A span still open at the end of the input
+    // - a `head -20` that cut mid-function, or a brace this stripper miscounted
+    // for a reason nobody anticipated - is evidence that folding would be a
+    // guess, so those lines are emitted exactly as they arrived. That is the
+    // difference between "I deleted a body I could identify" and "everything
+    // after line N is gone".
+    name: 'head -20 app.ts - a body the input cuts off mid-way is never folded away',
+    cmd: 'head',
+    args: ['-20', 'app.ts'],
+    input: `// a comment to prove this is not a plain passthrough
+export function complete(): number {
+  const a = 1
+  return a
+}
+
+export function truncated(): void {
+  const first = compute(1)
+  const second = compute(2)
+`,
+    assert: (out) => {
+      // the closed body is folded, as always
+      expect(out).toContain('export function complete(): number {')
+      expect(out).toContain('// ... implementation')
+      expect(out).not.toContain('const a = 1')
+      // the body the input cut off is still all there
+      expect(out).toContain('const first = compute(1)')
+      expect(out).toContain('const second = compute(2)')
+      // and the comment is still stripped
+      expect(out).not.toContain('a comment to prove')
+    },
+  },
+
+  // ── JSON numbers are literals, not values to re-derive ───────────────────
+  // Compacting through JSON.parse/JSON.stringify is not lossless: a 19-digit
+  // snowflake id is past 2^53 and comes back as different digits - three
+  // distinct ids collapsed into one identical value - `1e5` becomes `100000`,
+  // `1.0` becomes `1` and `-0` becomes `0`. Those digits were never in the file.
+  // This is the one place the library INVENTED a value rather than deleting one.
+  {
+    name: 'cat events.json - large integer ids survive byte-for-byte, not round-tripped',
+    cmd: 'cat',
+    args: ['events.json'],
+    input: JSON_SNOWFLAKE,
+    assert: (out, input) => {
+      expect(() => JSON.parse(out)).not.toThrow()
+      // every id is still the one in the file, and all three are still distinct
+      expect(out).toContain('1234567890123456789')
+      expect(out).toContain('1234567890123456790')
+      expect(out).toContain('1234567890123456791')
+      expect(out).toContain('9876543210987654321')
+      expect(out).toContain('9876543210987654323')
+      // and the literal forms are untouched
+      expect(out).toContain('1e5')
+      expect(out).toContain('1.0')
+      expect(out).toContain('-0')
+      // still a real compression - the indentation is what goes
+      expect(out.length).toBeLessThan(input.length)
+    },
+  },
+
   // ── no-trigger passthrough: unknown extension is never touched ──
   {
     name: 'cat notes.txt - unknown extension passes through; comment-like lines preserved',
@@ -592,7 +801,7 @@ describeCompression('source', [
       expect(out).toContain('// this looks like a comment but is plain text')
       expect(out).toContain('# so does this line')
       expect(out).toContain('- ship the thing')
-      expect(out).toBe(PLAIN_NOTES.trim())
+      expect(out).toBe(PLAIN_NOTES)
     },
   },
 
@@ -604,6 +813,241 @@ describeCompression('source', [
     input: '',
     assert: (out) => {
       expect(out).toBe('')
+    },
+  },
+
+  // ── line positions are the file's own ────────────────────────────────────
+  // A condenser that DELETES lines from a file shifts every line after them, and
+  // two consumers read that shift as fact:
+  //   - a program: `cat app.py | wc -l` returns a count that is not the file's,
+  //     and `sed -n '42p'` prints the wrong line;
+  //   - the agent itself: it reads the condensed output, sees a function at
+  //     line 10, and edits line 10 of a file where that function is at line 25.
+  // Blanking a removed line instead of dropping it keeps every surviving line at
+  // its true position. Measured cost across the cat/head/tail matrix entries:
+  // one point of reduction (44% -> 43%), because a blank line is a single token.
+  {
+    name: 'cat app.py - every surviving line keeps the line number it has in the file',
+    cmd: 'cat',
+    args: ['app.py'],
+    input: `# module docstring line
+# second comment line
+import os
+
+# a comment before the function
+def compute(total):
+    # inner comment
+    scaled = total * 2
+    return scaled
+
+# trailing note
+VERSION = "2.0.0"
+`,
+    assert: (out, input) => {
+      const inLines = input.split('\n')
+      const outLines = out.split('\n')
+      // the file's shape is preserved, so a line number means the same thing
+      expect(outLines).toHaveLength(inLines.length)
+      // and each surviving line sits exactly where it did - the only line that
+      // may differ from its input is the elision marker itself, which announces
+      // that the body under it was folded away
+      for (let i = 0; i < inLines.length; i++) {
+        const kept = outLines[i]?.trim()
+        if (!kept) continue
+        if (kept.endsWith('... implementation')) continue
+        expect(inLines[i]?.trim(), `line ${i + 1} moved`).toBe(kept)
+      }
+      // the comments are still gone - this is not a passthrough
+      expect(out).not.toContain('module docstring')
+      expect(out).not.toContain('inner comment')
+      expect(out).toContain('def compute(total):')
+      expect(out).toContain('VERSION = "2.0.0"')
+      expect(out.length).toBeLessThan(input.length)
+    },
+  },
+
+  // ── JSON read through cat/head/tail must stay JSON ───────────────────────
+  // `cat data.json | jq '.[].name'` is how an agent reads a JSON file, and the
+  // condenser used to answer it with "[12 items  schema: {id, name, active}]"
+  // followed by a five-item preview - text that is not JSON at all, so jq exits
+  // with a parse error. The same hazard was already fixed for `curl` and `aws`
+  // by re-serialising compactly; it simply had not been carried over here.
+  {
+    name: 'cat data.json - an array stays parseable JSON instead of gaining a prose header',
+    cmd: 'cat',
+    args: ['data.json'],
+    input: JSON.stringify(
+      Array.from({ length: 12 }, (_, i) => ({ id: i, name: `item${i}`, active: i % 2 === 0 })),
+      null,
+      2,
+    ),
+    assert: (out, input) => {
+      expect(() => JSON.parse(out)).not.toThrow()
+      // lossless: every item survives, not a five-item preview
+      expect(JSON.parse(out)).toHaveLength(12)
+      expect(JSON.parse(out)[11].name).toBe('item11')
+      // and it still compresses - the indentation is what goes
+      expect(out.length).toBeLessThan(input.length)
+    },
+  },
+  {
+    name: 'cat config.json - a wide object stays parseable JSON, keys intact',
+    cmd: 'cat',
+    args: ['config.json'],
+    input: JSON.stringify(
+      Object.fromEntries(Array.from({ length: 30 }, (_, i) => [`key${i}`, `value ${i}`])),
+      null,
+      2,
+    ),
+    assert: (out, input) => {
+      expect(() => JSON.parse(out)).not.toThrow()
+      expect(Object.keys(JSON.parse(out))).toHaveLength(30)
+      expect(JSON.parse(out).key29).toBe('value 29')
+      expect(out.length).toBeLessThan(input.length)
+    },
+  },
+  {
+    name: 'cat broken.json - content that only looks like JSON is passed through, never guessed at',
+    cmd: 'cat',
+    args: ['broken.json'],
+    input: '{\n  "a": 1,\n' + Array.from({ length: 30 }, (_, i) => `  "k${i}": ${i},`).join('\n') + '\n  MISSING QUOTES\n}\n',
+    assert: (out) => {
+      expect(out).toContain('MISSING QUOTES')
+      expect(out).not.toContain('keys}')
+    },
+  },
+
+  // ── the file argument is not always args[0] ──────────────────────────────
+  // detectLang(cmdArgs[0]) resolved the language from "-50", so the single most
+  // common head/tail form got no handling at all.
+  {
+    name: 'head -50 src/app.ts - language resolved from the file, not the flag',
+    cmd: 'head',
+    args: ['-50', 'src/app.ts'],
+    input: `// leading comment that should be stripped for a .ts file
+import { readFileSync } from 'node:fs'
+
+// another comment
+export function load(): string {
+  // inner comment
+  return readFileSync('config.json', 'utf8')
+}
+`,
+    assert: (out) => {
+      expect(out).not.toContain('leading comment')
+      expect(out).not.toContain('another comment')
+      expect(out).toContain('export function load()')
+    },
+  },
+  {
+    name: 'head -n 50 src/app.ts - the flag VALUE is not mistaken for the file',
+    cmd: 'head',
+    args: ['-n', '50', 'src/app.ts'],
+    input: `// comment to strip
+export const PORT = 3000
+`,
+    assert: (out) => {
+      expect(out).not.toContain('comment to strip')
+      expect(out).toContain('export const PORT = 3000')
+    },
+  },
+  {
+    name: 'tail -n 200 app.log - a .log file is not source, so nothing is stripped as a comment',
+    cmd: 'tail',
+    args: ['-n', '200', 'app.log'],
+    input: `2026-07-22T10:00:00Z INFO  # not a comment, a log message
+2026-07-22T10:00:01Z INFO  // neither is this
+`,
+    assert: (out) => {
+      expect(out).toContain('# not a comment, a log message')
+      expect(out).toContain('// neither is this')
+    },
+  },
+
+  // ── python triple quotes are a string, not a comment ────────────────────────
+  // `"""` opens AND closes, so treating it as a block-comment delimiter meant
+  // the line that opened a run also closed it: both delimiters were blanked and
+  // whatever sat between them was emitted at statement position. Every case
+  // below came back as Python that does not parse, from `cat`, which is how an
+  // agent reads a file before editing it.
+  {
+    name: 'cat query.py - a multi-line string assignment keeps its closing delimiter',
+    cmd: 'cat',
+    args: ['query.py'],
+    input: `SQL = """
+SELECT id, name
+FROM users
+"""
+LIMIT = 100
+`,
+    assert: (out) => {
+      // The closing delimiter used to be blanked, leaving the string open and
+      // the file unparseable. Counting the token rather than the line, because
+      // the opener shares its line with the assignment.
+      expect(out.split('"""')).toHaveLength(3)
+      expect(out).toContain('SQL = """')
+      // The string is data, not prose: its contents are the value of SQL.
+      expect(out).toContain('SELECT id, name')
+      expect(out).toContain('LIMIT = 100')
+    },
+  },
+  {
+    name: 'cat settings.py - the module docstring is emptied but still opens and closes',
+    cmd: 'cat',
+    args: ['settings.py'],
+    input: `"""
+Application settings.
+
+Every value here can be overridden by an environment variable.
+"""
+import os
+
+TIMEOUT = 30
+`,
+    assert: (out, input) => {
+      const lines = out.split('\n')
+      // Both delimiter lines survive, so the string terminates ...
+      expect(lines[0]).toBe('"""')
+      expect(lines[4]).toBe('"""')
+      // ... and the prose between them is gone rather than promoted to code.
+      expect(out).not.toContain('Application settings.')
+      expect(out).not.toContain('environment variable')
+      // Line numbers are the file's own: `import os` is on line 6 in both.
+      expect(input.split('\n')[5]).toBe('import os')
+      expect(lines[5]).toBe('import os')
+      expect(out.length).toBeLessThan(input.length)
+    },
+  },
+  {
+    name: 'cat cli.py - a docstring below a shebang is still the module docstring',
+    cmd: 'cat',
+    args: ['cli.py'],
+    input: `#!/usr/bin/env python3
+"""
+Command line entry point.
+"""
+import sys
+
+sys.exit(0)
+`,
+    assert: (out) => {
+      expect(out).not.toContain('Command line entry point.')
+      expect(out.split('\n').filter((l) => l.trim() === '"""')).toHaveLength(2)
+      expect(out).toContain('sys.exit(0)')
+    },
+  },
+  {
+    name: 'cat truncated.py - a docstring the file never closes takes nothing with it',
+    cmd: 'cat',
+    args: ['truncated.py'],
+    input: `"""
+Module docs that head -3 cut off in the middle.
+CONSTANT = 1
+`,
+    assert: (out, input) => {
+      // Without a closer there is no way to know where the string ends, so
+      // blanking forward would delete the rest of the file on a `head` cut.
+      expect(out.trim()).toBe(input.trim())
     },
   },
 ])

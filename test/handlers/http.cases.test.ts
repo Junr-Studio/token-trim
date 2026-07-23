@@ -4,8 +4,12 @@ import { describeCompression } from '../support/harness.js'
 // Characterization suite for the `http` handler (src/handlers/http.ts).
 // Two condensers dispatched by command name:
 //   curl → condenseCurl  - truncate any response body longer than 2000 chars.
-//   wget → condenseWget  - strip progress bars + verbose transfer headers,
-//                          keep the actual downloaded content.
+//   wget → condenseWget  - strip wget's own transfer log, keep the downloaded
+//                          content. The log is recognised BY POSITION - a run
+//                          opened by wget's `--<timestamp>--  <url>` banner -
+//                          not by the shape of a line, because with `-O -` the
+//                          stdout compress() sees IS the payload and a payload
+//                          line may say anything, including "Length: 42".
 // Each case pairs a realistic raw command output with behavioral assertions;
 // the harness runs the real compress(), checks it shrinks (unless allowGrowth),
 // runs the asserts, then snapshots the exact byte-for-byte output.
@@ -40,8 +44,12 @@ const CURL_SHORT = `{
 // Deterministic bodies pinned to the exact 2000-char boundary. condenseCurl
 // keeps `<= 2000` verbatim and truncates only when strictly greater.
 const CURL_PREFIX = '{"ok":true,"payload":"' // 22 chars
-const CURL_2000 = CURL_PREFIX + 'x'.repeat(2000 - CURL_PREFIX.length - 2) + '"}' // exactly 2000
 const CURL_2001 = CURL_PREFIX + 'x'.repeat(2001 - CURL_PREFIX.length - 2) + '"}' // exactly 2001
+
+/** Guards the fixture's own premise: it must really be JSON for the case to mean anything. */
+function input2001IsJson(): boolean {
+  try { JSON.parse(CURL_2001); return true } catch { return false }
+}
 
 // ── wget fixtures ─────────────────────────────────────────────────────────────
 
@@ -78,22 +86,77 @@ Saving to: 'big.iso'
      0K .......... .......... .......... .......... .......... 0%  1.15M 15m
  50000K .......... .......... .......... .......... .......... 5%  2.30M 12m`
 
+// A payload fetched with `-qO -`: wget printed no transfer log at all, so every
+// line here came off the wire. Three of them are shaped exactly like wget's own
+// chatter - a `Length:` header, a dot-meter row, a size-prefixed line - and one
+// is a bare blank separator. Deleting any of them corrupts the download.
+const WGET_PAYLOAD_LOOKALIKE = `metric,value
+Length: 42 (unspecified)
+19M of raw telemetry follows
+     0K .......... .......... rows below this line are data
+Resolving hostnames is done by the collector, not here
+Connecting to the socket took 3ms
+HTTP request sent, awaiting response was logged by the app itself
+Saving to: /var/lib/collector/spool
+requests_total,481203
+bytes_in_total,99182334`
+
+// A shell installer fetched for piping into sh. Truncating this does not
+// produce a shorter message - it produces a HALF-EXECUTED INSTALL.
+const CURL_INSTALL_SCRIPT =
+  '#!/bin/sh\nset -eu\n' +
+  Array.from(
+    { length: 80 },
+    (_, i) => `echo "step ${i}: preparing component number ${i} of the installation"`,
+  ).join('\n') +
+  '\ninstall_everything\necho "done"\n'
+
+// An HTML page: prose-shaped, nobody pipes it into a parser, safe to cap.
+const CURL_HTML =
+  '<!doctype html>\n<html><head><title>Example</title>\n' +
+  Array.from(
+    { length: 120 },
+    (_, i) => `<meta name="tag-${i}" content="value number ${i} for the page metadata">`,
+  ).join('\n') +
+  '\n</head><body><h1>Hello</h1><p>The content lives here.</p></body></html>\n'
+
 describeCompression('http', [
   // ── curl ────────────────────────────────────────────────────────────────────
+  // CHANGED DELIBERATELY: curl used to cut every body at 2000 characters
+  // regardless of what it was. curl's stdout is whatever the server returned and
+  // is routinely piped straight into another program, so a blind character cut
+  // corrupts the consumer. The condenser is shape-aware now.
   {
-    name: 'curl - truncates a long response body (>2000 chars) with a byte-count footer',
+    name: 'curl JSON body - condensed but still parseable, because `| jq` is the canonical use',
     cmd: 'curl',
     args: ['-s', 'https://api.example.com/v1/users'],
     input: CURL_LONG,
     assert: (out, input) => {
-      // Head of the body is preserved, tail past 2000 chars is dropped.
-      expect(out).toContain('START_OF_BODY')
-      expect(out).not.toContain('END_OF_BODY_SECRET_TAIL')
-      // Truncation footer reports the original size.
-      expect(out).toMatch(/\.\.\. \(\d+ bytes total, truncated\)$/)
-      // Real compression: ~5 KB collapses to the ~2 KB cap.
+      expect(() => JSON.parse(out)).not.toThrow()
       expect(out.length).toBeLessThan(input.length)
-      expect(out.length).toBeLessThan(2100)
+    },
+  },
+  {
+    name: 'curl shell script - never cut, because the pipe target executes it',
+    cmd: 'curl',
+    args: ['-sL', 'https://example.com/install.sh'],
+    input: CURL_INSTALL_SCRIPT,
+    assert: (out) => {
+      // `curl -sL … | sh` on a truncated script runs half an installation and
+      // then stops, leaving the machine in an undefined state.
+      expect(out).toBe(CURL_INSTALL_SCRIPT.trim())
+      expect(out).toContain('install_everything')
+      expect(out).toContain('echo "done"')
+    },
+  },
+  {
+    name: 'curl HTML page - prose-shaped, so it is capped and the elision is disclosed',
+    cmd: 'curl',
+    args: ['-s', 'https://example.com/'],
+    input: CURL_HTML,
+    assert: (out, input) => {
+      expect(out.length).toBeLessThan(input.length)
+      expect(out).toMatch(/truncated|elided/i)
     },
   },
   {
@@ -108,28 +171,13 @@ describeCompression('http', [
     },
   },
   {
-    name: 'curl - body exactly at the 2000-char boundary is kept verbatim (<= MAX)',
-    cmd: 'curl',
-    args: ['-s', 'https://api.example.com/v1/blob'],
-    input: CURL_2000,
-    assert: (out, input) => {
-      expect(input.length).toBe(2000)
-      expect(out).toBe(input)
-      expect(out).not.toContain('truncated')
-    },
-  },
-  {
-    name: 'curl - body just over the limit GROWS because the truncation footer adds overhead (allowGrowth)',
+    name: 'curl - a body at the size boundary that is valid JSON stays valid JSON',
     cmd: 'curl',
     args: ['-s', 'https://api.example.com/v1/blob'],
     input: CURL_2001,
-    allowGrowth: true,
-    assert: (out, input) => {
-      expect(input.length).toBe(2001)
-      // Truncated to the 2000-char cap plus a ~34-char footer => net larger.
-      expect(out).toContain('2001 bytes total, truncated')
-      expect(out.length).toBeGreaterThan(input.length)
-      expect(out.startsWith(CURL_PREFIX)).toBe(true)
+    assert: (out) => {
+      expect(input2001IsJson()).toBe(true)
+      expect(() => JSON.parse(out)).not.toThrow()
     },
   },
   {
@@ -163,6 +211,68 @@ describeCompression('http', [
       expect(out).toContain("'data.json' saved")
       // Substantial compression.
       expect(out.length).toBeLessThan(input.length)
+    },
+  },
+  {
+    name: 'wget - a payload whose lines merely LOOK like the transfer log is returned byte-for-byte',
+    cmd: 'wget',
+    args: ['-qO', '-', 'https://metrics.example.com/spool.csv'],
+    input: WGET_PAYLOAD_LOOKALIKE,
+    assert: (out, input) => {
+      // wget's chatter goes to stderr and compress() only ever sees stdout, so
+      // with `-qO -` every one of these lines came from the server. The
+      // condenser recognises the log by POSITION (a run opened by wget's own
+      // `--<timestamp>--  <url>` header line), never by the shape of a line, so
+      // none of these is eligible for deletion.
+      expect(out).toBe(input)
+      expect(out).toContain('Length: 42 (unspecified)')
+      expect(out).toContain('19M of raw telemetry follows')
+      expect(out).toContain('0K .......... .......... rows below this line are data')
+      expect(out).toContain('Resolving hostnames is done by the collector, not here')
+      expect(out).toContain('Saving to: /var/lib/collector/spool')
+      expect(out).toContain('bytes_in_total,99182334')
+    },
+  },
+  {
+    name: 'wget - two URLs in one run: each log block is stripped, each payload is kept',
+    cmd: 'wget',
+    args: ['-O', '-', 'https://example.com/a.txt', 'https://example.com/b.txt'],
+    input: `--2026-07-20 12:34:56--  https://example.com/a.txt
+Resolving example.com (example.com)... 93.184.216.34
+Connecting to example.com (example.com)|93.184.216.34|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 18 [text/plain]
+Saving to: 'STDOUT'
+
+     0K                                                       100% 1.15M=0s
+
+alpha payload line
+--2026-07-20 12:34:58--  https://example.com/b.txt
+Reusing existing connection to example.com:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 17 [text/plain]
+Saving to: 'STDOUT'
+
+     0K                                                       100% 2.30M=0s
+
+beta payload line
+2026-07-20 12:34:58 (2.30 MB/s) - written to stdout [17/17]`,
+    assert: (out) => {
+      // Both bodies survive; the second URL's banner reopened the log run, so
+      // its chatter is stripped like the first one's.
+      expect(out).toContain('alpha payload line')
+      expect(out).toContain('beta payload line')
+      expect(out).not.toMatch(/^--2026-/m)
+      expect(out).not.toContain('Resolving ')
+      expect(out).not.toContain('Length:')
+      // The reused-connection block opens with "Reusing existing connection"
+      // rather than "Resolving", so that line has to be chatter too or the run
+      // ends early and the rest of the block leaks through.
+      expect(out).not.toContain('Reusing existing connection')
+      expect(out).not.toContain('Saving to:')
+      // The completion line is not part of a log run: it is the answer to
+      // "did the transfer finish", and it survives.
+      expect(out).toContain('written to stdout [17/17]')
     },
   },
   {

@@ -1,21 +1,40 @@
 export const CLOUD_EXTRA_HANDLER = `
 // ── aws cli ───────────────────────────────────────────────────────────────────
-// Shorten ARNs; truncate ISO timestamps; cap list output at 20 items
+// The aws CLI's DEFAULT output format is JSON, with no flag on the command line
+// to say so - so \`isMachineOutput\` cannot see it and \`aws … | jq\` is the normal
+// way to consume it. Detect the shape from the payload instead, and keep it
+// valid: re-serialising compactly is lossless and typically halves the size,
+// where a line cap leaves an unterminated document.
 function condenseAws(text) {
-  let out = text;
+  // Trimmed for SNIFFING (a leading space must not hide the '{'); the
+  // passthrough hands back the body with only its blank edges removed.
+  const t = text.trim();
+  const kept = ttTrimBlankEdges(text);
+  if (!t) return text;
 
-  // Shorten ARNs: arn:aws:service:region:acct:resource → arn:…:resource
-  out = out.replace(/arn:aws:[\\w-]+:[\\w-]*:[\\d]*:([^\\s"',}\\]]+)/g, 'arn:…:$1');
+  if (t.charAt(0) === '{' || t.charAt(0) === '[') {
+    try {
+      const compact = JSON.stringify(JSON.parse(t));
+      return compact.length < t.length ? compact : kept;
+    } catch {
+      return kept; // looked like JSON but is not - do not guess
+    }
+  }
 
-  // Truncate ISO timestamps to date: "2024-03-15T12:34:56.789Z" → "2024-03-15"
-  out = out.replace(/(\\d{4}-\\d{2}-\\d{2})T\\d{2}:\\d{2}:\\d{2}[.\\d]*Z/g, '$1');
+  // Text / table output. Only timestamps are safe to shorten: an ARN's account
+  // id and region are what identify the resource, and two rows can differ ONLY
+  // in the account, so collapsing "arn:aws:iam::123456789012:role/x" to
+  // "arn:…:role/x" merges rows that are not the same thing.
+  // Built from \`kept\`, not \`t\`: an aws table right-aligns its first column, so
+  // the leading run of spaces on the header row is alignment, not chrome.
+  let out = kept.replace(/(\\d{4}-\\d{2}-\\d{2})T\\d{2}:\\d{2}:\\d{2}[.\\d]*Z/g, '$1');
 
-  // Cap list output
   const lines = out.split('\\n');
   if (lines.length > 40) {
-    return lines.slice(0, 40).join('\\n') + '\\n... +' + (lines.length - 40) + ' more lines (aws output truncated)';
+    return lines.slice(0, 40).join('\\n') +
+      '\\n... +' + (lines.length - 40) + ' more lines (truncated - re-run with __TT_FULL_FLAG__)';
   }
-  return out.trim();
+  return out;
 }
 
 // ── psql ──────────────────────────────────────────────────────────────────────
@@ -62,6 +81,6 @@ function condensePsql(text) {
     if (line.trim()) out.push(line);
   }
 
-  return out.join('\\n').trim() || text;
+  return ttTrimBlankEdges(out.join('\\n')) || text;
 }
 `

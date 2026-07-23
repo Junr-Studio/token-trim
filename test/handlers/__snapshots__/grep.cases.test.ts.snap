@@ -1,5 +1,115 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`compress - grep > --json - machine output must not be reshaped 1`] = `
+"{"type":"match","data":{"path":{"text":"src/f0.ts"},"line_number":0}}
+{"type":"match","data":{"path":{"text":"src/f1.ts"},"line_number":1}}
+{"type":"match","data":{"path":{"text":"src/f2.ts"},"line_number":2}}
+{"type":"match","data":{"path":{"text":"src/f3.ts"},"line_number":3}}
+{"type":"match","data":{"path":{"text":"src/f4.ts"},"line_number":4}}
+{"type":"match","data":{"path":{"text":"src/f5.ts"},"line_number":5}}
+{"type":"match","data":{"path":{"text":"src/f6.ts"},"line_number":6}}
+{"type":"match","data":{"path":{"text":"src/f7.ts"},"line_number":7}}
+{"type":"match","data":{"path":{"text":"src/f8.ts"},"line_number":8}}
+{"type":"match","data":{"path":{"text":"src/f9.ts"},"line_number":9}}
+{"type":"match","data":{"path":{"text":"src/f10.ts"},"line_number":10}}
+{"type":"match","data":{"path":{"text":"src/f11.ts"},"line_number":11}}"
+`;
+
+exports[`compress - grep > -C1 context - the lines the flag was passed to show are not deleted from the output 1`] = `
+"src/config/a.ts-9-  // resolve the layered configuration
+src/config/a.ts:10:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/a.ts-11-  return applyDefaults(cfg)
+--
+src/config/a.ts-23-  // resolve the layered configuration
+src/config/a.ts:24:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/a.ts-25-  return applyDefaults(cfg)
+--
+src/config/a.ts-37-  // resolve the layered configuration
+src/config/a.ts:38:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/a.ts-39-  return applyDefaults(cfg)
+--
+src/config/a.ts-51-  // resolve the layered configuration
+src/config/a.ts:52:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/a.ts-53-  return applyDefaults(cfg)
+--
+src/config/a.ts-65-  // resolve the layered configuration
+src/config/a.ts:66:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/a.ts-67-  return applyDefaults(cfg)
+--
+src/config/a.ts-79-  // resolve the layered configuration
+src/config/a.ts:80:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/a.ts-81-  return applyDefaults(cfg)
+--
+src/config/b.ts-9-  // resolve the layered configuration
+src/config/b.ts:10:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/b.ts-11-  return applyDefaults(cfg)
+--
+src/config/b.ts-23-  // resolve the layered configuration
+src/config/b.ts:24:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/b.ts-25-  return applyDefaults(cfg)
+--
+src/config/b.ts-37-  // resolve the layered configuration
+src/config/b.ts:38:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/b.ts-39-  return applyDefaults(cfg)
+--
+src/config/b.ts-51-  // resolve the layered configuration
+src/config/b.ts:52:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/b.ts-53-  return applyDefaults(cfg)
+--
+src/config/b.ts-65-  // resolve the layered configuration
+src/config/b.ts:66:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/b.ts-67-  return applyDefaults(cfg)
+--
+src/config/b.ts-79-  // resolve the layered configuration
+src/config/b.ts:80:  const cfg = readConfig(process.env.NODE_ENV)
+src/config/b.ts-81-  return applyDefaults(cfg)
+--"
+`;
+
+exports[`compress - grep > -c / --count - file:N rows are counts, not matches to be re-grouped 1`] = `
+"src/server/router.ts:25
+src/legacy/config-loader.ts:4
+src/api/handlers.ts:4
+src/utils/format.ts:3
+src/utils/date.ts:2
+src/utils/strings.ts:2
+src/config/defaults.ts:1
+src/index.ts:1
+src/frame.ts:1
+src/stats.ts:1
+src/write-proxy.ts:1"
+`;
+
+exports[`compress - grep > -l / --files-with-matches - bare path list survives (was annihilated to "0 matches in 0 file(s)") 1`] = `
+"src/features/widget-0/Widget0.tsx
+src/features/widget-1/Widget1.tsx
+src/features/widget-2/Widget2.tsx
+src/features/widget-3/Widget3.tsx
+src/features/widget-4/Widget4.tsx
+src/features/widget-5/Widget5.tsx
+src/features/widget-6/Widget6.tsx
+src/features/widget-7/Widget7.tsx
+src/features/widget-8/Widget8.tsx
+src/features/widget-9/Widget9.tsx
+src/features/widget-10/Widget10.tsx
+src/features/widget-11/Widget11.tsx"
+`;
+
+exports[`compress - grep > Windows drive letters - hits group under their real file, not a fabricated "C" 1`] = `
+"C:/repo/src/handlers/file0.ts:10:export const value0 = 0
+C:/repo/src/handlers/file1.ts:11:export const value1 = 1
+C:/repo/src/handlers/file2.ts:12:export const value2 = 2
+C:/repo/src/handlers/file3.ts:13:export const value3 = 3
+C:/repo/src/handlers/file4.ts:14:export const value4 = 4
+C:/repo/src/handlers/file5.ts:15:export const value5 = 5
+C:/repo/src/handlers/file6.ts:16:export const value6 = 6
+C:/repo/src/handlers/file7.ts:17:export const value7 = 7
+C:/repo/src/handlers/file8.ts:18:export const value8 = 8
+C:/repo/src/handlers/file9.ts:19:export const value9 = 9
+C:/repo/src/handlers/file10.ts:20:export const value10 = 10
+C:/repo/src/handlers/file11.ts:21:export const value11 = 11"
+`;
+
 exports[`compress - grep > empty output - no matches found returns empty (grep prints nothing on zero hits) 1`] = `""`;
 
 exports[`compress - grep > grep -r (no line numbers) - file:content fallback branch still groups by file 1`] = `
@@ -14,6 +124,21 @@ src/utils/date.ts  (2)
 src/utils/strings.ts  (2)
   export function truncate(input: string, max: number): string {
   export function slugify(input: string): string {"
+`;
+
+exports[`compress - grep > grep -rl - bare path list survives on the grep alias too 1`] = `
+"src/features/widget-0/Widget0.tsx
+src/features/widget-1/Widget1.tsx
+src/features/widget-2/Widget2.tsx
+src/features/widget-3/Widget3.tsx
+src/features/widget-4/Widget4.tsx
+src/features/widget-5/Widget5.tsx
+src/features/widget-6/Widget6.tsx
+src/features/widget-7/Widget7.tsx
+src/features/widget-8/Widget8.tsx
+src/features/widget-9/Widget9.tsx
+src/features/widget-10/Widget10.tsx
+src/features/widget-11/Widget11.tsx"
 `;
 
 exports[`compress - grep > grep -rn - many matches over several files: grouped under a summary header, 20/file cap, 120-char truncation 1`] = `
@@ -75,4 +200,76 @@ src/features/profile/ProfilePanel.tsx  (4)
   52:  const [value1, setValue1] = useState(initial1)
   64:  const [value2, setValue2] = useState(initial2)
   76:  const [value3, setValue3] = useState(initial3)"
+`;
+
+exports[`compress - grep > rg --files - the bare file listing is not a match list 1`] = `
+"src/features/widget-0/Widget0.tsx
+src/features/widget-1/Widget1.tsx
+src/features/widget-2/Widget2.tsx
+src/features/widget-3/Widget3.tsx
+src/features/widget-4/Widget4.tsx
+src/features/widget-5/Widget5.tsx
+src/features/widget-6/Widget6.tsx
+src/features/widget-7/Widget7.tsx
+src/features/widget-8/Widget8.tsx
+src/features/widget-9/Widget9.tsx
+src/features/widget-10/Widget10.tsx
+src/features/widget-11/Widget11.tsx"
+`;
+
+exports[`compress - grep > rg --heading - filenames on their own line are never deleted, and line numbers never become files 1`] = `
+"src/features/mod0.ts
+10:  const cfg = readConfig()
+11:  const merged = applyDefaults(cfg)
+12:  return readConfig(merged)
+
+src/features/mod1.ts
+10:  const cfg = readConfig()
+11:  const merged = applyDefaults(cfg)
+12:  return readConfig(merged)
+
+src/features/mod2.ts
+10:  const cfg = readConfig()
+11:  const merged = applyDefaults(cfg)
+12:  return readConfig(merged)
+
+src/features/mod3.ts
+10:  const cfg = readConfig()
+11:  const merged = applyDefaults(cfg)
+12:  return readConfig(merged)
+
+src/features/mod4.ts
+10:  const cfg = readConfig()
+11:  const merged = applyDefaults(cfg)
+12:  return readConfig(merged)
+
+src/features/mod5.ts
+10:  const cfg = readConfig()
+11:  const merged = applyDefaults(cfg)
+12:  return readConfig(merged)
+
+src/features/mod6.ts
+10:  const cfg = readConfig()
+11:  const merged = applyDefaults(cfg)
+12:  return readConfig(merged)
+
+src/features/mod7.ts
+10:  const cfg = readConfig()
+11:  const merged = applyDefaults(cfg)
+12:  return readConfig(merged)"
+`;
+
+exports[`compress - grep > unrecognised shape - falls back to the input instead of fabricating a zero summary 1`] = `
+"binary file matched at offset 0
+binary file matched at offset 4096
+binary file matched at offset 8192
+binary file matched at offset 12288
+binary file matched at offset 16384
+binary file matched at offset 20480
+binary file matched at offset 24576
+binary file matched at offset 28672
+binary file matched at offset 32768
+binary file matched at offset 36864
+binary file matched at offset 40960
+binary file matched at offset 45056"
 `;

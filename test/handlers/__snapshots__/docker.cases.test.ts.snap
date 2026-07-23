@@ -1,5 +1,48 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`compress - docker > build (BuildKit) - a failing step keeps its diagnosis, and the "------" trailer is not the step grammar so it survives whole 1`] = `
+"#9 [build 3/3] RUN pnpm run build
+> api-gateway@1.24.3 build /app
+src/server.ts(42,7): error TS2322: Type 'string' is not assignable to type 'number'.
+ERROR: process "/bin/sh -c pnpm run build" did not complete successfully: exit code: 2
+ERROR: process "/bin/sh -c pnpm run build" did not complete successfully: exit code: 2
+------
+ > [build 3/3] RUN pnpm run build:
+1.998 src/server.ts(42,7): error TS2322: Type 'string' is not assignable to type 'number'.
+------
+Dockerfile:18
+ERROR: failed to solve: process "/bin/sh -c pnpm run build" did not complete successfully: exit code: 2"
+`;
+
+exports[`compress - docker > build (BuildKit) - interleaved parallel steps stay attributable: the prefix returns whenever the step changes 1`] = `
+"#12 [deps 3/3] RUN pnpm install
+Progress: resolved 812, reused 806
+#13 [tools 2/2] RUN cargo build --release
+Compiling serde v1.0.203
+#12 Packages: +812
+#13 Compiling tokio v1.38.0"
+`;
+
+exports[`compress - docker > build (BuildKit) - one header per step; the repeated #N prefix, the per-line clock and the DONE sign-off come off 1`] = `
+"#0 building with "default" instance using docker driver
+#1 [internal] load build definition from Dockerfile
+#2 [internal] load metadata for docker.io/library/node:22-alpine
+#3 [internal] load .dockerignore
+#4 [deps 1/4] FROM docker.io/library/node:22-alpine@sha256:8c2c4b7f1a5d0e93f4c6d9b2a7e1f0c3d5b8a9e2f4c7d1b6a3e0f9c2d5b8a1e4
+#5 [internal] load build context
+#6 [deps 2/4] WORKDIR /app
+CACHED
+#7 [deps 4/4] RUN pnpm install --frozen-lockfile
+Lockfile is up to date, resolution step is skipped
+Packages: +812
+dependencies:
++ fastify 4.28.1
+Done in 13.4s
+#8 exporting to image
+writing image sha256:9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e done
+naming to ghcr.io/acme/api-gateway:1.24.3 done"
+`;
+
 exports[`compress - docker > build - strips build context, cache markers, bare layer hashes, and pull layer-transfer noise; keeps Step/output lines 1`] = `
 "Step 1/8 : FROM node:18-alpine
 18-alpine: Pulling from library/node
@@ -22,6 +65,108 @@ Step 8/8 : CMD ["node", "dist/server.js"]
  ---> Running in 3c4d5e6f7081
 Successfully built 1b2c3d4e5f60
 Successfully tagged myapp:latest"
+`;
+
+exports[`compress - docker > build behind a global flag - \`docker --log-level warn build .\` still reaches the BuildKit condenser 1`] = `
+"#12 [deps 3/3] RUN pnpm install
+Progress: resolved 812, reused 806
+#13 [tools 2/2] RUN cargo build --release
+Compiling serde v1.0.203
+#12 Packages: +812
+#13 Compiling tokio v1.38.0"
+`;
+
+exports[`compress - docker > compose build (legacy builder) - the "Step k/n" transcript and its base-image pull chatter condense too 1`] = `
+"Building web
+Step 1/4 : FROM node:18-alpine
+18-alpine: Pulling from library/node
+Step 2/4 : WORKDIR /app
+Step 3/4 : RUN npm ci --production
+added 214 packages in 8.3s
+Step 4/4 : CMD ["node", "dist/server.js"]
+Successfully built 1b2c3d4e5f60
+Successfully tagged myapp:latest"
+`;
+
+exports[`compress - docker > compose build - the BuildKit transcript compose puts on STDOUT reaches the build condenser 1`] = `
+"#1 [internal] load local bake definitions
+reading from stdin 861B 0.0s done
+#2 [internal] load build definition from Dockerfile
+#3 [internal] load metadata for docker.io/library/alpine:3.17
+#4 [internal] load .dockerignore
+#5 [1/3] FROM docker.io/library/alpine:3.17@sha256:8fc3dacfb6d69da8d44e42390de777e48577085db99aa4e4af35f483eb08b989
+#6 [2/3] RUN apk add --no-cache curl
+fetch https://dl-cdn.alpinelinux.org/alpine/v3.17/main/x86_64/APKINDEX.tar.gz
+fetch https://dl-cdn.alpinelinux.org/alpine/v3.17/community/x86_64/APKINDEX.tar.gz
+(1/5) Installing ca-certificates (20240226-r0)
+(2/5) Installing brotli-libs (1.0.9-r9)
+(3/5) Installing nghttp2-libs (1.51.0-r2)
+(4/5) Installing libcurl (8.9.0-r0)
+(5/5) Installing curl (8.9.0-r0)
+Executing busybox-1.35.0-r31.trigger
+Executing ca-certificates-20240226-r0.trigger
+OK: 10 MiB in 20 packages
+#7 [3/3] RUN echo hello > /tmp/x
+#8 exporting to image
+naming to docker.io/library/composeproj-app:latest done
+#9 resolving provenance for metadata file"
+`;
+
+exports[`compress - docker > compose logs - same stream, same rule 1`] = `
+"{"t":"2026-07-22T09:00:00.000+00:00","s":"I","c":"NETWORK","msg":"Listening on 0.0.0.0"}
+Waiting for postgres at app-db:5432
+Preparing collection index build
+app ready
+Extracting templates from packages: 100%
+Download complete for dataset v3
+Pushed metrics batch 1
+done"
+`;
+
+exports[`compress - docker > compose ps - a different table from \`docker ps\`, so it is not rolled up 1`] = `
+"NAME                IMAGE            COMMAND                  SERVICE   CREATED         STATUS         PORTS
+composeproj-api-1   alpine:3.17      "node dist/server.js"    api       2 minutes ago   Up 2 minutes   0.0.0.0:3000->3000/tcp
+composeproj-db-1    postgres:16      "docker-entrypoint.s…"   db        2 minutes ago   Up 2 minutes   5432/tcp"
+`;
+
+exports[`compress - docker > compose pull - the daemon transfer report is stripped, exactly as \`docker pull\` is 1`] = `
+"Pulling redis
+latest: Pulling from library/redis
+Digest: sha256:0d3c3c3f3c8d1e6b5a4938271605f4e3d2c1b0a9887766554433221100ffeedd
+Status: Downloaded newer image for redis:latest"
+`;
+
+exports[`compress - docker > compose up - the service's own stdout is still passthrough, layer-shaped lines and all 1`] = `
+"Attaching to api-1
+Waiting for postgres at app-db:5432
+Preparing collection index build
+Extracting templates from packages: 100%
+app ready"
+`;
+
+exports[`compress - docker > container ls - the management-command spelling of \`docker ps\` reaches the same rollup 1`] = `
+"[docker] 5 containers:
+  a1b2c3d4e5f6 web-frontend (nginx:1.25-alpine) Up 2 hours
+  b2c3d4e5f6a7 app-db (postgres:16) Up 3 hours (healthy)
+  c3d4e5f6a7b8 app-cache (redis:7-alpine) Up 3 hours
+  d4e5f6a7b8c9 api-service (api:v2.3.1) Up 45 minutes
+  e5f6a7b8c9d0 message-broker (rabbitmq:3.12-management) Up 1 day"
+`;
+
+exports[`compress - docker > exec - same stream, same rule 1`] = `
+"Preparing environment
+Waiting 5s
+OK"
+`;
+
+exports[`compress - docker > image ls - the management-command spelling of \`docker images\` reaches the same rollup 1`] = `
+"[docker] 6 images:
+  nginx:1.25-alpine  [42.6MB]
+  postgres:16  [432MB]
+  myregistry.io/team/api:v2.3.1  [198MB]
+  redis:7-alpine  [41.4MB]
+  <none>:<none>  [1.12GB]
+  node:18-alpine  [176MB]"
 `;
 
 exports[`compress - docker > images - collapses to "[docker] N images:" with repo:tag [size] only (no IMAGE ID, no header) 1`] = `
@@ -65,6 +210,17 @@ exports[`compress - docker > kubectl get svc - compact "N svc:" table of name/ty
 
 exports[`compress - docker > kubectl get svc - no rows returns the "No <kind> found" sentinel 1`] = `"No svc found"`;
 
+exports[`compress - docker > logs - an application line that merely looks like layer chatter is payload and survives 1`] = `
+"{"t":"2026-07-22T09:00:00.000+00:00","s":"I","c":"NETWORK","msg":"Listening on 0.0.0.0"}
+Waiting for postgres at app-db:5432
+Preparing collection index build
+app ready
+Extracting templates from packages: 100%
+Download complete for dataset v3
+Pushed metrics batch 1
+done"
+`;
+
 exports[`compress - docker > logs - no table and no layer noise, passes through verbatim (modulo trim) 1`] = `
 "2026-07-20T10:15:03.221Z INFO  server starting, node v18.19.0
 2026-07-20T10:15:03.455Z INFO  connected to postgres at app-db:5432
@@ -85,10 +241,173 @@ exports[`compress - docker > ps - collapses the wide table to a "[docker] N cont
 
 exports[`compress - docker > ps - no containers running collapses to a single zero line 1`] = `"[docker] 0 containers running"`;
 
+exports[`compress - docker > ps behind -H - a value-taking global flag consumes its value, so the host is not mistaken for the subcommand 1`] = `
+"[docker] 5 containers:
+  a1b2c3d4e5f6 web-frontend (nginx:1.25-alpine) Up 2 hours
+  b2c3d4e5f6a7 app-db (postgres:16) Up 3 hours (healthy)
+  c3d4e5f6a7b8 app-cache (redis:7-alpine) Up 3 hours
+  d4e5f6a7b8c9 api-service (api:v2.3.1) Up 45 minutes
+  e5f6a7b8c9d0 message-broker (rabbitmq:3.12-management) Up 1 day"
+`;
+
+exports[`compress - docker > ps behind a global flag - the subcommand is resolved past --context, not read as args[0] 1`] = `
+"[docker] 5 containers:
+  a1b2c3d4e5f6 web-frontend (nginx:1.25-alpine) Up 2 hours
+  b2c3d4e5f6a7 app-db (postgres:16) Up 3 hours (healthy)
+  c3d4e5f6a7b8 app-cache (redis:7-alpine) Up 3 hours
+  d4e5f6a7b8c9 api-service (api:v2.3.1) Up 45 minutes
+  e5f6a7b8c9d0 message-broker (rabbitmq:3.12-management) Up 1 day"
+`;
+
 exports[`compress - docker > pull - default branch strips per-layer transfer noise, keeps digest/status 1`] = `
 "Using default tag: latest
 latest: Pulling from library/redis
 Digest: sha256:0d3c3c3f3c8d1e6b5a4938271605f4e3d2c1b0a9887766554433221100ffeedd
 Status: Downloaded newer image for redis:latest
 docker.io/library/redis:latest"
+`;
+
+exports[`compress - docker > run - the container command's own stdout is never layer-filtered either 1`] = `
+"Preparing migration plan
+Waiting for database...
+Already exists check skipped
+Verifying Checksum of bundle
+Migration complete"
+`;
+
+exports[`compress - docker machine formats > images -q - a bare image id list survives verbatim 1`] = `
+"a1b2c3d4e5f6
+b2c3d4e5f6a7
+c3d4e5f6a7b8"
+`;
+
+exports[`compress - docker machine formats > ps --format - a caller-defined go template stays exactly as the caller shaped it 1`] = `
+"web-frontend	Up 2 hours
+app-db	Up 3 hours (healthy)
+app-cache	Up 3 hours"
+`;
+
+exports[`compress - docker machine formats > ps -aq - the clustered short-flag form is recognised as an id list too 1`] = `
+"a1b2c3d4e5f6
+b2c3d4e5f6a7
+c3d4e5f6a7b8
+d4e5f6a7b8c9
+e5f6a7b8c9d0"
+`;
+
+exports[`compress - docker machine formats > ps -q - a bare container id list survives verbatim for \`| xargs\` 1`] = `
+"a1b2c3d4e5f6
+b2c3d4e5f6a7
+c3d4e5f6a7b8
+d4e5f6a7b8c9
+e5f6a7b8c9d0"
+`;
+
+exports[`compress - kubectl deepening > describe - an unrecognised shape passes through rather than being summarised 1`] = `"Error from server (NotFound): pods "missing" not found"`;
+
+exports[`compress - kubectl deepening > describe pod - keeps status, failing conditions and events; drops the annotation JSON dump 1`] = `
+"Name:             api-7d9f8c6b5-2xk4p
+Namespace:        production
+Node:             gke-node-2/10.128.0.14
+Status:           Running
+IP:               10.4.2.17
+Controlled By:  ReplicaSet/api-7d9f8c6b5
+Containers:
+  api:
+    Image:          myregistry.io/team/api:v2.3.1
+    State:          Running
+      Started:      Tue, 21 Jul 2026 09:01:20 +0000
+    Ready:          True
+    Restart Count:  0
+Conditions:
+  Ready             False
+  ContainersReady   False
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  22m                default-scheduler  Successfully assigned production/api-7d9f8c6b5-2xk4p to gke-node-2
+  Normal   Pulled     22m                kubelet            Container image already present on machine
+  Warning  Unhealthy  2m (x14 over 20m)  kubelet            Readiness probe failed: HTTP probe failed with statuscode: 503"
+`;
+
+exports[`compress - kubectl deepening > describe pod - the container names and the crash Reason survive, on both containers 1`] = `
+"Name:             web-7f9c5d8b6-abcde
+Namespace:        production
+Node:             gke-node-2/10.128.0.14
+Status:           Running
+IP:               10.4.2.19
+Controlled By:  ReplicaSet/web-7f9c5d8b6
+Containers:
+  app:
+    Image:          ghcr.io/acme/app:2.1
+    State:          Running
+      Started:      Tue, 21 Jul 2026 09:01:20 +0000
+    Ready:          True
+    Restart Count:  0
+  sidecar:
+    Image:          ghcr.io/acme/proxy:1.0
+    State:          Waiting
+      Reason:       CrashLoopBackOff
+    Last State:     Terminated
+      Reason:       OOMKilled
+      Exit Code:    137
+      Started:      Tue, 21 Jul 2026 09:00:02 +0000
+      Finished:     Tue, 21 Jul 2026 09:00:31 +0000
+    Ready:          False
+    Restart Count:  9
+Conditions:
+  Ready             False
+  ContainersReady   False
+Events:
+  Type     Reason   Age                  From     Message
+  ----     ------   ----                 ----     -------
+  Warning  BackOff  2m (x91 over 44m)    kubelet  Back-off restarting failed container sidecar in pod web-7f9c5d8b6-abcde"
+`;
+
+exports[`compress - kubectl deepening > get pods - a STATUS outside running/pending/failed still reaches the total, under its own name 1`] = `
+"6 pods: 1 running, 3 failed, 2 Completed
+  [x] loader-6b4d9f7c5-qqqqq [ErrImagePull]
+  [x] stale-7c6b5a4d3-hh2mn [Evicted]
+  [x] config-9e8d7c6b5-rr3jp [CreateContainerConfigError]"
+`;
+
+exports[`compress - kubectl deepening > get pods - a drain alongside a real failure: only the failure is flagged, and both are counted 1`] = `
+"3 pods: 1 running, 1 failed, 1 Terminating
+  [x] api-59d7c4b8f-zzzzz [CrashLoopBackOff]"
+`;
+
+exports[`compress - kubectl deepening > get pods - a draining pod is a lifecycle state, not a failure, and never reaches the [x] list 1`] = `"3 pods: 2 running, 1 Terminating"`;
+
+exports[`compress - kubectl deepening > get pods --all-namespaces - the long spelling behaves identically 1`] = `
+"3 pods: 2 running, 1 failed
+  [x] default/api-59d7c4b8f-zzzzz [CrashLoopBackOff]"
+`;
+
+exports[`compress - kubectl deepening > get pods --no-headers - with no header row the columns cannot be named, so the table passes through 1`] = `
+"web-7f9c5d8b6-abcde      1/1   Running            0   2d
+api-59d7c4b8f-zzzzz      0/1   CrashLoopBackOff   7   40m"
+`;
+
+exports[`compress - kubectl deepening > get pods -A - the NAMESPACE column shifts every other one, so the columns are read from the header 1`] = `
+"3 pods: 2 running, 1 failed
+  [x] default/api-59d7c4b8f-zzzzz [CrashLoopBackOff]"
+`;
+
+exports[`compress - kubectl deepening > get pods -o custom-columns - a caller-defined column set is passed through, never rolled up 1`] = `
+"NAME                     NODE
+web-7f9c5d8b6-abcde      node-1
+api-59d7c4b8f-zzzzz      node-2
+worker-6b4d9f7c5-qqqqq   node-3"
+`;
+
+exports[`compress - kubectl deepening > get pods -o=custom-columns-file - the inline-value spelling is recognised too 1`] = `
+"NAME                     NODE
+web-7f9c5d8b6-abcde      node-1
+api-59d7c4b8f-zzzzz      node-2
+worker-6b4d9f7c5-qqqqq   node-3"
+`;
+
+exports[`compress - kubectl deepening > get pods with a namespace flag - the kind is resolved past the flag, not read as args[1] 1`] = `
+"3 pods: 2 running, 1 failed
+  [x] worker-6b5a4c3d2-pl9wx [CrashLoopBackOff]"
 `;

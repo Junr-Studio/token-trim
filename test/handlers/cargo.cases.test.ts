@@ -206,6 +206,133 @@ error[E0432]: unresolved import \`crate::missing\`
 error: could not compile \`myapp\` (lib test) due to 1 previous error
 `
 
+// ── audit #48: one `test result:` line PER TEST BINARY ───────────────────────
+// A crate with a tests/ directory runs the lib unit binary and each integration
+// binary separately, and every one of them prints its own `test result:` line.
+// The condenser assigned (rather than accumulated) the counts, so the last
+// binary's tally silently replaced every earlier one.
+const TEST_TWO_BINARIES = `   Compiling myapp v0.1.0 (/home/user/myapp)
+    Finished test [unoptimized + debuginfo] target(s) in 0.94s
+     Running unittests src/lib.rs (target/debug/deps/myapp-1a2b3c4d5e6f)
+
+running 12 tests
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/integration.rs (target/debug/deps/integration-9f8e7d6c5b4a)
+
+running 3 tests
+
+failures:
+
+---- api::test_create stdout ----
+thread 'api::test_create' panicked at tests/integration.rs:14:5:
+assertion \`left == right\` failed
+  left: 500
+ right: 201
+
+failures:
+    api::test_create
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+`
+
+// `--no-fail-fast` keeps going after a binary fails, so the FAILING binary can
+// come first and a green one last. Assigning the counts then produced a header
+// claiming "0 failed" printed directly above a FAIL block, and the second
+// binary's chrome leaked into the first binary's failure detail because the
+// block was never closed at the binary boundary.
+const TEST_NO_FAIL_FAST = `    Finished test [unoptimized + debuginfo] target(s) in 1.10s
+     Running unittests src/lib.rs (target/debug/deps/myapp-1a2b3c4d5e6f)
+
+running 2 tests
+
+failures:
+
+---- tests::bad stdout ----
+thread 'tests::bad' panicked at src/lib.rs:9:5:
+assertion failed: false
+
+failures:
+    tests::bad
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration.rs (target/debug/deps/integration-9f8e7d6c5b4a)
+
+running 4 tests
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+`
+
+// ── audit #5: a `test result:` line inside a CAPTURED-STDOUT block ───────────
+// cargo echoes a failing test's own stdout under `---- <name> stdout ----`. A
+// test that shells out to `cargo test`, or that asserts on cargo's output,
+// therefore prints a `test result:` line INSIDE that block - and that line is
+// the CHILD's tally, not this binary's. Accumulating it unconditionally added
+// tests that never ran here: the run below has 2 tests and was reported as
+// "10 passed".
+//
+// libtest prints exactly one result line per binary and always LAST, after the
+// terminating `failures:` name list. So a result line still inside a captured
+// block belongs to whatever the test printed, and must not be counted.
+const TEST_NESTED_RESULT = `   Compiling myapp v0.1.0 (/home/user/myapp)
+    Finished test [unoptimized + debuginfo] target(s) in 0.94s
+     Running unittests src/lib.rs (target/debug/deps/myapp-1a2b3c4d5e6f)
+
+running 2 tests
+test harness::runs_cargo ... FAILED
+test harness::parses ... ok
+
+failures:
+
+---- harness::runs_cargo stdout ----
+thread 'harness::runs_cargo' panicked at tests/harness.rs:31:5:
+child cargo reported the wrong tally, stdout was:
+running 9 tests
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+failures:
+    harness::runs_cargo
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+`
+
+// The same fabrication with two REAL binaries around it, so the audit-48 sum
+// (6 + 0) and the audit-5 exclusion (the child's 99) are locked by one case:
+// accumulating everything gave "105 passed" for a run of 7 tests.
+const TEST_NESTED_TWO_BINARIES = `    Finished test [unoptimized + debuginfo] target(s) in 1.10s
+     Running unittests src/lib.rs (target/debug/deps/myapp-1a2b3c4d5e6f)
+
+running 6 tests
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/cli.rs (target/debug/deps/cli-9f8e7d6c5b4a)
+
+running 1 test
+test cli::reports_tally ... FAILED
+
+failures:
+
+---- cli::reports_tally stdout ----
+thread 'cli::reports_tally' panicked at tests/cli.rs:22:5:
+child cargo printed:
+test result: ok. 99 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+
+failures:
+    cli::reports_tally
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+`
+
+const TEST_CUT_MID_BLOCK = `---- tests::bad stdout ----
+thread 'tests::bad' panicked at src/lib.rs:9:5:
+assertion failed: false
+
+test result: FAILED. 7 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+`
+
 describeCompression('cargo', [
   {
     name: 'build - strips Compiling/Updating noise, keeps the E0308 error',
@@ -315,6 +442,170 @@ describeCompression('cargo', [
     input: '',
     assert: (out) => {
       expect(out).toBe('')
+    },
+  },
+
+  // ── rustc diagnostics: 8-14 lines of gutter art per error ─────────────────
+  // The caret block is a terminal affordance. Its information - file, line,
+  // column, code, message - is entirely contained in the first two lines, and
+  // the agent reads the file itself anyway.
+  {
+    name: 'build - each rustc diagnostic collapses to one file:line:col line, keeping code and message',
+    cmd: 'cargo',
+    args: ['build'],
+    input: `   Compiling myapp v0.1.0 (/home/me/myapp)
+error[E0308]: mismatched types
+  --> src/lib.rs:42:18
+   |
+42 |     let n: u32 = compute_total(items);
+   |            ---   ^^^^^^^^^^^^^^^^^^^^ expected \`u32\`, found \`i64\`
+   |            |
+   |            expected due to this
+   |
+help: you can convert an \`i64\` to a \`u32\` and panic if the converted value doesn't fit
+   |
+42 |     let n: u32 = compute_total(items).try_into().unwrap();
+   |                                      ++++++++++++++++++++
+
+error[E0433]: failed to resolve: use of undeclared crate or module \`serde_json\`
+  --> src/parse.rs:7:5
+   |
+7  |     serde_json::from_str(raw)
+   |     ^^^^^^^^^^ use of undeclared crate or module \`serde_json\`
+
+warning: unused variable: \`cfg\`
+  --> src/main.rs:15:9
+   |
+15 |     let cfg = load();
+   |         ^^^ help: if this is intentional, prefix it with an underscore: \`_cfg\`
+   |
+   = note: \`#[warn(unused_variables)]\` on by default
+
+error: aborting due to 2 previous errors; 1 warning emitted
+`,
+    assert: (out, input) => {
+      expect(out).toContain('src/lib.rs:42:18')
+      expect(out).toContain('E0308')
+      expect(out).toContain('mismatched types')
+      expect(out).toContain('src/parse.rs:7:5')
+      expect(out).toContain('E0433')
+      expect(out).toContain('src/main.rs:15:9')
+      // the gutter art is gone
+      expect(out).not.toMatch(/^\s*\|/m)
+      expect(out).not.toContain('^^^^')
+      expect(out).not.toContain('++++')
+      expect(out.length).toBeLessThan(input.length / 2)
+    },
+  },
+  {
+    name: 'build - a clean build keeps its Finished line and stays tiny',
+    cmd: 'cargo',
+    args: ['build'],
+    input: '   Compiling myapp v0.1.0 (/home/me/myapp)\n    Finished dev [unoptimized + debuginfo] target(s) in 3.41s\n',
+    assert: (out) => {
+      expect(out).toContain('Finished')
+      expect(out).not.toContain('Compiling')
+    },
+  },
+  {
+    name: 'build - output with no rustc diagnostics is left alone rather than summarised',
+    cmd: 'cargo',
+    args: ['build'],
+    input: 'error: could not find `Cargo.toml` in `/home/me` or any parent directory\n',
+    assert: (out) => {
+      expect(out).toBe('error: could not find `Cargo.toml` in `/home/me` or any parent directory')
+    },
+  },
+  {
+    name: 'build --message-format=json - machine output is not reshaped',
+    cmd: 'cargo',
+    args: ['build', '--message-format=json'],
+    input:
+      Array.from({ length: 12 }, (_, i) =>
+        JSON.stringify({ reason: 'compiler-message', target: { name: `crate${i}` }, message: { level: 'error' } }),
+      ).join('\n') + '\n',
+    assert: (out) => {
+      for (const line of out.split('\n').filter(Boolean)) {
+        expect(() => JSON.parse(line)).not.toThrow()
+      }
+    },
+  },
+
+  // ── audit #48: every `test result:` line counts ───────────────────────────
+  {
+    name: 'test (lib + integration binaries) - both tallies are summed, not overwritten',
+    cmd: 'cargo',
+    args: ['test'],
+    input: TEST_TWO_BINARIES,
+    assert: (out) => {
+      // 12 + 2 really ran and passed; reporting only the last binary erased 12.
+      expect(out).toContain('Cargo test: 14 passed, 1 failed')
+      expect(out).toContain('FAIL: api::test_create')
+      expect(out).toContain('assertion `left == right` failed')
+    },
+  },
+  {
+    name: 'test --no-fail-fast - a failing first binary is not erased by a green last one',
+    cmd: 'cargo',
+    args: ['test', '--no-fail-fast'],
+    input: TEST_NO_FAIL_FAST,
+    assert: (out) => {
+      // The header must not contradict the FAIL block printed underneath it.
+      expect(out).toContain('Cargo test: 5 passed, 1 failed')
+      expect(out).not.toMatch(/\b0 failed/)
+      expect(out).toContain('FAIL: tests::bad')
+      // The next binary's chrome must not leak into this failure's detail.
+      expect(out).not.toContain('Running tests/integration.rs')
+      expect(out).not.toContain('running 4 tests')
+    },
+  },
+
+  // ── audit #5: a captured-stdout `test result:` line is not a binary's ──────
+  {
+    name: 'test - a `test result:` line inside a failure\'s captured stdout is not counted',
+    cmd: 'cargo',
+    args: ['test'],
+    input: TEST_NESTED_RESULT,
+    assert: (out) => {
+      // 2 tests ran in this binary: 1 passed, 1 failed. The child's "9 passed"
+      // was printed BY the failing test, so it is not part of this tally.
+      expect(out).toContain('Cargo test: 1 passed, 1 failed')
+      expect(out).not.toContain('10 passed')
+      expect(out).toContain('FAIL: harness::runs_cargo')
+      // The panic message itself still survives verbatim.
+      expect(out).toContain('child cargo reported the wrong tally')
+    },
+  },
+  {
+    name: 'test - real per-binary tallies still sum while the captured one is excluded',
+    cmd: 'cargo',
+    args: ['test'],
+    input: TEST_NESTED_TWO_BINARIES,
+    assert: (out) => {
+      // 6 (lib) + 0 (cli) really passed; the child's 99 never ran here.
+      expect(out).toContain('Cargo test: 6 passed, 1 failed')
+      expect(out).not.toContain('105')
+      expect(out).not.toContain('99')
+      expect(out).toContain('FAIL: cli::reports_tally')
+    },
+  },
+  {
+    // The rule above - "a `test result:` line inside a captured-stdout block
+    // belongs to a CHILD run" - reads a cut stream backwards. `cargo test 2>&1
+    // | tail -20` starts in the middle of a block that therefore never closes,
+    // and the binary's own result line is inside it. Skipping that one left the
+    // header saying "0 passed, 0 failed" directly above a FAIL block: a
+    // fabricated zero, contradicting the very block printed under it.
+    name: 'test - a run cut mid-block still reports the tally it did receive',
+    cmd: 'cargo',
+    args: ['test'],
+    input: TEST_CUT_MID_BLOCK,
+    assert: (out) => {
+      expect(out).toContain('Cargo test: 7 passed, 1 failed')
+      expect(out).not.toMatch(/\b0 passed, 0 failed\b/)
+      expect(out).toContain('FAIL: tests::bad')
+      // the panic is still the detail that answers "why"
+      expect(out).toContain('assertion failed: false')
     },
   },
 ])

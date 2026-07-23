@@ -116,3 +116,18 @@ Did you mean? Style/For
 Errors are usually caused by using a version of RuboCop
 that does not match the .rubocop.yml configuration."
 `;
+
+exports[`compress - ruby > rubocop - offences in .rake / Gemfile / .gemspec / config.ru are counted and shown, not silently dropped 1`] = `
+"rubocop: 6 offense(s) in 5 file(s)  [E:1 W:2 C:3]
+app/models/user.rb (2)
+  Style/StringLiterals: Prefer single-quoted strings.
+  Lint/UselessAssignment: Useless assignment to variable - tmp.
+lib/tasks/import.rake (1)
+  Layout/IndentationWidth: Use 2 (not 4) spaces for indentation.
+Gemfile (1)
+  Style/FrozenStringLiteralComment: Missing frozen string literal comment.
+config.ru (1)
+  Lint/Syntax: unexpected token kEND (Using Ruby 3.2 parser).
+myapp.gemspec (1)
+  Lint/DuplicateMethods: Method Gem::Specification#name is defined twice."
+`;

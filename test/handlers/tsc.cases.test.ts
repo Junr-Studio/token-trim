@@ -103,6 +103,47 @@ const NO_TRIGGER = `Deploying to production...
 Done in 4.2s
 `
 
+// A Windows checkout: every diagnostic repeats the same 36-character absolute
+// prefix. Three distinct files, so the shared directory is hoistable.
+const WIN_ABSOLUTE = `C:\\Users\\dev\\source\\repos\\acme-portal\\src\\components\\Button.tsx(23,10): error TS2339: Property 'onClik' does not exist on type 'ButtonProps'. Did you mean 'onClick'?
+C:\\Users\\dev\\source\\repos\\acme-portal\\src\\components\\Button.tsx(51,5): error TS2554: Expected 2 arguments, but got 1.
+C:\\Users\\dev\\source\\repos\\acme-portal\\src\\hooks\\useAuth.ts(14,22): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+C:\\Users\\dev\\source\\repos\\acme-portal\\test\\Button.spec.tsx(88,21): error TS2532: Object is possibly 'undefined'.
+
+Found 4 errors in 3 files.
+`
+
+// The same absolute prefix, but only one file carries it. One occurrence is not
+// a repetition, so a "base:" header would cost more than it saves.
+const WIN_ABSOLUTE_SINGLE_FILE = `C:\\Users\\dev\\source\\repos\\acme-portal\\src\\hooks\\useAuth.ts(14,22): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+C:\\Users\\dev\\source\\repos\\acme-portal\\src\\hooks\\useAuth.ts(31,9): error TS2532: Object is possibly 'undefined'.
+C:\\Users\\dev\\source\\repos\\acme-portal\\src\\hooks\\useAuth.ts(47,3): error TS2304: Cannot find name 'useSesion'.
+C:\\Users\\dev\\source\\repos\\acme-portal\\src\\hooks\\useAuth.ts(62,15): error TS2339: Property 'refresh' does not exist on type 'Session'.
+
+Found 4 errors in 1 file.
+`
+
+// The state an edit/typecheck loop actually spends its time in: a handful of
+// diagnostics across a couple of files. condenseTsc unconditionally prepends a
+// summary line, a 50-character rule and a per-file group header, so at this
+// size the "compressed" form is 50-160% LARGER than the bare tsc output - the
+// inverse of the product's purpose, and a counterexample to the release note
+// "No condenser can return more characters than it received". Five sibling
+// condensers already carry the shorter-of guard; tsc did not.
+const SMALL_RUN = `src/mod1.ts(12,5): error TS2304: Cannot find name 'thing1'.
+src/mod2.ts(30,5): error TS2304: Cannot find name 'thing2'.
+`
+
+// Byte-for-byte the WARNINGS run above, but with the CRLF line endings real
+// Windows tsc emits (TypeScript takes sys.newLine from os.EOL). `split('\n')`
+// leaves a trailing \r on every line; in JS `.` never matches \r and `$`
+// without /m only matches end-of-input, so ERROR_RE's `(.+)$` could not match
+// a single diagnostic. On an entire advertised platform the condenser silently
+// did nothing and the frame's generic backstop then elided error lines from
+// the middle that the grouped form would have kept. The rollup below must be
+// identical to the one the LF fixture produces.
+const CRLF_WARNINGS = WARNINGS.replace(/\n/g, '\r\n')
+
 describeCompression('tsc', [
   {
     name: 'errors - groups by file, top-5 codes summary, truncates >120-char messages, keeps overload context',
@@ -193,6 +234,68 @@ describeCompression('tsc', [
       expect(out).not.toContain('TypeScript:')
       expect(out).toContain('Deploying to production')
       expect(out).toContain('Done in 4.2s')
+    },
+  },
+  {
+    name: 'absolute Windows paths - the shared checkout directory is hoisted to one base line',
+    cmd: 'tsc',
+    args: ['--noEmit'],
+    input: WIN_ABSOLUTE,
+    assert: (out, input) => {
+      expect(out.split('\n')[0]).toBe('base: C:\\Users\\dev\\source\\repos\\acme-portal\\')
+      // Hoisted exactly once - that is the whole saving.
+      expect(out.split('C:\\Users\\dev\\source\\repos\\acme-portal\\').length - 1).toBe(1)
+      // Grouping still works, on the now-relative paths.
+      expect(out).toContain('src\\components\\Button.tsx  (2)')
+      expect(out).toContain('src\\hooks\\useAuth.ts  (1)')
+      expect(out).toContain('test\\Button.spec.tsx  (1)')
+      expect(out).toMatch(/^base:.*\nTypeScript: 4 errors in 3 files/)
+      expect(out.length).toBeLessThan(input.length)
+    },
+  },
+  {
+    name: 'absolute path on a single file - no base line, the path is left absolute',
+    cmd: 'tsc',
+    args: ['--noEmit'],
+    input: WIN_ABSOLUTE_SINGLE_FILE,
+    assert: (out) => {
+      expect(out).not.toContain('base:')
+      expect(out).toContain('C:\\Users\\dev\\source\\repos\\acme-portal\\src\\hooks\\useAuth.ts  (4)')
+    },
+  },
+  {
+    name: 'a two-error run is already terse - the summary + rule + group headers would cost more than they save',
+    cmd: 'tsc',
+    args: ['--noEmit'],
+    input: SMALL_RUN,
+    assert: (out, input) => {
+      // The one promise a compressor makes.
+      expect(out.length).toBeLessThanOrEqual(input.length)
+      // Declining looks like passthrough: nothing is lost by not grouping, and
+      // both diagnostics are still there in tsc's own format.
+      expect(out).toBe(input.trim())
+      expect(out).toContain("Cannot find name 'thing1'.")
+      expect(out).toContain("Cannot find name 'thing2'.")
+    },
+  },
+  {
+    name: 'CRLF stdout (real Windows tsc) - diagnostics are parsed and grouped exactly as on LF',
+    cmd: 'tsc',
+    args: ['--noEmit'],
+    input: CRLF_WARNINGS,
+    assert: (out, input) => {
+      // The same rollup the LF fixture produces - the condenser must not
+      // no-op on an entire platform the README advertises.
+      expect(out).toMatch(/^TypeScript: 16 errors in 4 files/)
+      expect(out).toContain('TS6133(14×)')
+      expect(out).toContain('src/legacy/parser.ts  (5)')
+      expect(out).toContain('src/legacy/tokenizer.ts  (5)')
+      expect(out).toContain('src/legacy/analyzer.ts  (3)')
+      // and the one real error is still distinguishable in the code histogram
+      expect(out).toContain('TS2551(1×)')
+      // No stray carriage returns survive to cost a token apiece.
+      expect(out).not.toContain('\r')
+      expect(out.length).toBeLessThan(input.length)
     },
   },
   {

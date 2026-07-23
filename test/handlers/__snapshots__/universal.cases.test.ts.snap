@@ -1,14 +1,14 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`compress - universal > (a) strips ANSI cursor position + move sequences, preserves SGR color 1`] = `
+exports[`compress - universal > (a) strips every ANSI escape - cursor moves and SGR colour alike 1`] = `
 "Building project...
 Status: compiling modules
 Moving cursor then back done
-[31mERROR[0m: type mismatch in handler
-[1;32mPASS[0m: 12 checks succeeded
+ERROR: type mismatch in handler
+PASS: 12 checks succeeded
  cursor saved  cursor restored
 Column jump and next line marker
-Warning: [33mdeprecated API[0m used here"
+Warning: deprecated API used here"
 `;
 
 exports[`compress - universal > (b) collapses a run of 4+ CR progress redraws to only the final frame 1`] = `
@@ -58,5 +58,5 @@ Resolving packages
 
 Fetched 88 pkgs
 
-[32mDONE[0m installation complete"
+DONE installation complete"
 `;

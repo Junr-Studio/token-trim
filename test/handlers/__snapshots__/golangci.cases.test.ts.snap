@@ -2,7 +2,11 @@
 
 exports[`compress - golangci > empty output - nothing to compress, returns empty string 1`] = `""`;
 
+exports[`compress - golangci > run - a message that itself ends in a parenthetical is not read as the linter 1`] = `"golangci-lint: 3 issue(s) in 2 file(s)"`;
+
 exports[`compress - golangci > run - clean output surfaces the "No issues found" marker, strips info noise 1`] = `"No issues found."`;
+
+exports[`compress - golangci > run - default format: linter read from the trailing paren, every issue counted 1`] = `"golangci-lint: 5 issue(s) in 3 file(s)  unparam(1x)  errcheck(1x)  golint(1x)  gosimple(1x)  typecheck(1x)"`;
 
 exports[`compress - golangci > run - groups issues by linter, dedups files, caps at top-5, one summary line 1`] = `"golangci-lint: 8 issue(s) in 4 file(s)  errcheck(3x)  ineffassign(1x)  gofmt(1x)  golint(1x)  govet(1x)"`;
 
@@ -10,5 +14,11 @@ exports[`compress - golangci > run - load failure with no parseable issues passe
 "level=warning msg="[runner] The linter 'golint' is deprecated (since v1.41.0), please use 'revive'"
 level=error msg="Running error: context loading failed: failed to load packages: no Go files to analyze in ./...""
 `;
+
+exports[`compress - golangci > run - mixed naming: named linters histogrammed, unnamed issue still counted 1`] = `"golangci-lint: 3 issue(s) in 2 file(s)  errcheck(1x)  gosimple(1x)"`;
+
+exports[`compress - golangci > run - no linter name on the line: counts stay, histogram is omitted not invented 1`] = `"golangci-lint: 4 issue(s) in 2 file(s)"`;
+
+exports[`compress - golangci > run - real linter names still reach the histogram after the shape check 1`] = `"golangci-lint: 6 issue(s) in 3 file(s)  ineffassign(1x)  unused(1x)  gosec(1x)  gocyclo(1x)  err113(1x)"`;
 
 exports[`compress - golangci > run - single issue keeps parenthetical issue(s)/file(s) wording at N=1 1`] = `"golangci-lint: 1 issue(s) in 1 file(s)  errcheck(1x)"`;

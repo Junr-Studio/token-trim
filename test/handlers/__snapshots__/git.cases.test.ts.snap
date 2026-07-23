@@ -1,5 +1,144 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`compress - git > blame - a gap of blank source lines splits the run, so no header claims a line it did not print 1`] = `
+"4788fef <Boris Bembinoff> 2026-03-12  L1-3
+import { readFileSync, writeFileSync } from 'node:fs'
+import { dirname } from 'node:path'
+export const CONFIG_VERSION = 2
+4788fef <Boris Bembinoff> 2026-03-12  L9-11
+export function loadConfig(file) {
+  return JSON.parse(readFileSync(file, 'utf8'))
+}"
+`;
+
+exports[`compress - git > blame - a source line that really is “·” stays distinguishable from a blank one 1`] = `
+"a1b2c3d <Alice Smith> 2026-05-02  L1-3
+# Changelog
+·
+- fix: handle null config case"
+`;
+
+exports[`compress - git > blame - a trailing blank line is dropped rather than stood in for, and the range shrinks to match 1`] = `
+"a1b2c3d <Alice Smith> 2026-05-02  L1
+module.exports = { loadConfig, saveConfig }"
+`;
+
+exports[`compress - git > blame - contiguous lines from one commit collapse to a single attribution header, code keeps its indentation 1`] = `
+"4788fef <Boris Bembinoff> 2026-03-12  L118-122
+export function loadConfig(file) {
+  const raw = readFileSync(file, 'utf8')
+  if (!raw.trim()) return {}
+  return JSON.parse(raw)
+}
+9f8e7d6 <Alice Smith> 2026-05-02  L124-126
+export function saveConfig(file, cfg) {
+  const dir = dirname(file)
+  mkdirSync(dir, { recursive: true })
+uncommitted <Not Committed Yet> 2026-07-22  L127-128
+  writeFileSync(file, JSON.stringify(cfg, null, 2))
+}"
+`;
+
+exports[`compress - git > blame --line-porcelain - git’s own machine format is left parseable 1`] = `
+"4788fef0d695715cffb695047522014f50de8504 118 118 2
+author Boris Bembinoff
+author-mail <boris@junr.studio>
+author-time 1773322921
+author-tz +0100
+summary feat: configurable config loader
+filename src/config.js
+	export function loadConfig(file) {
+4788fef0d695715cffb695047522014f50de8504 119 119
+author Boris Bembinoff
+author-mail <boris@junr.studio>
+author-time 1773322921
+author-tz +0100
+summary feat: configurable config loader
+filename src/config.js
+	  const raw = readFileSync(file, 'utf8')"
+`;
+
+exports[`compress - git > blame -L 1,2 -L 40,41 - a run that spans a gap in the printed line numbers is split, so no header claims the lines between the ranges 1`] = `
+"f2b896a <Junr Studio> 2026-07-20  L1-2
+{
+  "name": "@junr_studio/token-trim",
+f2b896a <Junr Studio> 2026-07-20  L40-41
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js""
+`;
+
+exports[`compress - git > branch - a three-branch list has nothing to gain and is left alone 1`] = `
+"  feat/extend-commands
+* main
+  release/2.0"
+`;
+
+exports[`compress - git > branch --format - a caller-defined shape is never reinterpreted 1`] = `
+"main origin/main
+feat/extend-commands origin/feat/extend-commands
+release/2.0"
+`;
+
+exports[`compress - git > branch -a - locals stay one per line, remotes collapse onto a single line 1`] = `
+"[git] 3 local, 6 remote branches
+  feat/extend-commands
+* main
+  release/2.0
+remote: origin/HEAD -> origin/main, origin/dependabot/npm_and_yarn/vite-5.4.11, origin/feat/extend-commands, origin/fix/windows-path-resolution, origin/main, origin/release/2.0"
+`;
+
+exports[`compress - git > branch -vv - keeps ahead/behind and gone markers, drops the padding and the redundant upstream name 1`] = `
+"[git] 4 local branches
+* main 4788fef [ahead 2] chore: pin publint and attw as dev deps
+  feat/extend-commands a1b2c3d [ahead 1, behind 3] wip: blame condenser
+  legacy 9c8b7a6 [gone] last work before the rewrite
+  spike 1122334 no upstream yet"
+`;
+
+exports[`compress - git > config --list - a subcommand with no condenser is handed back, not summarised 1`] = `
+"user.name=Boris Bembinoff
+user.email=boris@junr.studio
+core.autocrlf=true
+core.editor=code --wait
+alias.lg=log --graph --oneline"
+`;
+
+exports[`compress - git > describe - a single-line answer has nothing to condense and is not touched 1`] = `"v2.3.1-14-g4788fef"`;
+
+exports[`compress - git > diff - a binary-only change keeps the file name and git’s "differ" line 1`] = `
+"diff: 1 file(s)  +0 -0
+
+── assets/logo.png
+Binary files a/assets/logo.png and b/assets/logo.png differ"
+`;
+
+exports[`compress - git > diff - a pure rename and a pure mode change name both paths (the only information they carry) 1`] = `
+"diff: 2 file(s)  +0 -0
+
+── src/old-name.ts -> src/new-name.ts (rename)
+
+── scripts/deploy.sh (mode 100644 -> 100755)"
+`;
+
+exports[`compress - git > diff - a removed line whose content starts with "-- " is a REMOVAL, not a file header 1`] = `
+"diff: 1 file(s)  +1 -4
+
+── db/001_init.sql
+- -- Author: Alice
+- CREATE TABLE users (id serial primary key);
+- -- TODO: drop the legacy audit table before release
+- DROP TABLE legacy_audit;
++ CREATE TABLE users (id serial primary key, email text);"
+`;
+
+exports[`compress - git > diff - an added line whose content starts with "++ " is an ADDITION, not a changed path 1`] = `
+"diff: 1 file(s)  +2 -0
+
+── notes/changes.md
++ ++ b/etc/shadow
++ ++ added a new escalation path"
+`;
+
 exports[`compress - git > diff - drops hunk/index headers, keeps +/- and a summary 1`] = `
 "diff: 1 file(s)  +3 -1
 
@@ -10,6 +149,54 @@ exports[`compress - git > diff - drops hunk/index headers, keeps +/- and a summa
 + export const VERSION = '2.0.0'"
 `;
 
+exports[`compress - git > diff - every entry is named, including the rename, the deletion, the binary and the chmod 1`] = `
+"diff: 6 file(s)  +2 -3
+
+── a.txt -> a2.txt (rename)
+
+── b.txt
+- bee two
++ bee three
+
+── c.txt (deleted)
+- gone one
+- gone two
+
+── d.txt (new)
++ dee one
+
+── real.bin
+Binary files a/real.bin and b/real.bin differ
+
+── sub/mod.py (mode 100644 -> 100755)"
+`;
+
+exports[`compress - git > diff --name-only - machine format survives verbatim (was annihilated to "0 file(s)") 1`] = `
+"src/app.ts
+src/handlers/git.ts
+test/handlers/git.cases.test.ts
+README.md"
+`;
+
+exports[`compress - git > diff --name-status - status letters survive verbatim 1`] = `
+"M	src/app.ts
+A	src/handlers/helm.ts
+D	src/handlers/legacy.ts"
+`;
+
+exports[`compress - git > diff --numstat - binary rows (-	-	path) are not miscounted as removals 1`] = `
+"12	4	src/app.ts
+3	0	src/handlers/git.ts
+-	-	assets/logo.png"
+`;
+
+exports[`compress - git > diff --stat - keeps every path, its churn, and the totals line 1`] = `
+"[git] 3 files changed, 49 insertions(+), 6 deletions(-)
+  src/app.ts  12
+  src/handlers/git.ts  3
+  test/handlers/git.cases.test.ts  40"
+`;
+
 exports[`compress - git > log - passes an already-compact pretty log through cleanly 1`] = `
 "a1b2c3d fix: handle null config case (2 hours ago) <alice>
 e4f5g6h feat: configurable server port (5 hours ago) <bob>
@@ -17,9 +204,361 @@ e4f5g6h feat: configurable server port (5 hours ago) <bob>
 1122334 docs: update README (2 days ago) <carol>"
 `;
 
+exports[`compress - git > log --graph - the gutter is dropped and each commit collapses to one line 1`] = `
+"af8531b Merge branch 'feat/alpha2' <Bob Jones>
+ab2cb23 feat: add alpha <Bob Jones>
+1955427 fix: handle null config case <Alice Smith>
+85fb44b chore: bump deps <Alice Smith>"
+`;
+
+exports[`compress - git > log --graph --oneline - flattening the gutter leaves the one-line log untouched otherwise 1`] = `
+"af8531b Merge branch 'feat/alpha2'
+ab2cb23 feat: add alpha
+1955427 fix: handle null config case
+85fb44b chore: bump deps"
+`;
+
+exports[`compress - git > log --graph -p - each commit’s patch goes through the diff condenser 1`] = `
+"af8531b Merge branch 'feat/alpha2' <Bob Jones>
+ab2cb23 feat: add alpha <Bob Jones>
+diff: 1 file(s)  +1 -0
+
+── a.txt (new)
++ alpha"
+`;
+
+exports[`compress - git > log --stat - the per-commit file churn survives instead of being swallowed with the header 1`] = `
+"4788fef chore: pin publint and attw as dev dependencies <Boris Bembinoff>
+[git] 2 files changed, 6 insertions(+), 6 deletions(-)
+  package.json  4
+  package-lock.json  8
+a1b2c3d feat: collapse contiguous git blame runs <Alice Smith>
+[git] 2 files changed, 103 insertions(+)
+  src/handlers/git.ts  62
+  test/handlers/git.cases.test.ts  41"
+`;
+
+exports[`compress - git > log --stat with an injected --pretty - the stat rows are still condensed, one block per commit 1`] = `
+"4788fef chore: pin publint and attw as dev dependencies (28 hours ago) <Junr Studio>
+[git] 3 files changed, 14 insertions(+), 7 deletions(-)
+  .github/workflows/ci.yml  4
+  CHANGELOG.md  11
+  package.json  6
+
+6374018 chore: harden supply-chain posture and fix license badge (2 days ago) <Junr Studio>
+[git] 2 files changed, 43 insertions(+), 1 deletion(-)
+  .github/workflows/scorecard.yml  42
+  README.md  2"
+`;
+
+exports[`compress - git > ls-files - a long path list is only capped: never indented, grouped or reordered 1`] = `
+".editorconfig
+.gitignore
+CONTRIBUTING.md
+LICENSE
+README.md
+package.json
+tsconfig.json
+src/handlers/h0.ts
+src/handlers/h1.ts
+src/handlers/h2.ts
+src/handlers/h3.ts
+src/handlers/h4.ts
+src/handlers/h5.ts
+src/handlers/h6.ts
+src/handlers/h7.ts
+src/handlers/h8.ts
+src/handlers/h9.ts
+src/handlers/h10.ts
+src/handlers/h11.ts
+src/handlers/h12.ts
+src/handlers/h13.ts
+src/handlers/h14.ts
+src/handlers/h15.ts
+src/handlers/h16.ts
+src/handlers/h17.ts
+src/handlers/h18.ts
+src/handlers/h19.ts
+src/handlers/h20.ts
+src/handlers/h21.ts
+src/handlers/h22.ts
+src/handlers/h23.ts
+src/handlers/h24.ts
+src/handlers/h25.ts
+src/handlers/h26.ts
+src/handlers/h27.ts
+src/handlers/h28.ts
+src/handlers/h29.ts
+src/handlers/h30.ts
+src/handlers/h31.ts
+src/handlers/h32.ts
+test/handlers/h20.cases.test.ts
+test/handlers/h21.cases.test.ts
+test/handlers/h22.cases.test.ts
+test/handlers/h23.cases.test.ts
+test/handlers/h24.cases.test.ts
+test/handlers/h25.cases.test.ts
+test/handlers/h26.cases.test.ts
+test/handlers/h27.cases.test.ts
+test/handlers/h28.cases.test.ts
+test/handlers/h29.cases.test.ts
+test/handlers/h30.cases.test.ts
+test/handlers/h31.cases.test.ts
+test/handlers/h32.cases.test.ts
+test/handlers/h33.cases.test.ts
+test/handlers/h34.cases.test.ts
+test/handlers/h35.cases.test.ts
+test/handlers/h36.cases.test.ts
+test/handlers/h37.cases.test.ts
+test/handlers/h38.cases.test.ts
+test/handlers/h39.cases.test.ts"
+`;
+
+exports[`compress - git > ls-files - a short path list is handed back byte for byte 1`] = `
+"src/frame.ts
+src/handlers/git.ts
+src/write-proxy.ts"
+`;
+
+exports[`compress - git > ls-files -z - the NUL-delimited form stays splittable on NUL 1`] = `"src/frame.ts src/handlers/git.ts src/write-proxy.ts "`;
+
+exports[`compress - git > reflog - the ref is stated once in a header that spells out the index syntax, and the oldest entries are capped away 1`] = `
+"[git] 52 reflog entries, index n is HEAD@{n} (40 shown, --full for all)
+@{0} 4788fef commit: chore: pin publint and attw as dev dependencies
+@{1} a1b2c3d checkout: moving from feat/extend-commands to main
+@{2} 9c8b7a6 commit: feat: collapse contiguous git blame runs
+@{3} 1122334 pull origin main: Fast-forward
+@{4} abc0000 commit: chore: routine change 0
+@{5} abc0001 commit: chore: routine change 1
+@{6} abc0002 commit: chore: routine change 2
+@{7} abc0003 commit: chore: routine change 3
+@{8} abc0004 commit: chore: routine change 4
+@{9} abc0005 commit: chore: routine change 5
+@{10} abc0006 commit: chore: routine change 6
+@{11} abc0007 commit: chore: routine change 7
+@{12} abc0008 commit: chore: routine change 8
+@{13} abc0009 commit: chore: routine change 9
+@{14} abc0010 commit: chore: routine change 10
+@{15} abc0011 commit: chore: routine change 11
+@{16} abc0012 commit: chore: routine change 12
+@{17} abc0013 commit: chore: routine change 13
+@{18} abc0014 commit: chore: routine change 14
+@{19} abc0015 commit: chore: routine change 15
+@{20} abc0016 commit: chore: routine change 16
+@{21} abc0017 commit: chore: routine change 17
+@{22} abc0018 commit: chore: routine change 18
+@{23} abc0019 commit: chore: routine change 19
+@{24} abc0020 commit: chore: routine change 20
+@{25} abc0021 commit: chore: routine change 21
+@{26} abc0022 commit: chore: routine change 22
+@{27} abc0023 commit: chore: routine change 23
+@{28} abc0024 commit: chore: routine change 24
+@{29} abc0025 commit: chore: routine change 25
+@{30} abc0026 commit: chore: routine change 26
+@{31} abc0027 commit: chore: routine change 27
+@{32} abc0028 commit: chore: routine change 28
+@{33} abc0029 commit: chore: routine change 29
+@{34} abc0030 commit: chore: routine change 30
+@{35} abc0031 commit: chore: routine change 31
+@{36} abc0032 commit: chore: routine change 32
+@{37} abc0033 commit: chore: routine change 33
+@{38} abc0034 commit: chore: routine change 34
+@{39} abc0035 commit: chore: routine change 35"
+`;
+
+exports[`compress - git > reflog --date=iso - a timestamped index is a shape we do not parse, so nothing is touched 1`] = `
+"4788fef HEAD@{2026-07-21 11:54:37 +0200}: commit: chore: pin publint
+a1b2c3d HEAD@{2026-07-21 09:12:03 +0200}: checkout: moving from main to feat/x"
+`;
+
+exports[`compress - git > remote -v - a push URL that differs from the fetch URL keeps both, labelled 1`] = `
+"origin https://github.com/acme/app.git (fetch)
+origin git@github.com:acme/app.git (push)"
+`;
+
+exports[`compress - git > remote -v - a remote whose fetch and push URL agree is printed once 1`] = `
+"origin git@github.com:junr-studio/token-trim.git
+upstream https://github.com/token-trim/token-trim.git"
+`;
+
+exports[`compress - git > remote show - a shape the handler does not parse is handed back 1`] = `
+"* remote origin
+  Fetch URL: git@github.com:junr-studio/token-trim.git
+  Push  URL: git@github.com:junr-studio/token-trim.git
+  HEAD branch: main
+  Remote branches:
+    main   tracked
+    v2-dev tracked"
+`;
+
+exports[`compress - git > shortlog - keeps every author, count and subject; drops the 6-space indent and the group blanks 1`] = `
+"Alice Smith (4):
+  fix: handle null config case
+  feat: configurable server port
+  chore: bump deps
+  docs: rewrite the contributing guide
+Bob Jones (2):
+  test: cover the blame condenser
+  refactor: split the git handler by subcommand
+Carol Danvers (1):
+  docs: update README"
+`;
+
+exports[`compress - git > shortlog -sn - the count column loses its alignment padding and its tab 1`] = `
+"142 Alice Smith
+87 Bob Jones
+3 Carol Danvers"
+`;
+
+exports[`compress - git > shortlog -w60 - a wrapped subject is one commit, not one per physical line (was "+-5 more", cut mid-subject) 1`] = `
+"Alice Smith (5):
+  refactor: split the git handler into one condenser per subcommand shape so that no output is ever parsed by two functions and an unrecognised shape is handed straight back
+  feat: collapse contiguous git blame runs under a single attribution header that carries the line range the run covers instead of repeating fifty bytes of prefix per line
+  fix: stop the shortlog condenser from counting a wrapped continuation line as another commit subject, which truncated a group at ten physical lines and cut a subject in half
+  test: cover every git subcommand with a realistic captured fixture and a behavioural assertion rather than a bare snapshot
+  docs: explain in the handler header why a condenser that cannot recognise its input has to return the text unchanged"
+`;
+
+exports[`compress - git > shortlog -w60 - an overflowing group reports the number of subjects actually elided 1`] = `
+"Bob Jones (14):
+  fix: handle a null config file without throwing on the first read
+  feat: configurable server port
+  chore: bump deps
+  docs: rewrite the contributing guide so a first-time contributor can get a working checkout without asking
+  test: cover the blame condenser
+  refactor: split the git handler by subcommand
+  fix: keep the stash@{n} handle exactly as git printed it because that is the argument git stash pop takes
+  perf: stop re-splitting the same text in every condenser
+  chore: pin publint and attw as dev dependencies
+  fix: do not reshape machine-readable output
+  ... +4 more (--full)"
+`;
+
+exports[`compress - git > shortlog -w60,6,6 - a caller-flattened indent2 still groups by commit, not by physical line 1`] = `
+"Alice Smith (4):
+  refactor: split the git handler into one condenser per subcommand shape so that no output is ever parsed by two functions
+  feat: collapse contiguous git blame runs under a single attribution header that carries the line range the run covers
+  fix: stop the shortlog condenser from counting a wrapped continuation line as another commit subject of its own
+  docs: explain in the handler header why a condenser that cannot recognise its input has to hand the text straight back"
+`;
+
+exports[`compress - git > shortlog -w60,6,6 - a wrap the flattened indents make genuinely ambiguous is handed back whole 1`] = `
+"Dave Lee (2):
+      fix: keep the stash handle exactly as git printed it
+      refactor: split the git handler by subcommand"
+`;
+
+exports[`compress - git > shortlog -w60,6,6 - an overflowing group counts commits, not the physical lines they wrapped onto 1`] = `
+"Carol Danvers (12):
+  fix: handle a null config file without throwing on the first read
+  feat: configurable server port
+  chore: bump deps
+  docs: rewrite the contributing guide so a first-time contributor can get a working checkout
+  test: cover the blame condenser
+  refactor: split the git handler by subcommand
+  fix: keep the stash handle exactly as git printed it because that is the argument git stash pop takes
+  perf: stop re-splitting the same text in every condenser
+  chore: pin publint and attw as dev dependencies
+  fix: do not reshape machine-readable output
+  ... +2 more (--full)"
+`;
+
+exports[`compress - git > shortlog -w60,6,6 - short subjects under flattened indents are not glued to each other 1`] = `
+"Bob Jones (3):
+  test: cover the blame condenser
+  chore: bump deps
+  docs: update README"
+`;
+
+exports[`compress - git > show - the commit hash, author and message survive alongside the diff 1`] = `
+"4788fef <Boris> (Jul 21 2026)
+chore: pin publint and attw as dev dependencies
+They were unpinned npx calls, which Scorecard flags.
+
+diff: 1 file(s)  +1 -1
+
+── package.json
+-   "publint": "npx publint",
++   "publint": "publint","
+`;
+
+exports[`compress - git > show --stat - commit header is condensed, not dumped raw into the stat rows 1`] = `
+"4788fef <Junr Studio> (Jul 21 2026)
+chore: pin publint and attw as dev dependencies
+Invoke them through npm scripts instead of unpinned npx.
+[git] 2 files changed, 6 insertions(+), 6 deletions(-)
+  package.json  4
+  package-lock.json  8"
+`;
+
+exports[`compress - git > stash list - drops the "WIP on"/"On" boilerplate but keeps the stash@{n} handle intact 1`] = `
+"stash@{0} main 4788fef chore: pin publint and attw as dev dependencies
+stash@{1} feat/extend-commands blame condenser, half finished
+stash@{2} main a1b2c3d fix: handle null config case"
+`;
+
 exports[`compress - git > status - short/branch format stays compact 1`] = `
 "## main...origin/main [ahead 1]
  M src/app.ts
  M README.md
 ?? src/new-feature.ts"
+`;
+
+exports[`compress - git > tag - a list under the cap is left exactly as git printed it 1`] = `
+"v1.0.0
+v1.1.0
+v1.2.0
+v2.0.0"
+`;
+
+exports[`compress - git > tag - a long list is capped in place, keeping the newest-looking entries at the end 1`] = `
+"v0.0.0
+v0.1.0
+v0.10.0
+v0.11.0
+v0.12.0
+v2.17.0
+v2.18.0
+v2.19.0
+v2.2.0
+v2.3.0
+v2.4.0
+v2.5.0
+v2.6.0
+v2.7.0
+v2.8.0
+v2.9.0
+v3.0.0
+v3.1.0
+v3.10.0
+v3.11.0
+v3.12.0
+v3.13.0
+v3.14.0
+v3.15.0
+v3.16.0
+v3.17.0
+v3.18.0
+v3.19.0
+v3.2.0
+v3.3.0
+v3.4.0
+v3.5.0
+v3.6.0
+v3.7.0
+v3.8.0
+v3.9.0
+v4.0.0
+v4.1.0
+v4.2.0
+v4.3.0"
+`;
+
+exports[`compress - git > tag - a repo with no tags stays empty rather than reporting "0 tags" 1`] = `""`;
+
+exports[`compress - git > worktree list - column padding goes, every path stays exactly as git printed it 1`] = `
+"/home/boris/projects/token-trim 4788fef [main]
+/home/boris/projects/token-trim/wt-blame a1b2c3d [feat/blame-condenser]
+/home/boris/projects/token-trim/wt-detached 9c8b7a6 (detached HEAD)
+/home/boris/projects/token-trim/wt-bare (bare)"
 `;

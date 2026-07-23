@@ -2,28 +2,44 @@
 
 exports[`compress - cargo > build (clean) - pure Compiling noise collapses to just the Finished line 1`] = `"Finished dev [unoptimized + debuginfo] target(s) in 2.14s"`;
 
+exports[`compress - cargo > build - a clean build keeps its Finished line and stays tiny 1`] = `"Finished dev [unoptimized + debuginfo] target(s) in 3.41s"`;
+
+exports[`compress - cargo > build - each rustc diagnostic collapses to one file:line:col line, keeping code and message 1`] = `
+"src/lib.rs:42:18: error[E0308]: mismatched types
+
+src/parse.rs:7:5: error[E0433]: failed to resolve: use of undeclared crate or module \`serde_json\`
+
+src/main.rs:15:9: warning: unused variable: \`cfg\`  [unused_variables]
+
+error: aborting due to 2 previous errors; 1 warning emitted"
+`;
+
+exports[`compress - cargo > build - output with no rustc diagnostics is left alone rather than summarised 1`] = `"error: could not find \`Cargo.toml\` in \`/home/me\` or any parent directory"`;
+
 exports[`compress - cargo > build - strips Compiling/Updating noise, keeps the E0308 error 1`] = `
-"error[E0308]: mismatched types
-  --> src/main.rs:4:18
-   |
-4  |     let x: u32 = "hello";
-   |            ---   ^^^^^^^ expected \`u32\`, found \`&str\`
-   |            |
-   |            expected due to this
-   |
+"src/main.rs:4:18: error[E0308]: mismatched types
 error: aborting due to 1 previous error
 
 For more information about this error, try \`rustc --explain E0308\`."
 `;
 
+exports[`compress - cargo > build --message-format=json - machine output is not reshaped 1`] = `
+"{"reason":"compiler-message","target":{"name":"crate0"},"message":{"level":"error"}}
+{"reason":"compiler-message","target":{"name":"crate1"},"message":{"level":"error"}}
+{"reason":"compiler-message","target":{"name":"crate2"},"message":{"level":"error"}}
+{"reason":"compiler-message","target":{"name":"crate3"},"message":{"level":"error"}}
+{"reason":"compiler-message","target":{"name":"crate4"},"message":{"level":"error"}}
+{"reason":"compiler-message","target":{"name":"crate5"},"message":{"level":"error"}}
+{"reason":"compiler-message","target":{"name":"crate6"},"message":{"level":"error"}}
+{"reason":"compiler-message","target":{"name":"crate7"},"message":{"level":"error"}}
+{"reason":"compiler-message","target":{"name":"crate8"},"message":{"level":"error"}}
+{"reason":"compiler-message","target":{"name":"crate9"},"message":{"level":"error"}}
+{"reason":"compiler-message","target":{"name":"crate10"},"message":{"level":"error"}}
+{"reason":"compiler-message","target":{"name":"crate11"},"message":{"level":"error"}}"
+`;
+
 exports[`compress - cargo > check - strips Blocking/Compiling noise, keeps the warning + Finished 1`] = `
-"warning: unused variable: \`y\`
- --> src/main.rs:3:9
-  |
-3 |     let y = 42;
-  |         ^ help: if this is intentional, prefix it with an underscore: \`_y\`
-  |
-  = note: \`#[warn(unused_variables)]\` on by default
+"src/main.rs:3:9: warning: unused variable: \`y\`  [unused_variables]
 
 warning: \`myapp\` (bin "myapp") generated 1 warning
     Finished dev [unoptimized + debuginfo] target(s) in 0.52s"
@@ -31,14 +47,7 @@ warning: \`myapp\` (bin "myapp") generated 1 warning
 
 exports[`compress - cargo > clippy - strips Updating/Compiling but preserves the Checking + lint 1`] = `
 "Checking myapp v0.1.0 (/home/user/myapp)
-warning: this expression creates a reference which is immediately dereferenced by the compiler
- --> src/main.rs:7:18
-  |
-7 |     do_something(&*value);
-  |                  ^^^^^^^ help: change this to: \`value\`
-  |
-  = note: \`#[warn(clippy::needless_borrow)]\` on by default
-  = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
+src/main.rs:7:18: warning: this expression creates a reference which is immediately dereferenced by the compiler  [clippy::needless_borrow]
 
 warning: \`myapp\` (bin "myapp") generated 1 warning
     Finished dev [unoptimized + debuginfo] target(s) in 0.30s"
@@ -49,7 +58,7 @@ exports[`compress - cargo > empty output - returns empty, never throws 1`] = `""
 exports[`compress - cargo > test (all pass) - a 12-test green run collapses to one summary line 1`] = `"Cargo test: 12 passed, 0 failed"`;
 
 exports[`compress - cargo > test (compile error) - no result line ⇒ passthrough, error preserved 1`] = `
-"Compiling myapp v0.1.0 (/home/user/myapp)
+"   Compiling myapp v0.1.0 (/home/user/myapp)
 error[E0432]: unresolved import \`crate::missing\`
  --> src/lib.rs:1:5
   |
@@ -70,6 +79,15 @@ exports[`compress - cargo > test (failure) - summary header + FAIL block capped 
        0: rust_begin_unwind"
 `;
 
+exports[`compress - cargo > test (lib + integration binaries) - both tallies are summed, not overwritten 1`] = `
+"Cargo test: 14 passed, 1 failed
+  FAIL: api::test_create
+    thread 'api::test_create' panicked at tests/integration.rs:14:5:
+    assertion \`left == right\` failed
+      left: 500
+     right: 201"
+`;
+
 exports[`compress - cargo > test (many failures) - only 5 render, rest collapse to "... +2 more" 1`] = `
 "Cargo test: 0 passed, 7 failed
   FAIL: suite::case_01
@@ -88,4 +106,33 @@ exports[`compress - cargo > test (many failures) - only 5 render, rest collapse 
     thread 'suite::case_05' panicked at src/lib.rs:50:5:
     assertion failed: result.is_ok()
   ... +2 more"
+`;
+
+exports[`compress - cargo > test - a \`test result:\` line inside a failure's captured stdout is not counted 1`] = `
+"Cargo test: 1 passed, 1 failed
+  FAIL: harness::runs_cargo
+    thread 'harness::runs_cargo' panicked at tests/harness.rs:31:5:
+    child cargo reported the wrong tally, stdout was:
+    running 9 tests"
+`;
+
+exports[`compress - cargo > test - a run cut mid-block still reports the tally it did receive 1`] = `
+"Cargo test: 7 passed, 1 failed
+  FAIL: tests::bad
+    thread 'tests::bad' panicked at src/lib.rs:9:5:
+    assertion failed: false"
+`;
+
+exports[`compress - cargo > test - real per-binary tallies still sum while the captured one is excluded 1`] = `
+"Cargo test: 6 passed, 1 failed
+  FAIL: cli::reports_tally
+    thread 'cli::reports_tally' panicked at tests/cli.rs:22:5:
+    child cargo printed:"
+`;
+
+exports[`compress - cargo > test --no-fail-fast - a failing first binary is not erased by a green last one 1`] = `
+"Cargo test: 5 passed, 1 failed
+  FAIL: tests::bad
+    thread 'tests::bad' panicked at src/lib.rs:9:5:
+    assertion failed: false"
 `;

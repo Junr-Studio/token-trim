@@ -9,6 +9,7 @@ export const PROXY_FRAME = `#!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
 import net from 'node:net';
 import path from 'node:path';
+import fs from 'node:fs';
 
 const cmd  = process.argv[2];
 const args = process.argv.slice(3);
@@ -24,50 +25,160 @@ const FULL_FLAG = '__TT_FULL_FLAG__';
 const wantFull  = args.includes(FULL_FLAG);
 const cleanArgs = wantFull ? args.filter(a => a !== FULL_FLAG) : args;
 
+// When stdout is a regular file the output is not going into the model's
+// context - it is being written somewhere ("cmd > out.txt"), and compressing it
+// silently corrupts what lands on disk. A character device (a real terminal) is
+// likewise a human reading directly. Only a pipe means "someone is capturing
+// this", which is the case this tool exists for.
+//
+// Defaults to compressing if the probe throws, so the worst case is only ever
+// "compressed as before", never "corrupted".
+function stdoutIsRedirected() {
+  try {
+    const st = fs.fstatSync(1);
+    return st.isFile() || st.isCharacterDevice() || st.isBlockDevice();
+  } catch {
+    return false;
+  }
+}
+const redirected = stdoutIsRedirected();
+
 // Rewrite args before running so we get compact output directly.
 // Handler functions are defined later in this file - function declarations are hoisted.
-const effectiveArgs = (!wantFull && cmd === 'git') ? rewriteGitArgs(cleanArgs) : cleanArgs;
+// \`rewritten.limit\` is a row cap we injected: it changes the ANSWER, not just
+// the format, and it truncates at the source where savedBytes cannot see it.
+// Disclosed on stderr below - a truncation the agent cannot detect is worse
+// than the tokens it saves.
+// Skipped when redirected as well: injecting "-20" into "git log > commits.txt"
+// would truncate the FILE, not just the view.
+const rewritten     = (wantFull || redirected)
+  ? { args: cleanArgs, injected: [], limit: 0 }
+  : rewriteArgs(cmd, cleanArgs);
+const effectiveArgs = rewritten.args;
 
 // On Windows, spawnSync resolves binaries using Windows PATH which maps Unix
 // tools (cat, find, ls, grep ...) to wrong Windows counterparts.  Running via
 // 'sh' (always present via the git installer) gives proper POSIX resolution.
+// Colour escapes are tokens that render as nothing, and a pager on a pipe can
+// block forever. Cheaper and more reliable to ask the child not to emit them
+// than to strip them afterwards. The caller's own values are overridden
+// deliberately: this child's output is going into a context window, not a
+// terminal.
+function childEnv() {
+  return {
+    ...process.env,
+    PATH: cleanPath,
+    NO_COLOR: '1',
+    FORCE_COLOR: '0',
+    CLICOLOR: '0',
+    CLICOLOR_FORCE: '0',
+    TERM: 'dumb',
+    GIT_PAGER: 'cat',
+    PAGER: 'cat',
+    COLUMNS: '200',
+  };
+}
+
 const spawnOpts = {
   stdio: ['inherit', 'pipe', 'pipe'],
-  env: { ...process.env, PATH: cleanPath },
+  env: childEnv(),
   maxBuffer: 10 * 1024 * 1024,
 };
-const result = process.platform === 'win32'
-  ? spawnSync(
-      'sh',
-      ['-c', [cmd, ...effectiveArgs.map(function(a) {
+
+// A follow/watch invocation never ends, and spawnSync only returns its output
+// once the child exits - so capturing one makes the agent blind for the whole
+// run. There is nothing to compress about an endless stream: inherit all three
+// stdio handles and get out of the way.
+if (!wantFull && isFollowInvocation(cmd, cleanArgs)) {
+  const passthrough = process.platform === 'win32'
+    ? spawnSync('sh', ['-c', [cmd, ...cleanArgs.map(function(a) {
         return "'" + String(a).replace(/'/g, "'\\\\''") + "'";
-      })].join(' ')],
-      spawnOpts,
-    )
-  : spawnSync(cmd, effectiveArgs, spawnOpts);
+      })].join(' ')], { stdio: 'inherit', env: childEnv() })
+    : spawnSync(cmd, cleanArgs, { stdio: 'inherit', env: childEnv() });
+  process.exit(passthrough.status ?? 0);
+}
+function runWin32ViaSh() {
+  return spawnSync(
+    'sh',
+    ['-c', [cmd, ...effectiveArgs.map(function(a) {
+      return "'" + String(a).replace(/'/g, "'\\\\''") + "'";
+    })].join(' ')],
+    spawnOpts,
+  );
+}
+
+// On Windows, going through \`sh\` gives POSIX resolution so \`cat\`/\`find\`/\`grep\`
+// reach the Git tools rather than their unrelated Windows namesakes.
+//
+// But \`sh.exe\` is NOT on PATH in a default Git-for-Windows install - the
+// installer's default option adds Git\\cmd, not Git\\usr\\bin - and from cmd.exe
+// or PowerShell the .cmd wrapper runs with that PATH. Every proxied command
+// then returned exit 1 with EMPTY stdout: the wrapper turned a working command
+// into a hard failure. Fall back to spawning it directly, which is what would
+// have happened without the proxy at all.
+let result = process.platform === 'win32' ? runWin32ViaSh() : spawnSync(cmd, effectiveArgs, spawnOpts);
+if (process.platform === 'win32' && result.error && String(result.error.code ?? '') === 'ENOENT') {
+  result = spawnSync(cmd, effectiveArgs, spawnOpts);
+}
 
 const rawStdout = result.stdout?.toString('utf8') ?? '';
 const rawStderr = result.stderr?.toString('utf8') ?? '';
 
+// spawnSync signals a maxBuffer overflow or a signal kill through result.error
+// / result.signal and leaves result.status null. Falling back to 0 there would
+// report a truncated, failed capture as a clean success - the worst possible
+// lie to tell an agent, because it reads a broken build as a passing one.
+// Surface it instead: raw output, explicit banner, non-zero exit.
+const captureFailed = !!result.error || !!result.signal;
+const captureNote = result.error
+  ? (String(result.error.code ?? '') === 'ENOBUFS'
+      ? 'output exceeded the 10 MB capture buffer and was truncated'
+      : 'the command could not be captured: ' + String(result.error.message ?? result.error))
+  : 'the command was killed by signal ' + String(result.signal);
+
 // ── compress dispatcher ───────────────────────────────────────────────────────
 
-function compress(text, cmdName, cmdArgs) {
+function compress(text, cmdName, cmdArgs, exitStatus) {
   if (!text) return text;
+
+  // The caller asked for a machine format (--json, -o yaml, --porcelain ...),
+  // so this output is going to be parsed by something other than the agent.
+  // Reshaping it corrupts the consumer; the only safe transform is none.
+  //
+  // Drops at most ONE trailing newline and nothing else - not .trim(), because
+  // leading whitespace is significant in column formats ("git status
+  // --porcelain" encodes the index state in columns 1-2).
+  if (isMachineOutput(cmdName, cmdArgs)) return text.replace(/\\n$/, '');
+
   let out = text;
 
-  // Strip ANSI cursor-positioning and progress-bar carriage-return sequences
-  out = out.replace(/\\x1b\\[\\d*;\\d*[Hf]/g, '');
-  out = out.replace(/\\x1b\\[\\d*[ABCDEFGsu]/g, '');
+  // Strip ANSI escapes: the full CSI grammar (colour, cursor, mode toggles like
+  // \\x1b[?25l) and OSC strings (window titles, hyperlinks), not just the few
+  // cursor-move forms. Then the progress-bar carriage-return collapsing.
+  out = out.replace(/\\x1b\\[[0-9;?]*[ -/]*[@-~]/g, '');
+  out = out.replace(/\\x1b\\][^\\x07\\x1b]*(?:\\x07|\\x1b\\\\)/g, '');
   out = out.replace(/(\\r(?:\\x1b\\[[0-9;]*[A-Za-z])?[^\\n]{0,256}){4,}(\\r(?:\\x1b\\[[0-9;]*[A-Za-z])?[^\\n]{0,256})/g, '$2');
 
-  const sub = cmdArgs[0] ?? '';
+  // What the agent would have read had no condenser run at all. ANSI stripping
+  // is pure deletion, so this is always <= the raw output, and it is the
+  // baseline the transform below has to beat. See the no-growth guard.
+  const preCondense = out;
 
-  if      (cmdName === 'tsc' || /TS\\d{4}:/.test(out))             out = condenseTsc(out);
+  // Resolve the subcommand past any global flags, so "git -C dir log" and
+  // "kubectl -n prod get pods" still reach their condenser.
+  const sub = resolveSub(cmdName, cmdArgs).sub;
+
+  if      (cmdName === 'tsc')                                       out = condenseTsc(out);
   else if (cmdName === 'npm' || cmdName === 'pnpm' || cmdName === 'yarn') {
-    if (sub === 'audit') out = condensePkgAudit(out);
-    else                  out = stripPkgNoise(out);
+    if      (sub === 'audit')          out = condensePkgAudit(out);
+    // Package managers mostly DELEGATE: "npm run build" is really tsc, "npm
+    // test" is really vitest. Sniff the delegate's output here, inside the
+    // branch - a sniff placed ahead of the command branches hijacks unrelated
+    // commands (a text search matching "TS2304:" became a compiler report).
+    else if (/TS\\d{4}:/.test(out))     out = condenseTsc(out);
+    else                               out = condensePkgSub(out, sub, cmdArgs);
   }
-  else if (cmdName === 'grep' || cmdName === 'rg')                  out = groupGrep(out);
+  else if (cmdName === 'grep' || cmdName === 'rg')                  out = groupGrep(out, cmdArgs);
   else if (cmdName === 'cargo')                                     out = condenseCargo(out, sub);
   else if (cmdName === 'pytest')                                    out = condensePytest(out);
   else if (cmdName === 'mypy')                                      out = condenseMypy(out);
@@ -78,7 +189,7 @@ function compress(text, cmdName, cmdArgs) {
   else if (cmdName === 'kubectl')                                   out = condenseKubectl(out, cmdArgs);
   else if (cmdName === 'curl')                                      out = condenseCurl(out);
   else if (cmdName === 'wget')                                      out = condenseWget(out);
-  else if (cmdName === 'gh')                                        out = condenseGh(out);
+  else if (cmdName === 'gh')                                        out = condenseGh(out, cmdArgs);
   else if (cmdName === 'make')                                      out = condenseMake(out);
   else if (cmdName === 'rspec')                                     out = condenseRspec(out);
   else if (cmdName === 'rubocop')                                   out = condenseRubocop(out);
@@ -86,7 +197,11 @@ function compress(text, cmdName, cmdArgs) {
   else if (cmdName === 'vitest')                                    out = condenseVitest(out);
   else if (cmdName === 'jest')                                      out = condenseJest(out);
   else if (cmdName === 'playwright')                                out = condensePlaywright(out);
-  else if (cmdName === 'prettier')                                  out = condensePrettier(out);
+  // cmdArgs matters here: --write and --check/-l produce different reports, and
+  // sniffing which one ran from the OUTPUT inverts them - a single "[error]"
+  // line was enough to relabel files prettier had just reformatted as files
+  // that "need formatting". The mode is in argv; it does not have to be guessed.
+  else if (cmdName === 'prettier')                                  out = condensePrettier(out, cmdArgs);
   else if (cmdName === 'eslint')                                    out = condenseEslint(out);
   else if (cmdName === 'next')                                      out = condenseNext(out);
   else if (cmdName === 'aws')                                       out = condenseAws(out);
@@ -104,17 +219,180 @@ function compress(text, cmdName, cmdArgs) {
   else if (cmdName === 'ls')                                        out = condenseLs(out);
   else if (cmdName === 'find')                                      out = condenseFind(out);
   else if (cmdName === 'git') {
-    if (sub === 'diff' || sub === 'show' || /^(diff --|--- a\\/|@@ )/m.test(out))
-      out = condenseDiff(out);
-    else if (sub === 'log')    out = condenseGitLog(out);
+    // The SUBCOMMAND decides, and only then the content. \`git log -p\` prints
+    // patches, so a content sniff evaluated in the same condition as
+    // \`sub === 'diff'\` routed it to condenseDiff - which condenses the first
+    // commit header and then treats every later "commit <sha>" line as body
+    // text. Ordering the subcommand first is what keeps log output in the log
+    // condenser; the sniff stays as a fallback for a git invocation whose
+    // subcommand we did not recognise at all.
+    if      (sub === 'log')    out = condenseGitLog(out, cmdArgs);
     else if (sub === 'status') out = condenseGitStatus(out);
+    else if (sub === 'diff' || sub === 'show') out = condenseDiff(out, cmdArgs);
+    else if (/^(diff --|--- a\\/|@@ )/m.test(out)) out = condenseDiff(out, cmdArgs);
+    else                       out = condenseGitOther(out, sub, cmdArgs);
   }
+  else if (cmdName === 'helm')                                      out = condenseHelm(out, cmdArgs);
+  else if (cmdName === 'tree')                                      out = condenseTree(out, cmdArgs);
+  else if (cmdName === 'ps')                                        out = condensePs(out, cmdArgs);
+  else if (cmdName === 'du' || cmdName === 'df')                    out = condenseDiskUsage(out, cmdArgs);
+  else if (cmdName === 'systemctl')                                 out = condenseSystemctl(out, cmdArgs);
+  else if (cmdName === 'journalctl')                                out = condenseJournalctl(out, cmdArgs);
   else if (cmdName === 'cat' || cmdName === 'head' || cmdName === 'tail')
-    out = aggressiveStrip(out, detectLang(cmdArgs[0] ?? ''));
+    out = aggressiveStrip(out, detectLang(resolveFileArg(cmdName, cmdArgs)));
+  // Content sniff LAST, as a fallback for commands with no branch of their own.
+  // Ahead of the command branches it hijacked unrelated output: a text search
+  // whose hits merely mention "TS2304:" came back as a compiler error report.
+  else if (/TS\\d{4}:/.test(out))                                    out = condenseTsc(out);
+
+  // ── no condenser may grow its input ─────────────────────────────────────────
+  // A transform that returns MORE characters than it was given has not
+  // condensed anything - it has added text, which is the one thing this library
+  // promises never to do. It happens at the small end, where a rollup line costs
+  // more than the lines it replaces: \`ruff format --check\` on an already-clean
+  // tree turned "3 files already formatted" (26 ch) into "ruff format: 0
+  // reformatted, 3 already formatted" (47 ch), and a shallow \`npm ls\` bought a
+  // problem list with output the tree already contained.
+  //
+  // This was policed per condenser, which every new condenser then has to
+  // re-earn - and the suite only caught the cases it happened to contain. Making
+  // it structural means the proxy can never cost an agent more context than
+  // running the command without it, whatever a condenser does.
+  //
+  // Any notice a condenser queued is dropped along with its output: a notice
+  // announces an elision, and the text being handed back is the one that was
+  // never elided. The backstop caps run AFTER this point, so their own notices
+  // are unaffected.
+  if (out.length > preCondense.length) {
+    ttTakeNotices();
+    out = preCondense;
+  }
+
+  // \`exitStatus\` is undefined when compress() is called outside the proxy (the
+  // test harness), which reads as "not a failure" - the stricter default. A
+  // non-zero exit means the agent is reading this output to find out what went
+  // wrong, so the backstop budget is raised rather than applied as-is.
+  const budget = exitStatus ? 4 : 1;
+
+  // Reading a FILE is the one case where whitespace is content, not chrome.
+  // The source condensers blank a removed line instead of dropping it so that
+  // every surviving line keeps the number it has on disk; collapsing blank runs,
+  // trimming the tail, or even stripping a trailing tab would undo that or
+  // silently drop a field from a TSV. So the file path skips all of it.
+  if (cmdName === 'cat' || cmdName === 'head' || cmdName === 'tail') {
+    return backstopCapHead(out);
+  }
 
   out = out.split('\\n').map(l => l.replace(/[ \\t]+$/, '')).join('\\n');
   out = out.replace(/\\n{3,}/g, '\\n\\n');
-  return out.trim();
+
+  // Leading BLANK LINES are chrome; the indentation of the first content line
+  // is not. This used to be \`.trim()\`, which cannot tell them apart - see
+  // ttTrimBlankEdges for what that cost.
+  return backstopCap(ttTrimBlankEdges(out), budget);
+}
+
+// ── backstop cap, file-read variant ───────────────────────────────────────────
+// A file is capped from the TAIL, never the middle. backstopCap drops lines out
+// of the middle, which is right for a log - the end is where the failure is -
+// and wrong for a file: it puts back exactly the line-number shift that the
+// blank-in-place strip exists to prevent, so \`sed -n '300p'\` silently returns
+// the wrong line. Keeping a prefix means every line the agent CAN see still
+// sits at its own number, and the part that is missing is missing from the end,
+// where "the file continues" is the obvious reading.
+//
+// The elision is disclosed out of band: nothing is inserted into the file's
+// own text.
+function backstopCapHead(out) {
+  const MAX_CHARS = 8000;
+  if (out.length <= MAX_CHARS) return out;
+
+  const lines = out.split('\\n');
+  const kept = [];
+  let used = 0;
+  for (const line of lines) {
+    if (used + line.length + 1 > MAX_CHARS) break;
+    kept.push(line);
+    used += line.length + 1;
+  }
+  if (kept.length === 0 || kept.length >= lines.length) return out;
+
+  ttNotice('showing the first ' + kept.length + ' of ' + lines.length +
+    ' lines - the remaining ' + (lines.length - kept.length) + ' are omitted from the END, so ' +
+    'every line number above is the file\\'s own; re-run with __TT_FULL_FLAG__ for the rest');
+  return kept.join('\\n');
+}
+
+// ── backstop cap ──────────────────────────────────────────────────────────────
+// Last resort for output no condenser recognised. Without it a single \`cat\` of
+// a large file delivers the whole thing into the context window - a 10 MB file
+// is roughly 2.6M tokens. Keeps the head AND the tail, because the end of a log
+// is usually where the failure is.
+function backstopCap(out, budgetMultiplier) {
+  const MAX_CHARS = 8000 * (budgetMultiplier ?? 1);
+  if (out.length <= MAX_CHARS) return out;
+
+  // A valid JSON document is all-or-nothing: half of one is not a smaller
+  // answer, it is an unparseable one, and the caller reached for this data
+  // deliberately (\`aws … | jq\`, \`gh api\`, \`kubectl get -o json\`). The aws CLI
+  // in particular emits JSON by DEFAULT, so no flag exists for isMachineOutput
+  // to key on and this is the only place that can protect it. Leave it whole.
+  const t = out.trim();
+  if (t.charAt(0) === '{' || t.charAt(0) === '[') {
+    try { JSON.parse(t); return out; } catch {}
+  }
+
+  const lines = out.split('\\n');
+  const headBudget = Math.floor(MAX_CHARS * 0.65);
+  const tailBudget = MAX_CHARS - headBudget;
+
+  const head = [];
+  let used = 0;
+  for (const l of lines) {
+    if (used + l.length + 1 > headBudget) break;
+    head.push(l); used += l.length + 1;
+  }
+
+  const tail = [];
+  used = 0;
+  for (let i = lines.length - 1; i >= head.length; i--) {
+    if (used + lines[i].length + 1 > tailBudget) break;
+    tail.unshift(lines[i]); used += lines[i].length + 1;
+  }
+
+  // One line longer than the whole budget fits in neither loop, so both come
+  // back empty and the "elision" would be the marker BY ITSELF - the entire
+  // payload deleted. Fall back to cutting by characters, which at least keeps
+  // both ends of the content.
+  if (head.length === 0 && tail.length === 0) {
+    const headChars = Math.floor(MAX_CHARS * 0.65);
+    const tailChars = MAX_CHARS - headChars;
+    return out.slice(0, headChars) +
+      '\\n... ' + (out.length - MAX_CHARS) + ' characters elided (' +
+      Math.round(out.length / 1024) + ' KB total) - re-run with __TT_FULL_FLAG__ for all of it ...\\n' +
+      out.slice(out.length - tailChars);
+  }
+
+  const elided = lines.length - head.length - tail.length;
+  if (elided <= 0) return out;
+
+  // A DATA LIST has to stay pipeable past this cap too. \`rg -l pat | xargs sed\`,
+  // \`git ls-files | xargs prettier\`, \`terraform state list | xargs -n1 terraform
+  // state show\` - the marker below reached the next program as arguments, so
+  // xargs was handed eight words ("...", "64", "lines", "elided", ...) none of
+  // which name anything. Every condenser that caps a list already discloses out
+  // of band via ttCapDataList; this is the one path that did not, and it is the
+  // path a list only reaches when it is LARGE - exactly when the cap bites.
+  if (ttIsDataList(out)) {
+    ttNotice(elided + ' of ' + lines.length +
+      ' entries omitted from the middle of this list; re-run with __TT_FULL_FLAG__ for all of them');
+    return head.concat(tail).join('\\n');
+  }
+
+  return head.join('\\n') +
+    '\\n... ' + elided + ' lines elided (' + Math.round(out.length / 1024) +
+    ' KB total) - re-run with __TT_FULL_FLAG__ for all of it ...\\n' +
+    tail.join('\\n');
 }
 
 // ── stats reporting ───────────────────────────────────────────────────────────
@@ -130,7 +408,25 @@ function reportSavings(displayCmd, savedBytes, originalBytes) {
 
 // ── main ──────────────────────────────────────────────────────────────────────
 
-const compressed = wantFull ? rawStdout.trim() : compress(rawStdout, cmd, effectiveArgs);
+// \`redirected\` short-circuits to the EXACT bytes, not even trimmed: the caller
+// is writing a file and expects a faithful copy.
+// A failed capture is never compressed: the output is already incomplete, and
+// condensing an incomplete stream produces a summary of a truncation.
+// \`--full\` means FULL: the raw stream, byte for byte. It used to be trimmed,
+// which meant no invocation of any kind could get a faithful stream through a
+// pipe.
+const condensed = (redirected || captureFailed)
+  ? rawStdout
+  : (wantFull ? rawStdout : compress(rawStdout, cmd, effectiveArgs, result.status));
+
+// The trailing newline is DATA, not whitespace. Condensers trim as they build,
+// so it was being dropped for every command - one byte that makes
+// \`find … | wc -l\` report 26 for 27 files, and makes \`cmd | while read x\`
+// silently discard the last record. Restore it if and only if the command
+// printed one: never invent one the command did not emit.
+const compressed = (rawStdout.endsWith('\\n') && condensed.length > 0 && !condensed.endsWith('\\n'))
+  ? condensed + '\\n'
+  : condensed;
 const originalBytes = Buffer.byteLength(rawStdout, 'utf8');
 const savedBytes = Math.max(0, originalBytes - Buffer.byteLength(compressed, 'utf8'));
 
@@ -138,15 +434,63 @@ process.stdout.write(compressed);
 if (rawStderr) process.stderr.write(rawStderr);
 
 // Hint on stderr when significant compression occurred (never clutters stdout)
-const HINT_CMDS = new Set(['jq','git','cat','head','tail','curl','wget','kubectl','docker','aws','psql','grep','rg','find','ls','terraform','tofu']);
-if (!wantFull && savedBytes > __TT_HINT_MIN__ && HINT_CMDS.has(cmd)) {
+// Commands whose condensers drop enough that the agent may genuinely need the
+// raw output back. A command absent here still gets compressed - it just never
+// advertises the escape hatch, which is right for condensers that only strip
+// noise (install spinners, layer-transfer chatter) and wrong for any that
+// summarise or cap.
+const HINT_CMDS = new Set([
+  'jq','git','cat','head','tail','curl','wget','kubectl','docker','aws','psql',
+  'grep','rg','find','ls','terraform','tofu',
+  'gh','helm','npm','pnpm','yarn','bun','cargo','pytest','pip','dotnet',
+  'vitest','jest','playwright','mvn','gradle','tree','ps','du','df',
+  'systemctl','journalctl',
+]);
+if (!wantFull && !redirected && savedBytes > __TT_HINT_MIN__ && HINT_CMDS.has(cmd)) {
   process.stderr.write('\\n[__TT_HINT_LABEL__] instruction (not output): compressed to save tokens; re-run with __TT_FULL_FLAG__ for the full output, do not switch commands.\\n');
+}
+
+// Notices a condenser raised while compressing - always a truncation it had to
+// disclose without putting a foreign token into a data stream. stderr is where
+// every instruction to the agent lives; stdout stays exactly what the command
+// produced, minus what was elided.
+if (!redirected) {
+  for (const notice of ttTakeNotices()) {
+    process.stderr.write('\\n[__TT_HINT_LABEL__] instruction (not output): ' + notice + '.\\n');
+  }
+}
+
+// An injected limit truncates at the SOURCE, so originalBytes already measures
+// the short output and savedBytes is 0 - the hint above can never fire for it.
+// Disclose it separately, and only when the cap actually bit (the row count
+// reached the limit), so a 5-commit repo stays quiet.
+if (!wantFull && !redirected && rewritten.limit > 0) {
+  // Count ENTRIES, not lines. \`git log --stat\` and \`--graph\` print several
+  // lines per commit, so a line count tripped this at four commits and told the
+  // agent its 20-commit cap had bitten when it had not - a fabricated
+  // truncation notice, which is the same class of lie as a fabricated count.
+  // The hash prefix is the format this proxy injects, so when the caller
+  // supplied their own --pretty there is nothing to count and nothing is
+  // claimed.
+  const rows = compressed
+    ? compressed.split('\\n').filter(l => /^[0-9a-f]{7,40} /.test(l)).length
+    : 0;
+  if (rows > 0 && rows >= rewritten.limit) {
+    process.stderr.write('\\n[__TT_HINT_LABEL__] instruction (not output): capped at the ' + rewritten.limit +
+      ' most recent entries; re-run with __TT_FULL_FLAG__ to see all of them, do not switch commands.\\n');
+  }
+}
+
+if (captureFailed) {
+  process.stderr.write('\\n[__TT_HINT_LABEL__] instruction (not output): ' + captureNote +
+    '; the result above is INCOMPLETE and its exit status is unknown - do not treat it as success.\\n');
 }
 
 const subCmd = effectiveArgs[0] ?? '';
 const displayCmd = subCmd ? cmd + ' ' + subCmd : cmd;
 reportSavings(displayCmd, savedBytes, originalBytes);
-process.exitCode = result.status ?? 0;
+// Only trust result.status when the capture itself succeeded.
+process.exitCode = captureFailed ? (result.status ?? 1) : (result.status ?? 0);
 
 // ── handler functions (hoisted - can be referenced above) ─────────────────────
 `

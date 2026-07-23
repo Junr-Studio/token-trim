@@ -1,119 +1,111 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`compress - system > find - caps the whole body at 50 shown entries with a "+N more" footer 1`] = `
-"60 results in 10 dir(s)  .ts(60)
-./pkg/dir0/  (6)
-  file0.ts
-  file1.ts
-  file2.ts
-  file3.ts
-  file4.ts
-  file5.ts
-./pkg/dir1/  (6)
-  file0.ts
-  file1.ts
-  file2.ts
-  file3.ts
-  file4.ts
-  file5.ts
-./pkg/dir2/  (6)
-  file0.ts
-  file1.ts
-  file2.ts
-  file3.ts
-  file4.ts
-  file5.ts
-./pkg/dir3/  (6)
-  file0.ts
-  file1.ts
-  file2.ts
-  file3.ts
-  file4.ts
-  file5.ts
-./pkg/dir4/  (6)
-  file0.ts
-  file1.ts
-  file2.ts
-  file3.ts
-  file4.ts
-  file5.ts
-./pkg/dir5/  (6)
-  file0.ts
-  file1.ts
-  file2.ts
-  file3.ts
-  file4.ts
-  file5.ts
-./pkg/dir6/  (6)
-  file0.ts
-  file1.ts
-  file2.ts
-  file3.ts
-  file4.ts
-  file5.ts
-./pkg/dir7/  (6)
-  file0.ts
-  file1.ts
-  file2.ts
-  file3.ts
-  file4.ts
-  file5.ts
-./pkg/dir8/  (6)
-  file0.ts
-  file1.ts
-  file2.ts
-  file3.ts
-  file4.ts
-  file5.ts
-... +6 more"
+exports[`compress - system > find - a list over the cap keeps head and tail, and only real paths 1`] = `
+"./pkg/dir0/file0.ts
+./pkg/dir0/file1.ts
+./pkg/dir0/file2.ts
+./pkg/dir0/file3.ts
+./pkg/dir0/file4.ts
+./pkg/dir0/file5.ts
+./pkg/dir1/file0.ts
+./pkg/dir1/file1.ts
+./pkg/dir1/file2.ts
+./pkg/dir1/file3.ts
+./pkg/dir1/file4.ts
+./pkg/dir1/file5.ts
+./pkg/dir2/file0.ts
+./pkg/dir2/file1.ts
+./pkg/dir2/file2.ts
+./pkg/dir2/file3.ts
+./pkg/dir2/file4.ts
+./pkg/dir2/file5.ts
+./pkg/dir3/file0.ts
+./pkg/dir3/file1.ts
+./pkg/dir3/file2.ts
+./pkg/dir3/file3.ts
+./pkg/dir3/file4.ts
+./pkg/dir3/file5.ts
+./pkg/dir4/file0.ts
+./pkg/dir4/file1.ts
+./pkg/dir4/file2.ts
+./pkg/dir4/file3.ts
+./pkg/dir4/file4.ts
+./pkg/dir4/file5.ts
+./pkg/dir5/file0.ts
+./pkg/dir5/file1.ts
+./pkg/dir5/file2.ts
+./pkg/dir5/file3.ts
+./pkg/dir5/file4.ts
+./pkg/dir5/file5.ts
+./pkg/dir6/file0.ts
+./pkg/dir6/file1.ts
+./pkg/dir6/file2.ts
+./pkg/dir6/file3.ts
+./pkg/dir6/file4.ts
+./pkg/dir6/file5.ts
+./pkg/dir7/file0.ts
+./pkg/dir7/file1.ts
+./pkg/dir7/file2.ts
+./pkg/dir7/file3.ts
+./pkg/dir7/file4.ts
+./pkg/dir7/file5.ts
+./pkg/dir8/file0.ts
+./pkg/dir8/file1.ts
+./pkg/dir8/file2.ts
+./pkg/dir8/file3.ts
+./pkg/dir8/file4.ts
+./pkg/dir8/file5.ts
+./pkg/dir9/file0.ts
+./pkg/dir9/file1.ts
+./pkg/dir9/file2.ts
+./pkg/dir9/file3.ts
+./pkg/dir9/file4.ts
+./pkg/dir9/file5.ts"
 `;
 
-exports[`compress - system > find - extension-less results omit the extension tally from the header 1`] = `
-"12 results in 1 dir(s)
-./bin/  (12)
-  tool0
-  tool1
-  tool2
-  tool3
-  tool4
-  tool5
-  tool6
-  tool7
-  ... +4 more here"
+exports[`compress - system > find - a list under the cap is returned entirely, in order 1`] = `
+"./src/pages/page0.tsx
+./src/pages/page1.tsx
+./src/pages/page2.tsx
+./src/pages/page3.tsx
+./src/pages/page4.tsx
+./src/pages/page5.tsx
+./src/pages/page6.tsx
+./src/pages/page7.tsx
+./src/pages/page8.tsx
+./src/pages/page9.tsx
+./src/pages/page10.tsx
+./src/pages/page11.tsx"
 `;
 
-exports[`compress - system > find - groups many paths under per-directory headers with an extension tally 1`] = `
-"12 results in 4 dir(s)  .tsx(8) .ts(4)
-./packages/web-app/src/components/forms/  (5)
-  TextInput.tsx
-  Checkbox.tsx
-  RadioGroup.tsx
-  Select.tsx
-  DatePicker.tsx
-./packages/web-app/src/components/layout/  (3)
-  Header.tsx
-  Sidebar.tsx
-  Footer.tsx
-./packages/web-app/src/hooks/  (3)
-  useDebounce.ts
-  usePrevious.ts
-  useMediaQuery.ts
-./packages/web-app/src/utils/  (1)
-  validation.ts"
+exports[`compress - system > find - every output line is a path find really printed, so the list stays pipeable 1`] = `
+"./packages/web-app/src/components/forms/TextInput.tsx
+./packages/web-app/src/components/forms/Checkbox.tsx
+./packages/web-app/src/components/forms/RadioGroup.tsx
+./packages/web-app/src/components/forms/Select.tsx
+./packages/web-app/src/components/forms/DatePicker.tsx
+./packages/web-app/src/components/layout/Header.tsx
+./packages/web-app/src/components/layout/Sidebar.tsx
+./packages/web-app/src/components/layout/Footer.tsx
+./packages/web-app/src/hooks/useDebounce.ts
+./packages/web-app/src/hooks/usePrevious.ts
+./packages/web-app/src/hooks/useMediaQuery.ts
+./packages/web-app/src/utils/validation.ts"
 `;
 
-exports[`compress - system > find - shows at most 8 names per directory then "+N more here" 1`] = `
-"12 results in 1 dir(s)  .tsx(12)
-./src/pages/  (12)
-  page0.tsx
-  page1.tsx
-  page2.tsx
-  page3.tsx
-  page4.tsx
-  page5.tsx
-  page6.tsx
-  page7.tsx
-  ... +4 more here"
+exports[`compress - system > find - extension-less results are treated no differently; they are still just paths 1`] = `
+"./bin/tool0
+./bin/tool1
+./bin/tool2
+./bin/tool3
+./bin/tool4
+./bin/tool5
+./bin/tool6
+./bin/tool7
+./bin/tool8
+./bin/tool9
+./bin/tool10
+./bin/tool11"
 `;
 
 exports[`compress - system > find - small result set (≤ 10 lines) is below the trigger, passes through untouched 1`] = `
@@ -123,7 +115,39 @@ exports[`compress - system > find - small result set (≤ 10 lines) is below the
 ./package.json"
 `;
 
+exports[`compress - system > ls (plain) - a bare name list is not long format; nothing becomes a directory 1`] = `
+"docs.md
+dist
+data.json
+src
+README.md
+deploy.sh"
+`;
+
 exports[`compress - system > ls - empty output stays empty 1`] = `""`;
+
+exports[`compress - system > ls - empty output stays empty rather than reporting "0 files, 0 dirs" 1`] = `""`;
+
+exports[`compress - system > ls -l - ISO timestamps (--time-style=long-iso) parse the same way 1`] = `
+"1 files, 1 dirs  .ts(1)
+alpha.ts (1KB)
+beta/"
+`;
+
+exports[`compress - system > ls -l - a 4-digit size is not mistaken for the timestamp when finding the name 1`] = `
+"3 files, 1 dirs  .txt(1) .ts(1) .md(1)
+my report 2024.txt (1KB)
+normal.ts (2KB)
+small.md (512B)
+src/"
+`;
+
+exports[`compress - system > ls -l - a non-English locale month still parses; the row is not abandoned 1`] = `
+"2 files, 1 dirs  .txt(1) .md(1)
+rapport.txt (1KB)
+notes.md (2KB)
+archives/"
+`;
 
 exports[`compress - system > ls -la - caps the body at 50 entries with a "+N more" footer 1`] = `
 "60 files, 0 dirs  .ts(60)
@@ -186,20 +210,42 @@ drwxr-xr-x  2 alice  staff   64 Jul 20 14:02 .
 drwxr-xr-x  9 alice  staff  288 Jul 20 13:00 .."
 `;
 
+exports[`compress - system > ls -la - every directory ls printed is listed and counted, so "was dist/ built?" gets a true answer 1`] = `
+"2 files, 5 dirs  .json(1)
+.git/
+.gitignore (186B)
+dist/
+node_modules/
+package.json (3KB)
+src/
+test/"
+`;
+
 exports[`compress - system > ls -la - humanizes byte sizes into B / KB / MB bands 1`] = `
 "3 files, 0 dirs  .txt(1) .js(1) .mp4(1)
 notes.txt (512B)
-Jan 14 18:05 bundle.js (12KB)
-Jan 10 08:00 demo.mp4 (2.4MB)"
+bundle.js (12KB)
+demo.mp4 (2.4MB)"
 `;
 
-exports[`compress - system > ls -la - strips perm/owner/date columns, filters noise dirs, tallies extensions, humanizes sizes 1`] = `
-"5 files, 2 dirs  .json(2) .gitignore(1) .md(1) .ts(1)
+exports[`compress - system > ls -la - strips perm/owner/date columns, tallies extensions, humanizes sizes 1`] = `
+"5 files, 4 dirs  .json(2) .md(1) .ts(1)
 .gitignore (214B)
 package.json (842B)
 tsconfig.json (318B)
 README.md (523B)
 index.ts (690B)
 src/
-test/"
+test/
+node_modules/
+.git/"
+`;
+
+exports[`compress - system > ls -lh - human-readable sizes parse, and are relayed exactly as ls printed them 1`] = `
+"4 files, 1 dirs  .md(1) .ts(1) .json(1) .mp4(1)
+README.md (1.2K)
+index.ts (340B)
+src/
+package-lock.json (12K)
+demo.mp4 (2.4M)"
 `;

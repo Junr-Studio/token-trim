@@ -38,8 +38,17 @@ function condenseRubocop(text) {
   let total = 0;
 
   for (const line of lines) {
-    // Format: path/to/file.rb:10:5: C: Layout/... description
-    const m = line.match(/^([^:]+\\.rb):\\d+:\\d+:\\s+([CWEF]):\\s+(.+)/);
+    // Format: path/to/file:10:5: C: Layout/... description
+    //
+    // The path is NOT anchored to ".rb". RuboCop's default AllCops/Include
+    // covers **/*.rake, **/Rakefile, **/Gemfile, **/*.gemspec and **/*.ru too,
+    // so a mixed offence list is the norm in a Rails repo. Requiring ".rb" here
+    // dropped those rows from the body, from the severity histogram AND from
+    // the total - and since this condenser replaces the whole output, RuboCop's
+    // own "N offenses detected" line went with them, leaving the undercount
+    // silent. An E: Lint/Syntax in a Gemfile then vanishes from the report an
+    // agent uses to decide the lint is clean.
+    const m = line.match(/^([^:]+):\\d+:\\d+:\\s+([CWEF]):\\s+(.+)/);
     if (!m) continue;
     total++;
     const [, file, sev] = m;
@@ -96,6 +105,6 @@ function condenseRake(text) {
     if (line.trim()) out.push(line);
   }
 
-  return out.join('\\n').trim() || text;
+  return ttTrimBlankEdges(out.join('\\n')) || text;
 }
 `

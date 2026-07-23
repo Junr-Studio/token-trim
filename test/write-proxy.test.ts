@@ -118,4 +118,28 @@ describe('writeProxyScripts - custom options + subsetting', () => {
     await expect(writeProxyScripts(d, { binDirEnvVar: 'bad name!' })).rejects.toThrow()
     await fs.rm(d, { recursive: true, force: true })
   })
+
+  // `dir` is caller-supplied and `$` is legal in a path everywhere. Interpolated
+  // inside DOUBLE quotes the shell expanded it, so a directory named
+  // `d_$HOME_cache` became `d_`: setup.sh put a non-existent directory on PATH
+  // and compression silently never activated, while every wrapper died with
+  // "Cannot find module". A backtick would have been command substitution.
+  it('emits shell-safe paths, so a $ or a backtick in the directory is literal', async () => {
+    const base = await tmpDir()
+    const hostile = path.join(base, 'd_$HOME`whoami`_cache')
+    await fs.mkdir(hostile, { recursive: true })
+    const p = await writeProxyScripts(hostile, { commands: ['git'] })
+
+    const setup = await fs.readFile(p.setupScript, 'utf8')
+    const wrapper = await fs.readFile(path.join(p.binDir, process.platform === 'win32' ? 'git' : 'git'), 'utf8')
+
+    // the literal directory name survives in both generated scripts
+    expect(setup).toContain('d_$HOME`whoami`_cache')
+    expect(wrapper).toContain('d_$HOME`whoami`_cache')
+    // and neither leaves it exposed to expansion: no double-quoted occurrence
+    expect(setup).not.toMatch(/"[^"\n]*d_\$HOME/)
+    expect(wrapper).not.toMatch(/"[^"\n]*d_\$HOME/)
+
+    await fs.rm(base, { recursive: true, force: true })
+  })
 })

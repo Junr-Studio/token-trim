@@ -33,8 +33,13 @@ exports[`compress - build-tools > dotnet build - Build FAILED keeps error count 
 
 exports[`compress - build-tools > dotnet build - Build succeeded keeps result + WARN lines, drops MSBuild chatter 1`] = `
 "Build succeeded.
-  WARN: /home/user/MyApp/Program.cs(23,13): warning CS0219: The variable 'x' is assigned but its value is ne
   WARN: /home/user/MyApp/Program.cs(23,13): warning CS0219: The variable 'x' is assigned but its value is ne"
+`;
+
+exports[`compress - build-tools > dotnet build - MSBuild prints each diagnostic inline AND in the summary; that is one error, not two 1`] = `
+"Build FAILED.
+1 error(s):
+  /repo/Program.cs(7,13): error CS0103: The name 'foo' does not exist in the current context [/repo/MyApp.csproj]"
 `;
 
 exports[`compress - build-tools > dotnet test - clean/zero: all passing reduces to a single summary line 1`] = `"dotnet test: 42 passed"`;
@@ -61,15 +66,20 @@ exports[`compress - build-tools > gradle - no BUILD line: fallback strips daemon
 compileClasspath - Compile classpath for source set 'main'."
 `;
 
+exports[`compress - build-tools > init - provider download chatter collapses, the version lock survives 1`] = `
+"hashicorp/aws v5.31.0
+hashicorp/random v3.6.0
+Terraform has been successfully initialized!"
+`;
+
 exports[`compress - build-tools > mvn - BUILD FAILURE keeps result header + numbered [ERROR] lines, drops [INFO] 1`] = `
 "BUILD FAILURE
-6 error(s):
+2 error(s):
   /home/user/my-app/src/main/java/com/example/App.java:[15,23] cannot find symbol
   symbol:   variable foo
   location: class com.example.App
   /home/user/my-app/src/main/java/com/example/App.java:[22,10] ';' expected
-  Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile
-  -> [Help 1]"
+  Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile"
 `;
 
 exports[`compress - build-tools > mvn - clean/zero: BUILD SUCCESS reduces the whole reactor log to one line 1`] = `"BUILD SUCCESS"`;
@@ -80,15 +90,153 @@ exports[`compress - build-tools > mvn - no BUILD line: fallback strips download/
 [INFO]    org.springframework:spring-context:jar:6.1.3:compile"
 `;
 
+exports[`compress - build-tools > mvn - one javac error printed twice inside a standard [ERROR] epilogue is one error, not fourteen 1`] = `
+"BUILD FAILURE
+1 error(s):
+  COMPILATION ERROR :
+  /repo/src/main/java/App.java:[12,9] cannot find symbol
+  symbol:   variable foo
+  location: class App
+  Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project my-app"
+`;
+
+exports[`compress - build-tools > output - unrecognised shape passes through rather than being summarised 1`] = `
+"bucket_name = "my-prod-bucket"
+region = "eu-west-1""
+`;
+
+exports[`compress - build-tools > show -json - machine output is not reshaped 1`] = `
+"{
+  "format_version": "1.0",
+  "values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_s3_bucket.b0"
+        },
+        {
+          "address": "aws_s3_bucket.b1"
+        },
+        {
+          "address": "aws_s3_bucket.b2"
+        },
+        {
+          "address": "aws_s3_bucket.b3"
+        },
+        {
+          "address": "aws_s3_bucket.b4"
+        },
+        {
+          "address": "aws_s3_bucket.b5"
+        },
+        {
+          "address": "aws_s3_bucket.b6"
+        },
+        {
+          "address": "aws_s3_bucket.b7"
+        },
+        {
+          "address": "aws_s3_bucket.b8"
+        },
+        {
+          "address": "aws_s3_bucket.b9"
+        },
+        {
+          "address": "aws_s3_bucket.b10"
+        },
+        {
+          "address": "aws_s3_bucket.b11"
+        },
+        {
+          "address": "aws_s3_bucket.b12"
+        },
+        {
+          "address": "aws_s3_bucket.b13"
+        },
+        {
+          "address": "aws_s3_bucket.b14"
+        },
+        {
+          "address": "aws_s3_bucket.b15"
+        },
+        {
+          "address": "aws_s3_bucket.b16"
+        },
+        {
+          "address": "aws_s3_bucket.b17"
+        },
+        {
+          "address": "aws_s3_bucket.b18"
+        },
+        {
+          "address": "aws_s3_bucket.b19"
+        },
+        {
+          "address": "aws_s3_bucket.b20"
+        },
+        {
+          "address": "aws_s3_bucket.b21"
+        },
+        {
+          "address": "aws_s3_bucket.b22"
+        },
+        {
+          "address": "aws_s3_bucket.b23"
+        },
+        {
+          "address": "aws_s3_bucket.b24"
+        },
+        {
+          "address": "aws_s3_bucket.b25"
+        },
+        {
+          "address": "aws_s3_bucket.b26"
+        },
+        {
+          "address": "aws_s3_bucket.b27"
+        },
+        {
+          "address": "aws_s3_bucket.b28"
+        },
+        {
+          "address": "aws_s3_bucket.b29"
+        }
+      ]
+    }
+  }
+}"
+`;
+
+exports[`compress - build-tools > state list - a bare address list is canonical xargs input and is never reshaped 1`] = `
+"module.network.aws_subnet.private[0]
+aws_iam_role_policy_attachment.app_1
+module.network.aws_subnet.private[2]
+aws_iam_role_policy_attachment.app_3
+module.network.aws_subnet.private[4]
+aws_iam_role_policy_attachment.app_5
+module.network.aws_subnet.private[6]
+aws_iam_role_policy_attachment.app_7
+module.network.aws_subnet.private[8]
+aws_iam_role_policy_attachment.app_9
+module.network.aws_subnet.private[10]
+aws_iam_role_policy_attachment.app_11
+module.network.aws_subnet.private[12]
+aws_iam_role_policy_attachment.app_13
+module.network.aws_subnet.private[14]
+aws_iam_role_policy_attachment.app_15
+module.network.aws_subnet.private[16]
+aws_iam_role_policy_attachment.app_17
+module.network.aws_subnet.private[18]
+aws_iam_role_policy_attachment.app_19
+module.network.aws_subnet.private[20]
+aws_iam_role_policy_attachment.app_21
+module.network.aws_subnet.private[22]
+aws_iam_role_policy_attachment.app_23"
+`;
+
 exports[`compress - build-tools > terraform init - non-plan branch strips backend/provider init noise, keeps result 1`] = `
-"- Finding hashicorp/aws versions matching "~> 5.0"...
-- Installing hashicorp/aws v5.31.0...
-- Installed hashicorp/aws v5.31.0 (signed by HashiCorp)
-Terraform has created a lock file .terraform.lock.hcl to record the provider
-selections it made above.
-Terraform has been successfully initialized!
-You may now begin working with Terraform. Try running "terraform plan" to see
-any changes that are required for your infrastructure."
+"hashicorp/aws v5.31.0
+Terraform has been successfully initialized!"
 `;
 
 exports[`compress - build-tools > terraform plan - caps the change list at 20 with a "+N more" tail 1`] = `
@@ -127,3 +275,5 @@ exports[`compress - build-tools > terraform plan - summarizes counts + per-resou
 `;
 
 exports[`compress - build-tools > tofu apply - reports applied add/destroy counts (0-changed omitted) 1`] = `"terraform apply: 2 to add, 1 to destroy"`;
+
+exports[`compress - build-tools > validate - a clean run collapses to one line 1`] = `"Success! The configuration is valid."`;

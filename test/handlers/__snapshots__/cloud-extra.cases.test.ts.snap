@@ -1,52 +1,19 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`compress - cloud-extra > aws (default json output) - stays parseable instead of being cut at 40 lines 1`] = `"{"Reservations":[{"ReservationId":"r-0","Instances":[{"InstanceId":"i-0abc00","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-0-0"}},{"InstanceId":"i-0abc01","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-0-1"}},{"InstanceId":"i-0abc02","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-0-2"}}]},{"ReservationId":"r-1","Instances":[{"InstanceId":"i-0abc10","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-1-0"}},{"InstanceId":"i-0abc11","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-1-1"}},{"InstanceId":"i-0abc12","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-1-2"}}]},{"ReservationId":"r-2","Instances":[{"InstanceId":"i-0abc20","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-2-0"}},{"InstanceId":"i-0abc21","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-2-1"}},{"InstanceId":"i-0abc22","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-2-2"}}]},{"ReservationId":"r-3","Instances":[{"InstanceId":"i-0abc30","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-3-0"}},{"InstanceId":"i-0abc31","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-3-1"}},{"InstanceId":"i-0abc32","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-3-2"}}]},{"ReservationId":"r-4","Instances":[{"InstanceId":"i-0abc40","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-4-0"}},{"InstanceId":"i-0abc41","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-4-1"}},{"InstanceId":"i-0abc42","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-4-2"}}]},{"ReservationId":"r-5","Instances":[{"InstanceId":"i-0abc50","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-5-0"}},{"InstanceId":"i-0abc51","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-5-1"}},{"InstanceId":"i-0abc52","InstanceType":"t3.medium","LaunchTime":"2026-03-15T12:34:56.789Z","State":{"Name":"running"},"IamInstanceProfile":{"Arn":"arn:aws:iam::123456789012:instance-profile/role-5-2"}}]}]}"`;
+
+exports[`compress - cloud-extra > aws - an ARN keeps its account and region, which are what identifies the resource 1`] = `
+"ROLES	arn:aws:iam::123456789012:role/prod-deployer	2026-01-02	prod-deployer
+ROLES	arn:aws:iam::999988887777:role/staging-deployer	2026-01-03	staging-deployer"
+`;
+
+exports[`compress - cloud-extra > aws - non-JSON text output that is unrecognised passes through rather than being capped mid-record 1`] = `"123456789012	arn:aws:iam::123456789012:user/ci	AIDAEXAMPLE"`;
+
 exports[`compress - cloud-extra > aws empty output - returns empty string unchanged 1`] = `""`;
 
-exports[`compress - cloud-extra > aws iam list-roles - shortens region-less ARNs and truncates ISO timestamps to date 1`] = `
-"{
-    "Roles": [
-        {
-            "Path": "/",
-            "RoleName": "AppRole",
-            "RoleId": "AROAEXAMPLEID123456",
-            "Arn": "arn:…:role/AppRole",
-            "CreateDate": "2024-03-15",
-            "MaxSessionDuration": 3600
-        },
-        {
-            "Path": "/service-role/",
-            "RoleName": "LambdaExecRole",
-            "RoleId": "AROAEXAMPLEID654321",
-            "Arn": "arn:…:role/service-role/LambdaExecRole",
-            "CreateDate": "2024-01-02",
-            "MaxSessionDuration": 3600
-        }
-    ]
-}"
-`;
+exports[`compress - cloud-extra > aws iam list-roles - default JSON output stays parseable, ARNs keep their identity 1`] = `"{"Roles":[{"Path":"/","RoleName":"AppRole","RoleId":"AROAEXAMPLEID123456","Arn":"arn:aws:iam::123456789012:role/AppRole","CreateDate":"2024-03-15T12:34:56.789Z","MaxSessionDuration":3600},{"Path":"/service-role/","RoleName":"LambdaExecRole","RoleId":"AROAEXAMPLEID654321","Arn":"arn:aws:iam::123456789012:role/service-role/LambdaExecRole","CreateDate":"2024-01-02T08:00:00Z","MaxSessionDuration":3600}]}"`;
 
-exports[`compress - cloud-extra > aws lambda list-functions - shortens region-bearing ARNs (service:region:acct dropped) 1`] = `
-"{
-    "Functions": [
-        {
-            "FunctionName": "process-orders",
-            "FunctionArn": "arn:…:function:process-orders",
-            "Runtime": "nodejs20.x",
-            "Role": "arn:…:role/service-role/process-orders-role",
-            "LastModified": "2024-06-01",
-            "CodeSize": 204800
-        },
-        {
-            "FunctionName": "resize-images",
-            "FunctionArn": "arn:…:function:resize-images",
-            "Runtime": "python3.12",
-            "Role": "arn:…:role/lambda-basic",
-            "LastModified": "2024-05-20",
-            "CodeSize": 512000
-        }
-    ]
-}"
-`;
+exports[`compress - cloud-extra > aws lambda list-functions - JSON stays parseable, region and account survive 1`] = `"{"Functions":[{"FunctionName":"process-orders","FunctionArn":"arn:aws:lambda:us-east-1:123456789012:function:process-orders","Runtime":"nodejs20.x","Role":"arn:aws:iam::123456789012:role/service-role/process-orders-role","LastModified":"2024-06-01T09:15:30.123Z","CodeSize":204800},{"FunctionName":"resize-images","FunctionArn":"arn:aws:lambda:us-east-1:123456789012:function:resize-images","Runtime":"python3.12","Role":"arn:aws:iam::123456789012:role/lambda-basic","LastModified":"2024-05-20T18:00:00Z","CodeSize":512000}]}"`;
 
 exports[`compress - cloud-extra > aws s3 cp success - no-trigger passthrough (no ARNs/timestamps, stays intact) 1`] = `
 "Completed 1.0 KiB/1.0 KiB (2.5 KiB/s) with 1 file(s) remaining
@@ -94,7 +61,7 @@ exports[`compress - cloud-extra > aws s3 ls (50 lines) - caps list output at 40 
 2024-03-15 12:01:00       1037 path/to/objects/file038.txt
 2024-03-15 12:02:00       1038 path/to/objects/file039.txt
 2024-03-15 12:03:00       1039 path/to/objects/file040.txt
-... +10 more lines (aws output truncated)"
+... +10 more lines (truncated - re-run with --full)"
 `;
 
 exports[`compress - cloud-extra > psql bordered (60 rows) - caps data rows at 50 with a truncation notice 1`] = `
@@ -305,7 +272,7 @@ active   | f"
 `;
 
 exports[`compress - cloud-extra > psql table - strips the dashed +/- separator line, keeps header/rows/count 1`] = `
-"id |  name  |       email
+" id |  name  |       email
   1 | Alice  | alice@example.com
   2 | Bob    | bob@example.com
   3 | Carol  | carol@example.com
@@ -313,6 +280,6 @@ exports[`compress - cloud-extra > psql table - strips the dashed +/- separator l
 `;
 
 exports[`compress - cloud-extra > psql zero rows - clean result, separator stripped, "(0 rows)" preserved 1`] = `
-"id | name
+" id | name
 (0 rows)"
 `;

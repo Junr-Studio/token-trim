@@ -4,6 +4,6 @@ export const MAKE_HANDLER = `
 function condenseMake(text) {
   const NOISE = /^(make\\[\\d+\\]:.*(?:Entering|Leaving) directory|echo )/;
   const lines = text.split('\\n').filter(l => !NOISE.test(l));
-  return lines.join('\\n').replace(/\\n{3,}/g, '\\n\\n').trim() || text;
+  return ttTrimBlankEdges(lines.join('\\n').replace(/\\n{3,}/g, '\\n\\n')) || text;
 }
 `

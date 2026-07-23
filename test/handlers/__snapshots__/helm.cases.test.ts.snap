@@ -1,0 +1,1145 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compress - helm > get manifest - the live manifest is the same pipeable YAML as template and stays verbatim 1`] = `
+"---
+# Source: myapp/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: myapp
+  labels:
+    helm.sh/chart: myapp-0.4.2
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: myapp/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: myapp
+---
+# Source: myapp/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: myapp
+    spec:
+      serviceAccountName: myapp
+      containers:
+        - name: myapp
+          image: "myregistry.io/team/api:v2.3.1"
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP"
+`;
+
+exports[`compress - helm > get values - values YAML stays verbatim; its "USER-SUPPLIED VALUES:" banner must not be read as a status dump section 1`] = `
+"USER-SUPPLIED VALUES:
+image:
+  repository: myregistry.io/team/api
+  tag: v2.3.1
+ingress:
+  enabled: true
+  host: api.example.com
+replicaCount: 3"
+`;
+
+exports[`compress - helm > history - one line per revision in release order, keeping the DESCRIPTION that says why a revision exists 1`] = `
+"[helm] 4 revisions:
+  rev9 superseded myapp-0.3.9 2.2.0 Upgrade complete
+  rev10 failed myapp-0.4.0 2.3.0 Upgrade "myapp" failed: timed out waiting for the condition
+  rev11 superseded myapp-0.3.9 2.2.0 Rollback to 9
+  rev12 deployed myapp-0.4.2 2.3.1 Upgrade complete"
+`;
+
+exports[`compress - helm > list - no releases installed collapses the lone header to a single zero line 1`] = `"[helm] 0 releases"`;
+
+exports[`compress - helm > list - one line per release (name/namespace/status/chart/app version/revision), dropping the UPDATED timestamp column and the padded header 1`] = `
+"[helm] 4 releases:
+  argo-cd (argocd) deployed argo-cd-5.51.6 v2.9.3 rev3
+  cert-manager (cert-manager) deployed cert-manager-v1.14.4 v1.14.4 rev1
+  ingress-nginx (ingress-nginx) deployed ingress-nginx-4.10.1 1.10.1 rev7
+  myapp (default) failed myapp-0.4.2 2.3.1 rev12"
+`;
+
+exports[`compress - helm > list - past the row cap the count stays the true total and the dropped rows are announced with a way to get them back 1`] = `
+"[helm] 30 releases:
+  svc-01 (prod) deployed svc-0.9.01 1.4.01 rev1
+  svc-02 (prod) deployed svc-0.9.02 1.4.02 rev2
+  svc-03 (prod) deployed svc-0.9.03 1.4.03 rev3
+  svc-04 (prod) deployed svc-0.9.04 1.4.04 rev4
+  svc-05 (prod) deployed svc-0.9.05 1.4.05 rev5
+  svc-06 (prod) deployed svc-0.9.06 1.4.06 rev6
+  svc-07 (prod) deployed svc-0.9.07 1.4.07 rev7
+  svc-08 (prod) deployed svc-0.9.08 1.4.08 rev8
+  svc-09 (prod) deployed svc-0.9.09 1.4.09 rev9
+  svc-10 (prod) deployed svc-0.9.10 1.4.10 rev10
+  svc-11 (prod) deployed svc-0.9.11 1.4.11 rev11
+  svc-12 (prod) deployed svc-0.9.12 1.4.12 rev12
+  svc-13 (prod) deployed svc-0.9.13 1.4.13 rev13
+  svc-14 (prod) deployed svc-0.9.14 1.4.14 rev14
+  svc-15 (prod) deployed svc-0.9.15 1.4.15 rev15
+  svc-16 (prod) deployed svc-0.9.16 1.4.16 rev16
+  svc-17 (prod) deployed svc-0.9.17 1.4.17 rev17
+  svc-18 (prod) deployed svc-0.9.18 1.4.18 rev18
+  svc-19 (prod) deployed svc-0.9.19 1.4.19 rev19
+  svc-20 (prod) deployed svc-0.9.20 1.4.20 rev20
+  svc-21 (prod) deployed svc-0.9.21 1.4.21 rev21
+  svc-22 (prod) deployed svc-0.9.22 1.4.22 rev22
+  svc-23 (prod) deployed svc-0.9.23 1.4.23 rev23
+  svc-24 (prod) deployed svc-0.9.24 1.4.24 rev24
+  svc-25 (prod) deployed svc-0.9.25 1.4.25 rev25
+  ... +5 more releases (--full)"
+`;
+
+exports[`compress - helm > list -q - a bare release-name list stays verbatim, it is piped into xargs helm uninstall 1`] = `
+"argo-cd
+cert-manager
+ingress-nginx
+myapp"
+`;
+
+exports[`compress - helm > repo list - two columns of name and URL are already minimal, reshaping them would only risk the \`| awk\` that reads them 1`] = `
+"NAME      	URL
+argo      	https://argoproj.github.io/argo-helm
+bitnami   	https://charts.bitnami.com/bitnami
+jetstack  	https://charts.jetstack.io
+prometheus	https://prometheus-community.github.io/helm-charts"
+`;
+
+exports[`compress - helm > search hub - a sibling table keyed by URL instead of NAME is left alone rather than parsed as if its columns lined up 1`] = `
+"URL                                               	CHART VERSION	APP VERSION	DESCRIPTION
+https://artifacthub.io/packages/helm/bitnami/redis	19.6.4       	7.2.5      	Redis(R) is an open source, advanced key-value store.
+https://artifacthub.io/packages/helm/truecharts/redis	14.0.3    	7.2.5      	Redis is an open source key-value store."
+`;
+
+exports[`compress - helm > search repo - "No results found" is passed through, never restated as a count parsed from nothing 1`] = `"No results found"`;
+
+exports[`compress - helm > search repo - one line per chart with both versions, truncating the long description rather than dropping it (it is where DEPRECATED is announced) 1`] = `
+"[helm] 4 charts:
+  bitnami/redis 19.6.4 (app 7.2.5) Redis(R) is an open source, advanced key-value s...
+  bitnami/redis-cluster 10.2.5 (app 7.2.5) Redis(R) is an open source, advanced key-value s...
+  bitnami/redis-sentinel 1.0.1 (app 7.2.5) DEPRECATED Redis(TM) is an open source, advanced...
+  prometheus-community/prometheus-redis-exporter 6.2.0 (app 1.61.0) Prometheus exporter for Redis metrics"
+`;
+
+exports[`compress - helm > status - NOTES ends the structured region: a column-0 uppercase line in the chart author's prose is prose, not a dump section, and the rest of the NOTES survives 1`] = `
+"NAME: myapp
+STATUS: deployed
+NOTES:
+WARNING:
+  this chart is deprecated
+MANIFEST:
+  see the docs for the manifest layout"
+`;
+
+exports[`compress - helm > status - a \`---\` divider further down the NOTES does not promote a word in the prose above it into a dump section 1`] = `
+"NAME: myapp
+STATUS: deployed
+NOTES:
+Thank you for installing myapp.
+
+MANIFEST:
+  the rendered manifest is available with: helm get manifest myapp
+
+---
+Read the docs at https://example.com/docs
+Contact the platform team for help."
+`;
+
+exports[`compress - helm > status - a MANIFEST that opens with its \`# Source:\` comment is still inventoried, not reduced to a line count 1`] = `
+"NAME: myapp
+STATUS: deployed
+
+MANIFEST: 2 documents: Service/myapp, ConfigMap/myapp-cm (--full)
+NOTES:
+ok"
+`;
+
+exports[`compress - helm > status - a dump section after the NOTES header is elided too, once a real document stream proves it is one 1`] = `
+"NAME: myapp
+STATUS: deployed
+NOTES:
+hello there
+
+MANIFEST: 1 document: Service/myapp (--full)"
+`;
+
+exports[`compress - helm > status - a report with no attached dumps survives verbatim, nothing is summarised away 1`] = `
+"NAME: argo-cd
+LAST DEPLOYED: Tue May 12 09:14:22 2026
+NAMESPACE: argocd
+STATUS: deployed
+REVISION: 3
+TEST SUITE: None
+NOTES:
+In order to access the server UI you have the following options:
+
+1. kubectl port-forward service/argo-cd-server -n argocd 8080:443
+
+2. enable ingress in the values file \`server.ingress.enabled\`
+
+After reaching the UI the first time you can login with username: admin and
+the random password generated during the installation."
+`;
+
+exports[`compress - helm > status - a values dump whose YAML happens to carry a top-level \`kind:\` key is counted, never reported as a k8s document inventory it was never parsed as 1`] = `
+"NAME: fluent-bit
+STATUS: deployed
+
+USER-SUPPLIED VALUES: 5 lines elided (--full)
+NOTES:
+hi"
+`;
+
+exports[`compress - helm > status - keeps the release header and the NOTES, replaces the values/hooks/manifest YAML dumps with a kind/name inventory 1`] = `
+"NAME: myapp
+LAST DEPLOYED: Tue Jul 21 18:44:02 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 12
+TEST SUITE: None
+
+USER-SUPPLIED VALUES: 7 lines elided (--full)
+COMPUTED VALUES: 29 lines elided (--full)
+HOOKS: 1 document: Pod/myapp-test-connection (--full)
+MANIFEST: 3 documents: ServiceAccount/myapp, Service/myapp, Deployment/myapp (--full)
+NOTES:
+1. Get the application URL by running these commands:
+  https://api.example.com/
+
+2. Watch the rollout status with:
+  kubectl --namespace default rollout status deployment/myapp"
+`;
+
+exports[`compress - helm > template - a chart larger than the backstop cap is still emitted whole, or the apply it feeds cannot parse 1`] = `
+"---
+# Source: myapp/templates/deployment-0.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-0
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-0
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-1.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-1
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-2.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-2
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-3.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-3
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-3
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-4.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-4
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-4
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-5.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-5
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-5
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-6.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-6
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-6
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-7.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-7
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-7
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-8.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-8
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-8
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-9.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-9
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-9
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-10.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-10
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-10
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-11.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-11
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-11
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-12.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-12
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-12
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-13.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-13
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-13
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-14.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-14
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-14
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-15.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-15
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-15
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-16.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-16
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-16
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-17.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-17
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-17
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-18.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-18
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-18
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-19.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-19
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-19
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-20.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-20
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-20
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-21.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-21
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-21
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-22.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-22
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-22
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-23.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-23
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-23
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-24.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-24
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-24
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-25.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-25
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-25
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-26.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-26
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-26
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-27.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-27
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-27
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-28.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-28
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-28
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-29.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-29
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-29
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-30.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-30
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-30
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-31.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-31
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-31
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-32.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-32
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-32
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-33.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-33
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-33
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-34.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-34
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-34
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-35.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-35
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-35
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-36.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-36
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-36
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-37.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-37
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-37
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-38.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-38
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-38
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080
+---
+# Source: myapp/templates/deployment-39.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-39
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: release-39
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    spec:
+      containers:
+        - name: myapp
+          image: "ghcr.io/acme/myapp:1.4.2"
+          ports:
+            - containerPort: 8080"
+`;
+
+exports[`compress - helm > template - rendered manifests stay verbatim: the canonical use is \`helm template ./chart | kubectl apply -f -\`, and stdout being a pipe is exactly what makes the frame compress, so an inventory here would break the apply for every chart small enough to work today 1`] = `
+"---
+# Source: myapp/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: myapp
+  labels:
+    helm.sh/chart: myapp-0.4.2
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: myapp/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: myapp
+---
+# Source: myapp/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: myapp
+    spec:
+      serviceAccountName: myapp
+      containers:
+        - name: myapp
+          image: "myregistry.io/team/api:v2.3.1"
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP"
+`;
+
+exports[`compress - helm > upgrade --dry-run - the rendered manifest is an inventory, because this report is read by the agent and never piped to kubectl (it opens with a prose line) 1`] = `
+"Release "myapp" has been upgraded. Happy Helming!
+NAME: myapp
+LAST DEPLOYED: Tue Jul 21 19:02:44 2026
+NAMESPACE: default
+STATUS: pending-upgrade
+REVISION: 13
+TEST SUITE: None
+
+HOOKS: (none)
+MANIFEST: 2 documents: Service/myapp, Deployment/myapp (--full)
+NOTES:
+1. Get the application URL by running these commands:
+  https://api.example.com/"
+`;
+
+exports[`compress - helm > version - a subcommand no branch claims passes through untouched 1`] = `"version.BuildInfo{Version:"v3.14.4", GitCommit:"81c902a123462fd4052bc5e9aa9c513c4c8fc142", GitTreeState:"clean", GoVersion:"go1.21.9"}"`;

@@ -1,14 +1,32 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`compress - python > go test ./... - a failing run does not report "0 passed" and does not delete the ok lines 1`] = `
+"Go test: 4 packages ok, 1 failed
+  FAIL: TestCheckoutAppliesPromo (0.01s)
+    checkout_test.go:112: status = 500, want 400"
+`;
+
 exports[`compress - python > go test - all pass: collapses to the single ok package line 1`] = `"ok  	example.com/mymath	0.008s"`;
 
-exports[`compress - python > go test - failures: summary header + FAIL names, RUN/detail lines stripped 1`] = `
-"Go test: 3 passed, 2 failed
+exports[`compress - python > go test - failures: summary header, FAIL names, and the assertion under each 1`] = `
+"Go test: 3 tests passed, 2 failed
   FAIL: TestDivide (0.00s)
+    math_test.go:40: expected 1, got 0
   FAIL: TestModulo (0.01s)"
 `;
 
 exports[`compress - python > mypy - clean run: returns the Success line only 1`] = `"Success: no issues found in 12 source files"`;
+
+exports[`compress - python > mypy - file-level errors and .pyi stubs are counted and shown, not silently dropped 1`] = `
+"mypy: 4 error(s) in 3 file(s)  return-value(1) arg-type(1) name-defined(1)
+setup.py (1)
+  Duplicate module named "setup"
+src/models.py (2)
+  Incompatible return value type (got "int", expected "str")  [return-value]
+  Argument 1 has incompatible type "str"; expected "int"  [arg-type]
+src/stubs.pyi (1)
+  Name "Foo" is not defined  [name-defined]"
+`;
 
 exports[`compress - python > mypy - groups errors by file, summary header with top codes, note: lines stripped 1`] = `
 "mypy: 5 error(s) in 3 file(s)  return-value(1) arg-type(1) return(1) name-defined(1) no-untyped-def(1)
@@ -36,6 +54,12 @@ exports[`compress - python > pip list --outdated - one "pkg (old → new)" row e
   urllib3 (1.26.15 → 2.2.1)"
 `;
 
+exports[`compress - python > pip list --outdated - the dashed separator row is not emitted as a package 1`] = `
+"pip outdated:
+  requests (2.28.1 → 2.31.0)
+  urllib3 (1.26.12 → 2.2.1)"
+`;
+
 exports[`compress - python > pip show - unrecognized subcommand passes through unchanged (no-trigger) 1`] = `
 "Name: requests
 Version: 2.31.0
@@ -49,6 +73,12 @@ Requires: certifi, charset-normalizer, idna, urllib3
 Required-by:"
 `;
 
+exports[`compress - python > pytest - a parametrized node id is not truncated mid-bracket 1`] = `
+"Pytest: 8 passed, 2 failed
+  FAIL: tests/test_math.py::test_range[1 - 2]
+  FAIL: tests/test_math.py::test_range[3 - 4]"
+`;
+
 exports[`compress - python > pytest - all green: collapses full session to one "Pytest: N passed" line 1`] = `"Pytest: 42 passed"`;
 
 exports[`compress - python > pytest - empty output passes through as empty (edge case) 1`] = `""`;
@@ -60,8 +90,52 @@ exports[`compress - python > pytest - failures: header with passed/failed/error(
   FAIL: ERR:tests/test_broken_import.py"
 `;
 
+exports[`compress - python > ruff check - a clean run is still recognised, not turned into a fabricated total 1`] = `"All checks passed!"`;
+
 exports[`compress - python > ruff check - clean run: returns the "All checks passed" line 1`] = `"All checks passed!"`;
+
+exports[`compress - python > ruff check - multi-letter rule prefixes (SIM, PLR, UP, ARG, RUF) are counted, not dropped 1`] = `"ruff: 7 issue(s) in 3 file(s)  F401(1) SIM108(1) PLR2004(1) UP035(1) ARG001(1)"`;
 
 exports[`compress - python > ruff check - one summary line: total issues, file count, top rules; messages dropped 1`] = `"ruff: 6 issue(s) in 3 file(s)  F401(2) E501(2) F811(1) E722(1)"`;
 
+exports[`compress - python > ruff check - the >=0.14 default \`full\` format condenses to the same one line 1`] = `"ruff: 3 issue(s) in 2 file(s)  F401(1) E501(1) F811(1)"`;
+
+exports[`compress - python > ruff check - the default full diagnostic format is condensed, not passed through 1`] = `"ruff: 3 issue(s) in 2 file(s)  F401(1) E501(1) SIM108(1)"`;
+
 exports[`compress - python > ruff format - collapses per-file lines to one reformatted/unchanged tally 1`] = `"ruff format: 3 reformatted, 2 unchanged"`;
+
+exports[`compress - python-extra > ruff format - per-file lines with no summary at all still count correctly 1`] = `"ruff format: 2 reformatted, 0 unchanged"`;
+
+exports[`compress - python-extra > ruff format - the plain per-file form still rolls up 1`] = `"ruff format: 2 reformatted, 3 unchanged"`;
+
+exports[`compress - python-extra > ruff format --check - "already formatted" is read, not counted as 0 unchanged 1`] = `
+"ruff format: 2 would be reformatted, 1 already formatted
+  src/billing.py
+  src/routes.py"
+`;
+
+exports[`compress - python-extra > ruff format --check - reports the real file counts from the summary line 1`] = `"ruff format: 2 would be reformatted, 3 unchanged"`;
+
+exports[`compress - python-extra > ruff format --check - reports what WOULD change and keeps the paths 1`] = `
+"ruff format: 2 would be reformatted, 14 unchanged
+  src/api/routes.py
+  src/services/billing.py"
+`;
+
+exports[`compress - python-extra > ruff format --diff - the diff survives instead of collapsing to a fabricated 1/1 count 1`] = `
+"--- src/app.py
++++ src/app.py
+@@ -1,5 +1,5 @@
+-def handler(event,context):
+-    return {"statusCode":200}
++def handler(event, context):
++    return {"statusCode": 200}
+
+--- src/util.py
++++ src/util.py
+@@ -10,2 +10,3 @@
+-x=1
++x = 1
++
+2 files would be reformatted, 3 files left unchanged"
+`;

@@ -86,7 +86,13 @@ const KITCHEN_SINK =
 
 describeCompression('universal', [
   {
-    name: '(a) strips ANSI cursor position + move sequences, preserves SGR color',
+    // CHANGED DELIBERATELY: SGR colour codes used to be preserved, which was a
+    // consequence of the narrow cursor-only regexes rather than a decision.
+    // They are stripped now: an escape renders as nothing in a context window
+    // but still costs tokens, and removing them BEFORE the condensers run also
+    // lets their line regexes match output from tools that colourise. The child
+    // env additionally sets NO_COLOR/TERM=dumb so most tools never emit them.
+    name: '(a) strips every ANSI escape - cursor moves and SGR colour alike',
     cmd: 'echocmd',
     args: ['run'],
     input: ANSI_CURSOR,
@@ -94,11 +100,9 @@ describeCompression('universal', [
       // cursor-position (…;…H) and every cursor-move (A B C D E F G s u) gone
       expect(out).not.toContain('\x1b[1;1H')
       expect(out).not.toMatch(/\x1b\[\d*[ABCDEFGsu]/)
-      // SGR color / reset sequences (…m) are PRESERVED verbatim
-      expect(out).toContain('\x1b[31m')
-      expect(out).toContain('\x1b[0m')
-      expect(out).toContain('\x1b[1;32m')
-      expect(out).toContain('\x1b[33m')
+      // ...and so is every colour/reset sequence
+      // eslint-disable-next-line no-control-regex
+      expect(out).not.toMatch(/\x1b/)
       // human-readable text survives the strip
       expect(out).toContain('Status: compiling modules')
       expect(out).toContain('ERROR')
@@ -199,8 +203,9 @@ describeCompression('universal', [
       expect(out).not.toContain('[ 25%]')
       expect(out).not.toContain('[100%]')
       expect(out).toContain('Fetched 88 pkgs')
-      // color preserved
-      expect(out).toContain('\x1b[32m')
+      // colour stripped along with everything else escape-shaped (see case (a))
+      // eslint-disable-next-line no-control-regex
+      expect(out).not.toMatch(/\x1b/)
       // trailing whitespace gone and blank runs collapsed
       expect(out).not.toMatch(/[ \t]+$/m)
       expect(out).not.toMatch(/\n{3,}/)

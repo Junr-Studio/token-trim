@@ -125,6 +125,60 @@ const MVN_FAILURE = `[INFO] Scanning for projects...
 [ERROR] -> [Help 1]
 `
 
+// A real Maven compile failure for ONE javac error. Maven prefixes its whole
+// failure epilogue with [ERROR] - the goal-failure sentence, the blank
+// `[ERROR] ` separators, `-> [Help 1]`, the -e/-X hints and the Help article
+// links - and it repeats every compiler diagnostic once inline and once inside
+// that epilogue. Counting decorated LOG LINES therefore reported 14 "errors"
+// for a build with one, while Maven's own authoritative `[INFO] 1 error` was
+// thrown away by the [INFO] filter.
+const MVN_ONE_ERROR = `[INFO] Scanning for projects...
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ my-app ---
+[INFO] Compiling 12 source files to /repo/target/classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR :
+[INFO] -------------------------------------------------------------
+[ERROR] /repo/src/main/java/App.java:[12,9] cannot find symbol
+[ERROR]   symbol:   variable foo
+[ERROR]   location: class App
+[INFO] 1 error
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.102 s
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project my-app: Compilation failure
+[ERROR] /repo/src/main/java/App.java:[12,9] cannot find symbol
+[ERROR]   symbol:   variable foo
+[ERROR]   location: class App
+[ERROR]
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+`
+
+// MSBuild's console logger prints every diagnostic TWICE - once inline where
+// the compiler emitted it and once again in the trailing error summary - so a
+// build with one error was reported as "2 error(s):" with the identical line
+// listed twice. MSBuild's own "1 Error(s)" tally sits right there in the output.
+const DOTNET_ONE_ERROR = `MSBuild version 17.8.3+195e7f5a3 for .NET
+  Determining projects to restore...
+  Restored /repo/MyApp.csproj (in 480 ms).
+/repo/Program.cs(7,13): error CS0103: The name 'foo' does not exist in the current context [/repo/MyApp.csproj]
+
+Build FAILED.
+
+/repo/Program.cs(7,13): error CS0103: The name 'foo' does not exist in the current context [/repo/MyApp.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:02.10
+`
+
 const MVN_NORESULT = `[INFO] Scanning for projects...
 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.1.3/spring-core-6.1.3.pom
 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.1.3/spring-core-6.1.3.pom (2.5 kB at 45 kB/s)
@@ -366,17 +420,52 @@ describeCompression('build-tools', [
     },
   },
   {
+    // CHANGED DELIBERATELY: this used to assert `6 error(s):` for a fixture
+    // holding TWO javac errors. The 6 was the number of lines Maven happened to
+    // decorate with [ERROR] - two diagnostics, two continuation lines, the
+    // goal-failure sentence and `-> [Help 1]`. A count the tool never produced,
+    // presented as a diagnostic total, is exactly the fabricated-statistic bug
+    // class the project's own invariants exist to catch, so the assertion now
+    // pins the real number of compiler errors.
     name: 'mvn - BUILD FAILURE keeps result header + numbered [ERROR] lines, drops [INFO]',
     cmd: 'mvn',
     args: ['install'],
     input: MVN_FAILURE,
     assert: (out, input) => {
       expect(out).toContain('BUILD FAILURE')
-      expect(out).toContain('6 error(s):')
+      expect(out).toContain('2 error(s):')
       expect(out).toContain('cannot find symbol')
+      expect(out).toContain("';' expected")
+      // the detail lines still ride along under the header
+      expect(out).toContain('symbol:   variable foo')
+      expect(out).toContain('Failed to execute goal')
       expect(out).not.toContain('[INFO]')
       expect(out).not.toContain('Scanning for projects')
       expect(out.length).toBeLessThan(input.length)
+    },
+  },
+  {
+    name: 'mvn - one javac error printed twice inside a standard [ERROR] epilogue is one error, not fourteen',
+    cmd: 'mvn',
+    args: ['package'],
+    input: MVN_ONE_ERROR,
+    assert: (out) => {
+      expect(out).toContain('BUILD FAILURE')
+      // Maven printed `[INFO] 1 error`. The header must not contradict it.
+      expect(out).toMatch(/^\s*1 error\(s\):$/m)
+      // The diagnostic survives, but exactly once - not once per log line.
+      expect(out.split('cannot find symbol').length - 1).toBe(1)
+      expect(out).toContain('/repo/src/main/java/App.java:[12,9]')
+      expect(out).toContain('Failed to execute goal')
+      // Maven's fixed epilogue is chrome, not diagnostics: none of it may be
+      // counted, and the blank `[ERROR] ` separators must not become blank
+      // bullet lines.
+      expect(out).not.toContain('-> [Help 1]')
+      expect(out).not.toContain('re-run Maven with the -e switch')
+      expect(out).not.toContain('For more information about the errors')
+      expect(out).not.toMatch(/^ +$/m)
+      // And no "... +N more" implying diagnostics that do not exist.
+      expect(out).not.toContain('... +')
     },
   },
   {
@@ -485,6 +574,21 @@ describeCompression('build-tools', [
     },
   },
 
+  {
+    name: 'dotnet build - MSBuild prints each diagnostic inline AND in the summary; that is one error, not two',
+    cmd: 'dotnet',
+    args: ['build'],
+    input: DOTNET_ONE_ERROR,
+    assert: (out) => {
+      expect(out).toMatch(/^Build FAILED\./)
+      // MSBuild's own tally in the same output says "1 Error(s)".
+      expect(out).toMatch(/^\s*1 error\(s\):$/m)
+      // The error line is listed once, not echoed back twice.
+      expect(out.split('error CS0103').length - 1).toBe(1)
+      expect(out).toContain("The name 'foo' does not exist in the current context")
+    },
+  },
+
   // ── bun ──────────────────────────────────────────────────────────────────
   {
     name: 'bun install - strips resolving/fetching/downloading/lockfile progress noise',
@@ -545,6 +649,95 @@ describeCompression('build-tools', [
     input: '',
     assert: (out) => {
       expect(out).toBe('')
+    },
+  },
+
+  // ── terraform: only plan/apply were condensed; the rest fell through ───────
+  {
+    name: 'state list - a bare address list is canonical xargs input and is never reshaped',
+    cmd: 'terraform',
+    args: ['state', 'list'],
+    // `terraform state list | xargs -n1 terraform state show` is the idiom, and
+    // `terraform state list | grep aws_iam` is how anyone finds anything in a
+    // large state. Grouping or indenting these breaks both.
+    input: Array.from({ length: 24 }, (_, i) =>
+      i % 2 === 0
+        ? `module.network.aws_subnet.private[${i}]`
+        : `aws_iam_role_policy_attachment.app_${i}`,
+    ).join('\n') + '\n',
+    assert: (out) => {
+      const lines = out.split('\n').filter((l) => l.includes('.'))
+      expect(lines).toHaveLength(24)
+      for (const l of lines) expect(l).toBe(l.trim())
+      expect(out).toContain('module.network.aws_subnet.private[0]')
+      expect(out).toContain('aws_iam_role_policy_attachment.app_23')
+    },
+  },
+  {
+    name: 'init - provider download chatter collapses, the version lock survives',
+    cmd: 'terraform',
+    args: ['init'],
+    input: `Initializing the backend...
+Initializing provider plugins...
+- Finding hashicorp/aws versions matching "~> 5.0"...
+- Finding hashicorp/random versions matching "~> 3.5"...
+- Installing hashicorp/aws v5.31.0...
+- Installed hashicorp/aws v5.31.0 (signed by HashiCorp)
+- Installing hashicorp/random v3.6.0...
+- Installed hashicorp/random v3.6.0 (signed by HashiCorp)
+
+Terraform has created a lock file .terraform.lock.hcl to record the provider
+selections it made above. Include this file in your version control repository
+so that Terraform can guarantee to make the same selections by default when
+you run "terraform init" in the future.
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+`,
+    assert: (out, input) => {
+      expect(out).toContain('successfully initialized')
+      // the resolved provider versions are the one durable fact here
+      expect(out).toContain('aws v5.31.0')
+      expect(out).toContain('random v3.6.0')
+      // the boilerplate tutorial paragraphs are not
+      expect(out).not.toContain('You may now begin working')
+      expect(out).not.toContain('version control repository')
+      expect(out.length).toBeLessThan(input.length / 2)
+    },
+  },
+  {
+    name: 'validate - a clean run collapses to one line',
+    cmd: 'terraform',
+    args: ['validate'],
+    input: '\nSuccess! The configuration is valid.\n\n',
+    assert: (out) => {
+      expect(out).toBe('Success! The configuration is valid.')
+    },
+  },
+  {
+    name: 'show -json - machine output is not reshaped',
+    cmd: 'terraform',
+    args: ['show', '-json'],
+    input: JSON.stringify(
+      { format_version: '1.0', values: { root_module: { resources: Array.from({ length: 30 }, (_, i) => ({ address: `aws_s3_bucket.b${i}` })) } } },
+      null,
+      2,
+    ) + '\n',
+    assert: (out) => {
+      expect(() => JSON.parse(out)).not.toThrow()
+      expect(JSON.parse(out).values.root_module.resources).toHaveLength(30)
+    },
+  },
+  {
+    name: 'output - unrecognised shape passes through rather than being summarised',
+    cmd: 'terraform',
+    args: ['output'],
+    input: 'bucket_name = "my-prod-bucket"\nregion = "eu-west-1"\n',
+    assert: (out) => {
+      expect(out).toBe('bucket_name = "my-prod-bucket"\nregion = "eu-west-1"')
     },
   },
 ])
